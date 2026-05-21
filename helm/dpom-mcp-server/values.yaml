@@ -1,0 +1,81 @@
+# Default values for dpom-mcp-server.
+# Override per-environment via --values values-<env>.yaml or --set.
+
+replicaCount: 2
+
+image:
+  repository: swr.cn-north-9.myhuaweicloud.com/powercloud/DPOMBaseMCPService
+  # Tag injected at deploy time: <version>_<yyyyMMddHHmmss>
+  # e.g. 2.0.0_20260520171836
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+resources:
+  requests:
+    cpu: "2"
+    memory: "4Gi"
+  limits:
+    cpu: "4"
+    memory: "8Gi"
+
+# JVM tuning. Heap is capped via MaxRAMPercentage; remainder is for metaspace,
+# direct memory, thread stacks (virtual threads use a small pool of carrier threads).
+jvm:
+  opts: "-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
+
+env:
+  HUAWEICLOUD_REGION: cn-southwest-2
+
+# AK/SK MUST NOT live here. They are injected by the team's Vault Operator at pod start
+# into env vars HUAWEICLOUD_AK / HUAWEICLOUD_SK. Configure the injection mechanism
+# below; this is a placeholder reflecting the typical Vault Agent Injector pattern.
+#
+# TODO(SRE): replace this block with the team's standard Vault wiring.
+vault:
+  enabled: true
+  role: dpom-mcp-server
+  # Path within Vault where the secret lives.
+  secretPath: secret/data/dpom/mcp/huaweicloud
+  # Injector annotations applied to the Deployment podTemplate.
+  injectorAnnotations: {}
+    # vault.hashicorp.com/agent-inject: "true"
+    # vault.hashicorp.com/role: "dpom-mcp-server"
+    # vault.hashicorp.com/agent-inject-secret-creds: "secret/data/dpom/mcp/huaweicloud"
+    # vault.hashicorp.com/agent-inject-template-creds: |
+    #   {{- with secret "secret/data/dpom/mcp/huaweicloud" -}}
+    #   export HUAWEICLOUD_AK={{ .Data.data.ak }}
+    #   export HUAWEICLOUD_SK={{ .Data.data.sk }}
+    #   {{- end -}}
+
+service:
+  type: ClusterIP
+  port: 8080
+  managementPort: 8081
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 20
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Pod-level service account, override if RBAC required.
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

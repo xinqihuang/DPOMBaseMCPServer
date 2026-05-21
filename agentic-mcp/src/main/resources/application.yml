@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: DPOMBaseMCPServer
+  threads:
+    virtual:
+      enabled: true
+  ai:
+    mcp:
+      server:
+        name: DPOMBaseMCPServer
+        version: 0.0.1
+        type: SYNC
+        sse-message-endpoint: /mcp/messages
+        sse-endpoint: /sse
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+      group:
+        readiness:
+          include: readinessState,huaweiCloudCredentials
+        liveness:
+          include: livenessState
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+huaweicloud:
+  region: cn-southwest-2
+  ak: ${HUAWEICLOUD_AK:}
+  sk: ${HUAWEICLOUD_SK:}
+  project-id: ${HUAWEICLOUD_PROJECT_ID:}
+
+logging:
+  level:
+    root: INFO
+    com.huawei.smartom.agentic: INFO
+    org.springframework.ai: INFO
+
+resilience4j:
+  ratelimiter:
+    instances:
+      ces-readonly:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0
+      aom-readonly:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0
+      apm-readonly:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0
+  retry:
+    instances:
+      huaweicloud-retryable:
+        max-attempts: 3
+        wait-duration: 200ms
+        exponential-backoff-multiplier: 4

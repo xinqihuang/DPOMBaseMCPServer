@@ -1,0 +1,41 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# IDE - Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+
+# IDE - VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Local config / secrets
+*.env
+.env.local
+application-local.yml
+application-local.yaml
+application-local.properties
+
+# Build / temp
+build/
+dist/
+tmp/

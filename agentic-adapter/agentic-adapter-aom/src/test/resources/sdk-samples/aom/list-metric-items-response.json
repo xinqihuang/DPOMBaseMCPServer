@@ -1,0 +1,19 @@
+{
+  "metaData": {
+    "count": 1,
+    "total": 523,
+    "offset": 0,
+    "nextToken": 100
+  },
+  "metrics": [
+    {
+      "namespace": "PAAS.CONTAINER",
+      "metricName": "aom_process_cpu_usage",
+      "unit": "Percent",
+      "dimensions": [
+        {"name": "appName", "value": "aomApp"}
+      ],
+      "dimensionvaluehash": "a1b2c3d4e5f6"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+DPOMBaseMCPServer was deployed.
+
+Image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+Replicas: {{ .Values.replicaCount }}
+Region: {{ .Values.env.HUAWEICLOUD_REGION }}
+
+Check pod readiness:
+  kubectl --namespace {{ .Release.Namespace }} get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Probe health from inside the cluster:
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "dpom-mcp-server.fullname" . }} 8081:{{ .Values.service.managementPort }}
+  # then curl http://127.0.0.1:8081/actuator/health
+
+Run the smoke script against the running service:
+  ./scripts/smoke/smoke-list_ces_metrics.sh <host:port>

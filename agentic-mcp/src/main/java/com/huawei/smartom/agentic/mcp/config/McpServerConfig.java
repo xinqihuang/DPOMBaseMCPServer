@@ -1,0 +1,29 @@
+package com.huawei.smartom.agentic.mcp.config;
+
+import com.huawei.smartom.agentic.mcp.tool.AomMetricsTool;
+import com.huawei.smartom.agentic.mcp.tool.CesMetricsTool;
+import com.huawei.smartom.agentic.mcp.tool.HelloWorldTool;
+
+import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Registers MCP tool beans with the Spring AI MCP server.
+ *
+ * <p>Add new tool components to the {@code toolObjects(...)} list as they are introduced.
+ */
+@Configuration
+public class McpServerConfig {
+
+    @Bean
+    public ToolCallbackProvider toolCallbackProvider(
+            HelloWorldTool helloWorldTool,
+            CesMetricsTool cesMetricsTool,
+            AomMetricsTool aomMetricsTool) {
+        return MethodToolCallbackProvider.builder()
+                .toolObjects(helloWorldTool, cesMetricsTool, aomMetricsTool)
+                .build();
+    }
+}

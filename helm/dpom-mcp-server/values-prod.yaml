@@ -1,0 +1,18 @@
+# Production overrides (Guiyang One region).
+# Use: helm upgrade --install dpom-mcp-server ./helm/dpom-mcp-server \
+#        --values ./helm/dpom-mcp-server/values-prod.yaml \
+#        --set image.tag=2.0.0_20260520171836
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: "2"
+    memory: "4Gi"
+  limits:
+    cpu: "4"
+    memory: "8Gi"
+
+env:
+  HUAWEICLOUD_REGION: cn-southwest-2
+  SPRING_PROFILES_ACTIVE: prod

@@ -1,0 +1,8 @@
+apiVersion: v2
+name: dpom-mcp-server
+description: Huawei Cloud monitoring MCP server (AOM/APM/CES read-only)
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+maintainers:
+  - name: SmartOM Agentic Team

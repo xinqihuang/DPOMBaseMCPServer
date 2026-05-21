@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.huawei.smartom.agentic</groupId>
+        <artifactId>DPOMBaseMCPServer</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>agentic-adapter</artifactId>
+    <packaging>pom</packaging>
+    <name>agentic-adapter</name>
+    <description>Parent module for CES/AOM/APM adapter modules.</description>
+
+    <modules>
+        <module>agentic-adapter-ces</module>
+        <module>agentic-adapter-aom</module>
+        <module>agentic-adapter-apm</module>
+    </modules>
+
+</project>
