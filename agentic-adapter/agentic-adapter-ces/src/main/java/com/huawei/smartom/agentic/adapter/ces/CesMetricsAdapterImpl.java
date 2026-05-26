@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.ces;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
@@ -27,6 +31,9 @@ import java.util.Objects;
  *
  * <p>Maps between our public DTOs and the SDK request/response classes. All SDK exceptions
  * are funnelled through {@link HuaweiCloudInvocation} to be mapped into {@code SmartomException}.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Component
 public class CesMetricsAdapterImpl implements CesMetricsAdapter {
@@ -40,6 +47,13 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     private final CesClient cesClient;
     private final HuaweiCloudInvocation invocation;
 
+    /**
+     * Constructs a new {@code CesMetricsAdapterImpl} wired with the Huawei Cloud CES SDK client
+     * and the shared resilience/exception-mapping invocation helper.
+     *
+     * @param cesClient  configured Huawei Cloud CES SDK client
+     * @param invocation helper applying rate limiting, retry and SDK exception mapping
+     */
     public CesMetricsAdapterImpl(CesClient cesClient, HuaweiCloudInvocation invocation) {
         this.cesClient = cesClient;
         this.invocation = invocation;

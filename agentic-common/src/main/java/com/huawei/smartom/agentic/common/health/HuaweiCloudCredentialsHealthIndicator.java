@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.health;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
@@ -15,12 +19,20 @@ import org.springframework.stereotype.Component;
  * <p>projectId is checked here because AOM APIs require it. CES does not need projectId and will
  * continue to work even when projectId is missing; however, the overall readiness probe will report
  * DOWN until all required credentials are present.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Component("huaweiCloudCredentials")
 public class HuaweiCloudCredentialsHealthIndicator implements HealthIndicator {
 
     private final HuaweiCloudProperties properties;
 
+    /**
+     * Constructs a new {@code HuaweiCloudCredentialsHealthIndicator} backed by the given properties.
+     *
+     * @param properties the resolved Huawei Cloud credential/region properties to be checked
+     */
     public HuaweiCloudCredentialsHealthIndicator(HuaweiCloudProperties properties) {
         this.properties = properties;
     }

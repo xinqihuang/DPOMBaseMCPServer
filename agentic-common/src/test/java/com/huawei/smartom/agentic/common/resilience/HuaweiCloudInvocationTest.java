@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.resilience;
 
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -8,10 +12,8 @@ import com.huawei.smartom.agentic.common.sdk.SdkExceptionMapper;
 import com.huaweicloud.sdk.core.exception.ClientRequestException;
 import com.huaweicloud.sdk.core.exception.ServerResponseException;
 
-import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 
@@ -25,6 +27,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * Huawei Cloud Invocation Test.
+ *
+ * @author h00884391
+ * @since 2026-05-21
+ */
 class HuaweiCloudInvocationTest {
 
     private static final String RL = "ces-readonly";

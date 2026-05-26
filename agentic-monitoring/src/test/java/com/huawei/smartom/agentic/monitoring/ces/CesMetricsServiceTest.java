@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.monitoring.ces;
 
 import com.huawei.smartom.agentic.adapter.ces.CesMetricsAdapter;
@@ -25,6 +29,9 @@ import static org.mockito.Mockito.when;
  * Unit tests for {@link CesMetricsService}.
  *
  * <p>Covers UT-04..08 (parameter validation) from the spec.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 class CesMetricsServiceTest {
 

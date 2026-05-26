@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.ces;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
@@ -45,6 +49,9 @@ import static org.mockito.Mockito.when;
  *
  * <p>Covers UT-01/02/03/09/10/11/12/13/14/15 from the list_ces_metrics spec.
  * Parameter-validation cases (UT-04..08) belong to {@code CesMetricsServiceTest}.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 class CesMetricsAdapterImplTest {
 

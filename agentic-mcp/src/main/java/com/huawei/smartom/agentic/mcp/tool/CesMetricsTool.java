@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
@@ -16,6 +20,9 @@ import org.springframework.stereotype.Component;
  *
  * <p>Tool naming, description and parameter semantics follow
  * {@code docs/specs/tools/list_ces_metrics.md}.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Component
 public class CesMetricsTool {
@@ -24,13 +31,31 @@ public class CesMetricsTool {
 
     private final CesMetricsService service;
 
+    /**
+     * Constructs a new {@code CesMetricsTool} that delegates tool invocations to the
+     * underlying monitoring service.
+     *
+     * @param service the CES monitoring orchestration service performing validation and adapter dispatch
+     */
     public CesMetricsTool(CesMetricsService service) {
         this.service = service;
     }
 
     /**
-     * Tool description text is mirrored from the spec; do not paraphrase casually —
-     * the Agent's tool selection depends on its precision.
+     * MCP entry point: lists CES metric definitions for the given namespace, metric name, or dimension.
+     *
+     * <p>Tool description text on the {@link Tool} annotation is mirrored from the spec; do not
+     * paraphrase casually — the Agent's tool selection depends on its precision.
+     *
+     * @param namespace  CES namespace such as {@code SYS.ECS}, optional
+     * @param metricName exact metric name, e.g. {@code cpu_util}, optional
+     * @param dimName    dimension name (e.g. {@code instance_id}); must be paired with {@code dimValue}
+     * @param dimValue   dimension value; must be paired with {@code dimName}
+     * @param limit      page size in [1, 1000], default 100 applied downstream when {@code null}
+     * @param start      pagination marker returned by a previous response, optional
+     * @param order      sort order, {@code "asc"} or {@code "desc"} (default {@code "desc"})
+     * @return the {@link com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse} on success,
+     *         or an {@link ErrorResponse} when a {@link SmartomException} is caught
      */
     @Tool(
             name = "list_ces_metrics",

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.aom.contract;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>If these tests fail after an SDK upgrade, the adapter mapping logic in
  * {@code AomMetricsAdapterImpl} must be reviewed before releasing.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 class AomListMetricsContractTest {
 

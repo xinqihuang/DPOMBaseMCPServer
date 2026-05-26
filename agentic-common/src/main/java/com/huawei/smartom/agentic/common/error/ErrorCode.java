@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.error;
 
 /**
@@ -5,6 +9,9 @@ package com.huawei.smartom.agentic.common.error;
  *
  * <p>Each error code carries a {@code retryable} flag indicating whether the
  * MCP client (Agent) may safely retry the request.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 public enum ErrorCode {
 
@@ -32,6 +39,12 @@ public enum ErrorCode {
         this.retryable = retryable;
     }
 
+    /**
+     * Returns whether an operation that failed with this error code may be safely retried.
+     *
+     * @return {@code true} if the MCP client (Agent) may retry the request after backoff,
+     *         {@code false} for terminal errors such as {@code INVALID_PARAM} or {@code UPSTREAM_AUTH_FAILED}
+     */
     public boolean isRetryable() {
         return retryable;
     }

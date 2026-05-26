@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.ces.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +15,9 @@ import java.util.List;
  * @param metricName  metric name (e.g. {@code cpu_util})
  * @param unit        metric unit (e.g. {@code %})
  * @param dimensions  dimensions identifying the resource the metric applies to
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 public record CesMetricInfo(
         @JsonProperty("namespace") String namespace,

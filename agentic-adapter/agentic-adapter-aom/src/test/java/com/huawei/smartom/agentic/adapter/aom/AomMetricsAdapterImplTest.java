@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.aom;
 
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsRequest;
@@ -49,6 +53,9 @@ import static org.mockito.Mockito.when;
  *
  * <p>Input validation tests (UT-05 to UT-11) live in {@code AomMetricsServiceTest} in the
  * monitoring module, because validation is enforced by the service layer.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 class AomMetricsAdapterImplTest {
 

@@ -30,6 +30,19 @@
         <property name="eachLine" value="true"/>
     </module>
 
+    <!--
+      File header must carry the Huawei copyright notice.
+      Required format (first three lines of every .java file):
+          /*
+           * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+           */
+    -->
+    <module name="RegexpHeader">
+        <property name="fileExtensions" value="java"/>
+        <property name="header"
+                  value="^/\*$\n^ \* Copyright \(c\) Huawei Technologies Co\., Ltd 2026-2026, All rights reserved$\n^ \*/$"/>
+    </module>
+
     <module name="TreeWalker">
         <!-- Imports -->
         <module name="AvoidStarImport"/>
@@ -99,6 +112,84 @@
         <module name="SimplifyBooleanReturn"/>
         <module name="DefaultComesLast"/>
         <module name="FallThrough"/>
+
+        <!--
+          Source file structure: copyright header, package, imports,
+          top-level type, each separated by a blank line. RegexpHeader
+          (Checker level) covers the copyright; EmptyLineSeparator enforces
+          the rest.
+        -->
+        <module name="EmptyLineSeparator">
+            <property name="tokens"
+                      value="PACKAGE_DEF, IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF,
+                             STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF"/>
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <property name="allowMultipleEmptyLines" value="false"/>
+            <property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>
+        </module>
+
+        <!--
+          Top-level public class/interface/enum/record must have Javadoc
+          containing a description and a creation date (the @since tag).
+        -->
+        <module name="MissingJavadocType">
+            <property name="scope" value="public"/>
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF"/>
+        </module>
+        <module name="JavadocType">
+            <property name="scope" value="public"/>
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF"/>
+        </module>
+        <!--
+          WriteTag requires an @since YYYY-MM-DD tag on every type
+          definition. Severity=error fires when the tag is missing or has
+          the wrong format; tagSeverity=ignore keeps successful matches
+          silent. WriteTag has no scope property, so it applies to package-
+          private types as well — acceptable trade-off for a uniform rule.
+        -->
+        <module name="WriteTag">
+            <property name="tag" value="@since"/>
+            <property name="tagFormat" value="\d{4}-\d{2}-\d{2}"/>
+            <property name="tagSeverity" value="ignore"/>
+            <property name="severity" value="error"/>
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF"/>
+        </module>
+        <!--
+          @author tag is required on every type definition. Any non-empty
+          value is accepted (no format constraint). Lives on the line
+          immediately above @since, enforced by AtclauseOrder below.
+        -->
+        <module name="WriteTag">
+            <property name="tag" value="@author"/>
+            <property name="tagSeverity" value="ignore"/>
+            <property name="severity" value="error"/>
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF"/>
+        </module>
+
+        <!--
+          Public methods (and constructors) require Javadoc with a
+          description. @param / @return / @throws must be present wherever
+          they apply, and AtclauseOrder enforces the ordering
+          @param -> @return -> @throws.
+        -->
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="allowMissingPropertyJavadoc" value="false"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="accessModifiers" value="public"/>
+            <property name="validateThrows" value="true"/>
+            <property name="allowMissingParamTags" value="false"/>
+            <property name="allowMissingReturnTag" value="false"/>
+        </module>
+        <module name="AtclauseOrder">
+            <property name="tagOrder" value="@param, @return, @throws, @exception, @author, @since"/>
+            <property name="target"
+                      value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF,
+                             METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
+        </module>
+        <module name="NonEmptyAtclauseDescription"/>
 
         <!-- No System.out / printStackTrace -->
         <module name="Regexp">

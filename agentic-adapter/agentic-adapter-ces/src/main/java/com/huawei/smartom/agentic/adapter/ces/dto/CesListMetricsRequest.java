@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.ces.dto;
 
 /**
@@ -14,6 +18,9 @@ package com.huawei.smartom.agentic.adapter.ces.dto;
  * @param limit       page size [1,1000]; defaults to 100 when null
  * @param start       pagination marker from previous page; nullable
  * @param order       sort order, "asc" or "desc"; defaults to "desc" when null
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 public record CesListMetricsRequest(
         String namespace,

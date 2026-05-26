@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.monitoring.aom;
 
 import com.huawei.smartom.agentic.adapter.aom.AomMetricsAdapter;
@@ -28,6 +32,9 @@ import static org.mockito.Mockito.when;
  *
  * <p>Uses a mock {@link AomMetricsAdapter} and verifies that the adapter is never invoked
  * when input validation fails.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 class AomMetricsServiceTest {
 

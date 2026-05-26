@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.exception;
 
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -8,6 +12,12 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * Smartom Exception Test.
+ *
+ * @author h00884391
+ * @since 2026-05-21
+ */
 class SmartomExceptionTest {
 
     @Test

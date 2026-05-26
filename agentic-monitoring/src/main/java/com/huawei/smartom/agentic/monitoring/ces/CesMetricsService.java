@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.monitoring.ces;
 
 import com.huawei.smartom.agentic.adapter.ces.CesMetricsAdapter;
@@ -18,6 +22,9 @@ import java.util.regex.Pattern;
  *       {@link InvalidParamException} on violation</li>
  *   <li>Delegate to the adapter layer for the actual SDK call</li>
  * </ul>
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Service
 public class CesMetricsService {
@@ -34,6 +41,11 @@ public class CesMetricsService {
 
     private final CesMetricsAdapter adapter;
 
+    /**
+     * Constructs a new {@code CesMetricsService} backed by the given adapter.
+     *
+     * @param adapter the CES adapter that performs the actual SDK call
+     */
     public CesMetricsService(CesMetricsAdapter adapter) {
         this.adapter = adapter;
     }

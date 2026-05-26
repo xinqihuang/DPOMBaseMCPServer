@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.error;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +15,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param errorMessage     human-readable description
  * @param upstreamTraceId  Huawei Cloud X-Request-Id (nullable when error originates locally)
  * @param retryable        whether the caller may retry
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 public record ErrorResponse(
         @JsonProperty("error_code") String errorCode,

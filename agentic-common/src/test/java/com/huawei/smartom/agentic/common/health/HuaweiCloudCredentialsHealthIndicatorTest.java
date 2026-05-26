@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.health;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
@@ -9,6 +13,12 @@ import org.springframework.boot.actuate.health.Status;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Huawei Cloud Credentials Health Indicator Test.
+ *
+ * @author h00884391
+ * @since 2026-05-21
+ */
 class HuaweiCloudCredentialsHealthIndicatorTest {
 
     @Test

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.resilience;
 
 import com.huawei.smartom.agentic.common.exception.SmartomException;
@@ -22,6 +26,9 @@ import java.util.function.Supplier;
  * -&gt; retry (only on retryable {@link com.huawei.smartom.agentic.common.error.ErrorCode}s).
  *
  * <p>Logs the API identifier, duration and final result (success or error code) on every call.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Component
 public class HuaweiCloudInvocation {
@@ -32,6 +39,14 @@ public class HuaweiCloudInvocation {
     private final RetryRegistry retryRegistry;
     private final SdkExceptionMapper exceptionMapper;
 
+    /**
+     * Constructs a new {@code HuaweiCloudInvocation} wired with the resilience registries
+     * and SDK exception mapper used to decorate every Huawei Cloud SDK call.
+     *
+     * @param rateLimiterRegistry registry providing named RateLimiter instances per service scope
+     * @param retryRegistry       registry providing named Retry instances (e.g. huaweicloud-retryable)
+     * @param exceptionMapper     mapper that converts SDK exceptions into {@link SmartomException}
+     */
     public HuaweiCloudInvocation(
             RateLimiterRegistry rateLimiterRegistry,
             RetryRegistry retryRegistry,
@@ -50,6 +65,7 @@ public class HuaweiCloudInvocation {
      * @param call             the actual SDK invocation
      * @param <T>              SDK response type
      * @return the SDK response
+     * @throws IllegalArgumentException if any argument is {@code null}
      * @throws SmartomException with a mapped {@link com.huawei.smartom.agentic.common.error.ErrorCode}
      */
     public <T> T execute(String rateLimiterName, String retryName, String api, Supplier<T> call) {

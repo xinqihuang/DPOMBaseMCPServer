@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsRequest;
@@ -20,6 +24,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Aom Metrics Tool Test.
+ *
+ * @author h00884391
+ * @since 2026-05-21
+ */
 class AomMetricsToolTest {
 
     private AomMetricsService service;

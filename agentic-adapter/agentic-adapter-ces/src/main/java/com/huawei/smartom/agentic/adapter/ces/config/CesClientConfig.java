@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.ces.config;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
@@ -20,6 +24,9 @@ import org.springframework.context.annotation.Configuration;
  *
  * <p>HTTP timeout is set on the underlying SDK transport here, in addition to the
  * application-level Resilience4j retry / rate-limiter applied per call.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Configuration
 public class CesClientConfig {
@@ -29,6 +36,12 @@ public class CesClientConfig {
     /** SDK transport timeout in seconds. */
     private static final int HTTP_TIMEOUT_SECONDS = 10;
 
+    /**
+     * Builds the singleton {@link CesClient} from the configured AK/SK, region and SDK HTTP timeout.
+     *
+     * @param properties resolved Huawei Cloud credential and region properties
+     * @return a ready-to-use {@link CesClient} pointing at the configured region
+     */
     @Bean
     public CesClient cesClient(HuaweiCloudProperties properties) {
         BasicCredentials credentials = new BasicCredentials()

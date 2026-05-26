@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.aom;
 
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsRequest;
@@ -34,6 +38,9 @@ import java.util.Objects;
  * </ul>
  * When both inventoryId and namespace are provided, path A is used and a WARN is logged.
  * SDK exceptions are funnelled through {@link HuaweiCloudInvocation} into SmartomException.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Component
 public class AomMetricsAdapterImpl implements AomMetricsAdapter {
@@ -47,6 +54,13 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
     private final AomClient aomClient;
     private final HuaweiCloudInvocation invocation;
 
+    /**
+     * Constructs a new {@code AomMetricsAdapterImpl} wired with the Huawei Cloud AOM SDK client
+     * and the shared resilience/exception-mapping invocation helper.
+     *
+     * @param aomClient  configured Huawei Cloud AOM SDK client
+     * @param invocation helper applying rate limiting, retry and SDK exception mapping
+     */
     public AomMetricsAdapterImpl(AomClient aomClient, HuaweiCloudInvocation invocation) {
         this.aomClient = aomClient;
         this.invocation = invocation;

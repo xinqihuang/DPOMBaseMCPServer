@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.sdk;
 
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -28,6 +32,9 @@ import org.springframework.stereotype.Component;
  * </ul>
  *
  * <p>The Huawei Cloud {@code X-Request-Id} is extracted via {@code ServiceResponseException#getRequestId()}.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Component
 public class SdkExceptionMapper {

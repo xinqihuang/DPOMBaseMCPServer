@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.resilience;
 
 import com.huawei.smartom.agentic.common.exception.SmartomException;
@@ -10,7 +14,6 @@ import jakarta.annotation.PostConstruct;
 
 import org.springframework.context.annotation.Configuration;
 
-
 /**
  * Resilience4j configuration adjustments.
  *
@@ -22,12 +25,21 @@ import org.springframework.context.annotation.Configuration;
  * <p>Using {@link PostConstruct} instead of a {@code @Bean} returning {@link RetryRegistry}
  * avoids registering a second {@link RetryRegistry} bean which would cause a circular
  * dependency with the Resilience4j auto-configuration.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Configuration
 public class ResilienceConfig {
 
     private final RetryRegistry retryRegistry;
 
+    /**
+     * Constructs a new {@code ResilienceConfig} that will customize the auto-configured
+     * {@link RetryRegistry} during {@link PostConstruct}.
+     *
+     * @param retryRegistry the Resilience4j retry registry auto-configured from {@code application.yml}
+     */
     public ResilienceConfig(RetryRegistry retryRegistry) {
         this.retryRegistry = retryRegistry;
     }

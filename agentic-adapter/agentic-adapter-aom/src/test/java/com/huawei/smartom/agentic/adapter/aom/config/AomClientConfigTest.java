@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.aom.config;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
@@ -17,6 +21,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+/**
+ * Aom Client Config Test.
+ *
+ * @author h00884391
+ * @since 2026-05-21
+ */
 @ExtendWith(MockitoExtension.class)
 class AomClientConfigTest {
 

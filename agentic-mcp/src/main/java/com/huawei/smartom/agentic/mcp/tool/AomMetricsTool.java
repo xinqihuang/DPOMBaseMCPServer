@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsRequest;
@@ -19,6 +23,9 @@ import java.util.List;
  *
  * <p>Tool naming, description and parameter semantics follow
  * {@code docs/specs/tools/list_aom_metrics_v0.2.md}.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Component
 public class AomMetricsTool {
@@ -27,13 +34,31 @@ public class AomMetricsTool {
 
     private final AomMetricsService service;
 
+    /**
+     * Constructs a new {@code AomMetricsTool} that delegates tool invocations to the
+     * underlying monitoring service.
+     *
+     * @param service the AOM monitoring orchestration service performing validation and adapter dispatch
+     */
     public AomMetricsTool(AomMetricsService service) {
         this.service = service;
     }
 
     /**
-     * Tool description text is mirrored from the spec; do not paraphrase casually —
-     * the Agent's tool selection depends on its precision.
+     * MCP entry point: lists AOM metric definitions for the given namespace or inventory id.
+     *
+     * <p>Tool description text on the {@link Tool} annotation is mirrored from the spec; do not
+     * paraphrase casually — the Agent's tool selection depends on its precision.
+     *
+     * @param namespace   AOM namespace (one of the predefined PAAS.* values, CUSTOMMETRICS, or a custom
+     *                    namespace); required unless {@code inventoryId} is set
+     * @param metricName  exact metric name filter, optional
+     * @param dimensions  AND-combined dimension filter list, optional
+     * @param inventoryId resource inventory id ({@code resType_resId}); required unless {@code namespace} is set
+     * @param limit       page size in [1, 1000], default applied downstream when {@code null}
+     * @param start       page offset (0-based), default applied downstream when {@code null}
+     * @return the {@link com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse} on success,
+     *         or an {@link ErrorResponse} when a {@link SmartomException} is caught
      */
     @Tool(
             name = "list_aom_metrics",

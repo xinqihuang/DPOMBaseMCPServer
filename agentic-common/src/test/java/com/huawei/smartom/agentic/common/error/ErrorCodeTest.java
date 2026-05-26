@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.error;
 
 import org.junit.jupiter.api.DisplayName;
@@ -5,6 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Error Code Test.
+ *
+ * @author h00884391
+ * @since 2026-05-21
+ */
 class ErrorCodeTest {
 
     @Test

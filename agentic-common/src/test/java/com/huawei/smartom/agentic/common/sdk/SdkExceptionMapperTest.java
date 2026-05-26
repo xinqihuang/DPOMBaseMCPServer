@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.common.sdk;
 
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -17,6 +21,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Sdk Exception Mapper Test.
+ *
+ * @author h00884391
+ * @since 2026-05-21
+ */
 class SdkExceptionMapperTest {
 
     private final SdkExceptionMapper mapper = new SdkExceptionMapper();

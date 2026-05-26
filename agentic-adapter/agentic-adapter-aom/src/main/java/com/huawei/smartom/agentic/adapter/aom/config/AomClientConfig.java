@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.adapter.aom.config;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
@@ -21,6 +25,9 @@ import org.springframework.context.annotation.Configuration;
  *
  * <p>Region is resolved via {@link AomRegion#valueOf(String)}.
  * HTTP timeout is set on the SDK transport layer; Resilience4j handles retry/rate-limiting.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Configuration
 public class AomClientConfig {

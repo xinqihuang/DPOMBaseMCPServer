@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.mcp;
 
 import com.huaweicloud.sdk.aom.v2.AomClient;
@@ -15,13 +19,16 @@ import org.springframework.test.context.TestPropertySource;
  *
  * <p>Test credentials are injected so the health indicator and SDK client beans construct
  * without calling live Huawei Cloud IAM endpoints.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @SpringBootTest
 @TestPropertySource(properties = {
-        "huaweicloud.region=cn-southwest-2",
-        "huaweicloud.ak=test-ak",
-        "huaweicloud.sk=test-sk",
-        "huaweicloud.project-id=test-project-id"
+    "huaweicloud.region=cn-southwest-2",
+    "huaweicloud.ak=test-ak",
+    "huaweicloud.sk=test-sk",
+    "huaweicloud.project-id=test-project-id"
 })
 class DpomBaseMcpServerApplicationTests {
 

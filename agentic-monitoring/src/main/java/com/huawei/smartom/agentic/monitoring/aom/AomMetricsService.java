@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved
+ */
+
 package com.huawei.smartom.agentic.monitoring.aom;
 
 import com.huawei.smartom.agentic.adapter.aom.AomMetricsAdapter;
@@ -23,6 +27,9 @@ import java.util.regex.Pattern;
  *
  * <p>Validation uses short-circuit evaluation: rules are checked in order and the first violation
  * throws immediately, avoiding potential NPEs in later rules.
+ *
+ * @author h00884391
+ * @since 2026-05-21
  */
 @Service
 public class AomMetricsService {
@@ -46,6 +53,11 @@ public class AomMetricsService {
 
     private final AomMetricsAdapter adapter;
 
+    /**
+     * Constructs a new {@code AomMetricsService} backed by the given adapter.
+     *
+     * @param adapter the AOM adapter that performs the actual SDK call
+     */
     public AomMetricsService(AomMetricsAdapter adapter) {
         this.adapter = adapter;
     }
