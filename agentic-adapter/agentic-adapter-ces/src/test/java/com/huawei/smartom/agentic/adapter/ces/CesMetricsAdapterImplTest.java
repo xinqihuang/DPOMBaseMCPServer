@@ -153,13 +153,13 @@ class CesMetricsAdapterImplTest {
     @Test
     @DisplayName("UT-10: marker present + count>0 -> has_more=true, marker passed through")
     void ut10HasMore() {
-        MetricInfoList m = new MetricInfoList()
+        MetricInfoList metric = new MetricInfoList()
                 .withNamespace("SYS.ECS")
                 .withMetricName("cpu_util")
                 .withUnit("%")
                 .withDimensions(List.of(new MetricsDimension().withName("instance_id").withValue("i-1")));
         ListMetricsResponse resp = new ListMetricsResponse()
-                .withMetrics(List.of(m))
+                .withMetrics(List.of(metric))
                 .withMetaData(new MetaData().withCount(100).withTotal(523).withMarker("next-marker-x"));
         when(cesClient.listMetrics(any(ListMetricsRequest.class))).thenReturn(resp);
 
@@ -239,14 +239,14 @@ class CesMetricsAdapterImplTest {
     @Test
     @DisplayName("UT-15: unit field is always carried through")
     void ut15UnitPreserved() {
-        MetricInfoList m = new MetricInfoList()
+        MetricInfoList metric = new MetricInfoList()
                 .withNamespace("SYS.ECS")
                 .withMetricName("disk_read_bytes_rate")
                 .withUnit("Byte/s")
                 .withDimensions(List.of());
         when(cesClient.listMetrics(any(ListMetricsRequest.class)))
                 .thenReturn(new ListMetricsResponse()
-                        .withMetrics(List.of(m))
+                        .withMetrics(List.of(metric))
                         .withMetaData(new MetaData().withCount(1).withTotal(1)));
 
         CesListMetricsResponse out = adapter.listMetrics(

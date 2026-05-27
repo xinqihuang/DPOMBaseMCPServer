@@ -173,14 +173,14 @@ class AomMetricsAdapterImplTest {
     @Test
     @DisplayName("UT-13: next_token != null + count > 0 — has_more=true, next_token passed through")
     void ut13HasMoreWhenNextTokenPresent() {
-        MetricItemResultAPI m = new MetricItemResultAPI()
+        MetricItemResultAPI metric = new MetricItemResultAPI()
                 .withNamespace("PAAS.CONTAINER")
                 .withMetricName("aom_cpu")
                 .withUnit("Percent")
                 .withDimensions(List.of(new Dimension().withName("appName").withValue("app1")));
         when(aomClient.listMetricItems(any())).thenReturn(
                 new ListMetricItemsResponse()
-                        .withMetrics(List.of(m))
+                        .withMetrics(List.of(metric))
                         .withMetaData(new MetaDataSeries().withCount(100).withTotal(523).withNextToken(100)));
 
         AomListMetricsResponse out = adapter.listMetrics(
@@ -195,11 +195,11 @@ class AomMetricsAdapterImplTest {
     @Test
     @DisplayName("UT-14: next_token=null — has_more=false")
     void ut14NoNextTokenHasMoreFalse() {
-        MetricItemResultAPI m = new MetricItemResultAPI()
+        MetricItemResultAPI metric = new MetricItemResultAPI()
                 .withNamespace("PAAS.NODE").withMetricName("aom_mem").withUnit("Percent");
         when(aomClient.listMetricItems(any())).thenReturn(
                 new ListMetricItemsResponse()
-                        .withMetrics(List.of(m))
+                        .withMetrics(List.of(metric))
                         .withMetaData(new MetaDataSeries().withCount(1).withTotal(1)));
 
         AomListMetricsResponse out = adapter.listMetrics(

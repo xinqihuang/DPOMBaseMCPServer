@@ -65,28 +65,28 @@ public class CesMetricsService {
         return adapter.listMetrics(request);
     }
 
-    private void validate(CesListMetricsRequest r) {
+    private void validate(CesListMetricsRequest request) {
         // dim_name / dim_value must be provided together
-        boolean dimNameMissing = r.dimName() == null;
-        boolean dimValueMissing = r.dimValue() == null;
+        boolean dimNameMissing = request.dimName() == null;
+        boolean dimValueMissing = request.dimValue() == null;
         if (dimNameMissing != dimValueMissing) {
             throw new InvalidParamException("dim_name and dim_value must be provided together");
         }
 
         // limit range
-        if (r.limit() == null || r.limit() < LIMIT_MIN || r.limit() > LIMIT_MAX) {
+        if (request.limit() == null || request.limit() < LIMIT_MIN || request.limit() > LIMIT_MAX) {
             throw new InvalidParamException(
                     "limit must be in [" + LIMIT_MIN + "," + LIMIT_MAX + "]");
         }
 
         // namespace format
-        if (r.namespace() != null && !NAMESPACE_PATTERN.matcher(r.namespace()).matches()) {
+        if (request.namespace() != null && !NAMESPACE_PATTERN.matcher(request.namespace()).matches()) {
             throw new InvalidParamException(
                     "namespace format invalid, expected like 'SYS.ECS'");
         }
 
         // order enum
-        String order = r.order();
+        String order = request.order();
         if (!"asc".equals(order) && !"desc".equals(order)) {
             throw new InvalidParamException("order must be 'asc' or 'desc'");
         }

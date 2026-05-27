@@ -77,26 +77,26 @@ public class AomMetricsService {
         return adapter.listMetrics(request);
     }
 
-    private void validate(AomListMetricsRequest r) {
+    private void validate(AomListMetricsRequest request) {
         // Rule 1: namespace or inventory_id required
-        if (isBlank(r.namespace()) && isBlank(r.inventoryId())) {
+        if (isBlank(request.namespace()) && isBlank(request.inventoryId())) {
             throw new InvalidParamException(
                     "namespace or inventory_id must be provided (AOM API rejects empty body)");
         }
 
         // Rule 3: limit range [1, 1000]
-        if (r.limit() < LIMIT_MIN || r.limit() > LIMIT_MAX) {
+        if (request.limit() < LIMIT_MIN || request.limit() > LIMIT_MAX) {
             throw new InvalidParamException(
-                    "limit must be in [" + LIMIT_MIN + "," + LIMIT_MAX + "], got: " + r.limit());
+                    "limit must be in [" + LIMIT_MIN + "," + LIMIT_MAX + "], got: " + request.limit());
         }
 
         // Rule 4: start >= 0
-        if (r.start() < 0) {
-            throw new InvalidParamException("start must be >= 0, got: " + r.start());
+        if (request.start() < 0) {
+            throw new InvalidParamException("start must be >= 0, got: " + request.start());
         }
 
         // Rule 5: dimensions — each element must have non-blank name and value
-        List<AomMetricDimension> dims = r.dimensions();
+        List<AomMetricDimension> dims = request.dimensions();
         if (dims != null) {
             for (AomMetricDimension dim : dims) {
                 if (isBlank(dim.name()) || isBlank(dim.value())) {
@@ -108,23 +108,24 @@ public class AomMetricsService {
         }
 
         // Rule 6: namespace format (only validated when provided)
-        if (!isBlank(r.namespace()) && !NAMESPACE_PATTERN.matcher(r.namespace()).matches()) {
+        if (!isBlank(request.namespace()) && !NAMESPACE_PATTERN.matcher(request.namespace()).matches()) {
             throw new InvalidParamException(
-                    "namespace format invalid: '" + r.namespace()
+                    "namespace format invalid: '" + request.namespace()
                     + "'; expected PAAS.CONTAINER/PAAS.NODE/PAAS.SLA/PAAS.AGGR/CUSTOMMETRICS "
                     + "or a custom namespace matching [A-Za-z][A-Za-z0-9_.]{2,63}");
         }
 
         // Rule 7: inventory_id format (only validated when provided)
-        if (!isBlank(r.inventoryId()) && !INVENTORY_ID_PATTERN.matcher(r.inventoryId()).matches()) {
+        if (!isBlank(request.inventoryId())
+                && !INVENTORY_ID_PATTERN.matcher(request.inventoryId()).matches()) {
             throw new InvalidParamException(
-                    "inventory_id format invalid: '" + r.inventoryId()
+                    "inventory_id format invalid: '" + request.inventoryId()
                     + "'; expected resType_resId where resType is one of: "
                     + "host/application/instance/container/process/network/storage/volume");
         }
     }
 
-    private boolean isBlank(String s) {
-        return s == null || s.isBlank();
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

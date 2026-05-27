@@ -42,33 +42,33 @@ public class SdkExceptionMapper {
     /**
      * Map an arbitrary throwable from the SDK call path to a {@link SmartomException}.
      *
-     * @param t the original throwable, must not be null
+     * @param throwable the original throwable, must not be null
      * @return a {@link SmartomException} (or {@link UpstreamException}) preserving the cause
      */
-    public SmartomException map(Throwable t) {
-        if (t == null) {
+    public SmartomException map(Throwable throwable) {
+        if (throwable == null) {
             return new SmartomException(ErrorCode.INTERNAL, "null throwable", null, null);
         }
-        if (t instanceof SmartomException already) {
+        if (throwable instanceof SmartomException already) {
             return already;
         }
-        if (t instanceof RequestNotPermitted) {
+        if (throwable instanceof RequestNotPermitted) {
             return new UpstreamException(
                     ErrorCode.UPSTREAM_THROTTLED,
-                    "Local rate limiter rejected the request: " + t.getMessage(),
+                    "Local rate limiter rejected the request: " + throwable.getMessage(),
                     null,
-                    t);
+                    throwable);
         }
-        if (t instanceof ServiceResponseException sre) {
+        if (throwable instanceof ServiceResponseException sre) {
             return mapServiceResponse(sre);
         }
-        if (t instanceof RequestTimeoutException) {
-            return new UpstreamException(ErrorCode.TIMEOUT, safeMessage(t), null, t);
+        if (throwable instanceof RequestTimeoutException) {
+            return new UpstreamException(ErrorCode.TIMEOUT, safeMessage(throwable), null, throwable);
         }
-        if (t instanceof ConnectionException) {
-            return new UpstreamException(ErrorCode.TIMEOUT, safeMessage(t), null, t);
+        if (throwable instanceof ConnectionException) {
+            return new UpstreamException(ErrorCode.TIMEOUT, safeMessage(throwable), null, throwable);
         }
-        return new SmartomException(ErrorCode.INTERNAL, safeMessage(t), null, t);
+        return new SmartomException(ErrorCode.INTERNAL, safeMessage(throwable), null, throwable);
     }
 
     private SmartomException mapServiceResponse(ServiceResponseException sre) {
@@ -92,11 +92,11 @@ public class SdkExceptionMapper {
         return ErrorCode.UPSTREAM_ERROR;
     }
 
-    private String safeMessage(Throwable t) {
-        String m = t.getMessage();
-        if (m == null || m.isEmpty()) {
-            return t.getClass().getSimpleName();
+    private String safeMessage(Throwable throwable) {
+        String message = throwable.getMessage();
+        if (message == null || message.isEmpty()) {
+            return throwable.getClass().getSimpleName();
         }
-        return m;
+        return message;
     }
 }

@@ -90,16 +90,35 @@
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
 
-        <!-- Naming -->
+        <!--
+          Naming.
+          PackageName keeps its dotted-segment regex.
+          All other identifiers must match \w{2,64} — 2 to 64 word
+          characters. This rules out single-letter names (loop vars,
+          lambda/catch params, etc.). Generic type parameters live under
+          a different token type and are not affected by these modules.
+        -->
         <module name="PackageName">
             <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
         </module>
-        <module name="TypeName"/>
-        <module name="MethodName"/>
-        <module name="LocalVariableName"/>
-        <module name="ParameterName"/>
-        <module name="ConstantName"/>
-        <module name="MemberName"/>
+        <module name="TypeName">
+            <property name="format" value="^\w{2,64}$"/>
+        </module>
+        <module name="MethodName">
+            <property name="format" value="^\w{2,64}$"/>
+        </module>
+        <module name="LocalVariableName">
+            <property name="format" value="^\w{2,64}$"/>
+        </module>
+        <module name="ParameterName">
+            <property name="format" value="^\w{2,64}$"/>
+        </module>
+        <module name="ConstantName">
+            <property name="format" value="^\w{2,64}$"/>
+        </module>
+        <module name="MemberName">
+            <property name="format" value="^\w{2,64}$"/>
+        </module>
 
         <!-- General -->
         <module name="EmptyBlock">
@@ -177,8 +196,15 @@
             <property name="allowMissingPropertyJavadoc" value="false"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
         </module>
+        <!--
+          JavadocMethod validates every method that has a Javadoc block,
+          regardless of access modifier. MissingJavadocMethod (above)
+          still only forces Javadoc presence on public methods, so private
+          helpers are not required to carry one — but if they do, the
+          tags must be complete (e.g. @return on a non-void method).
+        -->
         <module name="JavadocMethod">
-            <property name="accessModifiers" value="public"/>
+            <property name="accessModifiers" value="public, protected, package, private"/>
             <property name="validateThrows" value="true"/>
             <property name="allowMissingParamTags" value="false"/>
             <property name="allowMissingReturnTag" value="false"/>

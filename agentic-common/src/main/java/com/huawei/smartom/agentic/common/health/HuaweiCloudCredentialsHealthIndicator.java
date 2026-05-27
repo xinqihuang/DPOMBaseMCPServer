@@ -54,7 +54,7 @@ public class HuaweiCloudCredentialsHealthIndicator implements HealthIndicator {
         return Health.up().withDetail("region", properties.getRegion()).build();
     }
 
-    private boolean isBlank(String s) {
-        return s == null || s.isBlank();
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

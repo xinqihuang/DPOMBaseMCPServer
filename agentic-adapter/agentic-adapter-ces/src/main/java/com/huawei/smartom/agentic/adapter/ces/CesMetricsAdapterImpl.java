@@ -76,24 +76,27 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     /**
      * Build the SDK request. Null fields are left unset; the SDK serialises with
      * {@code NON_NULL} inclusion so absent fields will not appear on the wire.
+     *
+     * @param request the validated input DTO
+     * @return a fully populated SDK {@link ListMetricsRequest} ready to be dispatched
      */
-    private ListMetricsRequest toSdkRequest(CesListMetricsRequest r) {
+    private ListMetricsRequest toSdkRequest(CesListMetricsRequest request) {
         ListMetricsRequest sdk = new ListMetricsRequest();
-        if (r.namespace() != null) {
-            sdk.setNamespace(r.namespace());
+        if (request.namespace() != null) {
+            sdk.setNamespace(request.namespace());
         }
-        if (r.metricName() != null) {
-            sdk.setMetricName(r.metricName());
+        if (request.metricName() != null) {
+            sdk.setMetricName(request.metricName());
         }
-        if (r.dimName() != null && r.dimValue() != null) {
-            sdk.setDim0(r.dimName() + "," + r.dimValue());
+        if (request.dimName() != null && request.dimValue() != null) {
+            sdk.setDim0(request.dimName() + "," + request.dimValue());
         }
-        sdk.setLimit(r.limit());
-        if (r.start() != null) {
-            sdk.setStart(r.start());
+        sdk.setLimit(request.limit());
+        if (request.start() != null) {
+            sdk.setStart(request.start());
         }
         // order is normalised to "asc"/"desc" upstream; map to SDK enum.
-        sdk.setOrder(toOrderEnum(r.order()));
+        sdk.setOrder(toOrderEnum(request.order()));
         return sdk;
     }
 

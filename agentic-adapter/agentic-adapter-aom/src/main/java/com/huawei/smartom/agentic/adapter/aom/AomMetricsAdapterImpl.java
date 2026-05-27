@@ -83,36 +83,39 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
     /**
      * Build the SDK request. Path A uses {@code type=inventory}; path B uses metricItems in body.
      * When inventoryId is present it takes precedence over namespace.
+     *
+     * @param request the validated input DTO
+     * @return a fully populated SDK {@link ListMetricItemsRequest} ready to be dispatched
      */
-    private ListMetricItemsRequest toSdkRequest(AomListMetricsRequest r) {
-        if (r.inventoryId() != null) {
-            if (r.namespace() != null) {
+    private ListMetricItemsRequest toSdkRequest(AomListMetricsRequest request) {
+        if (request.inventoryId() != null) {
+            if (request.namespace() != null) {
                 LOG.warn("aom.listMetricItems: both inventory_id and namespace provided; "
                         + "inventory_id takes precedence, namespace ignored");
             }
             return new ListMetricItemsRequest()
                     .withType("inventory")
-                    .withLimit(String.valueOf(r.limit()))
-                    .withStart(String.valueOf(r.start()))
+                    .withLimit(String.valueOf(request.limit()))
+                    .withStart(String.valueOf(request.start()))
                     .withBody(new MetricAPIQueryItemParam()
-                            .withInventoryId(r.inventoryId()));
+                            .withInventoryId(request.inventoryId()));
         }
 
         // Path B: namespace-based query
         QueryMetricItemOptionParam item = new QueryMetricItemOptionParam()
-                .withNamespace(QueryMetricItemOptionParam.NamespaceEnum.fromValue(r.namespace()));
-        if (r.metricName() != null) {
-            item.setMetricName(r.metricName());
+                .withNamespace(QueryMetricItemOptionParam.NamespaceEnum.fromValue(request.namespace()));
+        if (request.metricName() != null) {
+            item.setMetricName(request.metricName());
         }
-        if (r.dimensions() != null && !r.dimensions().isEmpty()) {
-            List<Dimension> sdkDims = r.dimensions().stream()
+        if (request.dimensions() != null && !request.dimensions().isEmpty()) {
+            List<Dimension> sdkDims = request.dimensions().stream()
                     .map(d -> new Dimension().withName(d.name()).withValue(d.value()))
                     .toList();
             item.setDimensions(sdkDims);
         }
         return new ListMetricItemsRequest()
-                .withLimit(String.valueOf(r.limit()))
-                .withStart(String.valueOf(r.start()))
+                .withLimit(String.valueOf(request.limit()))
+                .withStart(String.valueOf(request.start()))
                 .withBody(new MetricAPIQueryItemParam()
                         .withMetricItems(List.of(item)));
     }
