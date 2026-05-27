@@ -48,11 +48,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link AomMetricsAdapterImpl}, covering adapter routing, response mapping,
- * and error handling (spec UT IDs: UT-01 to UT-04, UT-12 to UT-20).
+ * {@link AomMetricsAdapterImpl} 的单元测试，覆盖 adapter 路由、响应映射以及错误处理
+ *（对应 spec 中的 UT 编号：UT-01 至 UT-04、UT-12 至 UT-20）。
  *
- * <p>Input validation tests (UT-05 to UT-11) live in {@code AomMetricsServiceTest} in the
- * monitoring module, because validation is enforced by the service layer.
+ * <p>入参校验相关测试（UT-05 至 UT-11）位于 monitoring 模块下的 {@code AomMetricsServiceTest}，
+ * 因为校验逻辑由服务层负责。
  *
  * @author h00884391
  * @since 2026-05-21

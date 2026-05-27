@@ -27,11 +27,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link AomMetricsService} covering validation rules UT-04 to UT-11
- * from the {@code list_aom_metrics} spec.
+ * {@link AomMetricsService} 的单元测试，覆盖 {@code list_aom_metrics} 规约中 UT-04 至 UT-11
+ * 的校验规则。
  *
- * <p>Uses a mock {@link AomMetricsAdapter} and verifies that the adapter is never invoked
- * when input validation fails.
+ * <p>使用 {@link AomMetricsAdapter} 的 mock，验证入参校验失败时 adapter 不会被调用。
  *
  * @author h00884391
  * @since 2026-05-21

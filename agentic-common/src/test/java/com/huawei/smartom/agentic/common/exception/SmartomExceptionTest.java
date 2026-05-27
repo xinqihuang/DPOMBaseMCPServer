@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Smartom Exception Test.
+ * 业务异常基类及其子类的单元测试。
  *
  * @author h00884391
  * @since 2026-05-21

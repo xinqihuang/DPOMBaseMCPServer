@@ -9,12 +9,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * Metadata for a single CES metric definition.
+ * 单个 CES 指标定义的元数据。
  *
- * @param namespace   CES namespace (e.g. {@code SYS.ECS})
- * @param metricName  metric name (e.g. {@code cpu_util})
- * @param unit        metric unit (e.g. {@code %})
- * @param dimensions  dimensions identifying the resource the metric applies to
+ * @param namespace   CES 命名空间（例如 {@code SYS.ECS}）
+ * @param metricName  指标名称（例如 {@code cpu_util}）
+ * @param unit        指标单位（例如 {@code %}）
+ * @param dimensions  标识该指标所属资源的维度列表
  *
  * @author h00884391
  * @since 2026-05-21

@@ -17,21 +17,21 @@ import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.springframework.stereotype.Component;
 
 /**
- * Maps Huawei Cloud SDK exceptions to the unified {@link SmartomException}.
+ * 将华为云 SDK 异常映射为统一的 {@link SmartomException}。
  *
- * <p>Rules (in order):
+ * <p>映射规则（按顺序匹配）：
  * <ul>
  *   <li>Resilience4j {@code RequestNotPermitted} -&gt; {@link ErrorCode#UPSTREAM_THROTTLED}
- *   <li>{@code ServiceResponseException} with status 429 -&gt; {@link ErrorCode#UPSTREAM_THROTTLED}
- *   <li>{@code ServiceResponseException} with status 401 / 403 -&gt; {@link ErrorCode#UPSTREAM_AUTH_FAILED}
- *   <li>{@code ServiceResponseException} with status 5xx (incl. 500-599) -&gt; {@link ErrorCode#UPSTREAM_ERROR}
- *   <li>Other {@code ServiceResponseException} -&gt; {@link ErrorCode#UPSTREAM_ERROR}
+ *   <li>{@code ServiceResponseException} 状态码为 429 -&gt; {@link ErrorCode#UPSTREAM_THROTTLED}
+ *   <li>{@code ServiceResponseException} 状态码为 401 / 403 -&gt; {@link ErrorCode#UPSTREAM_AUTH_FAILED}
+ *   <li>{@code ServiceResponseException} 状态码为 5xx（包含 500-599）-&gt; {@link ErrorCode#UPSTREAM_ERROR}
+ *   <li>其他 {@code ServiceResponseException} -&gt; {@link ErrorCode#UPSTREAM_ERROR}
  *   <li>{@code RequestTimeoutException} / {@code ConnectionException} -&gt; {@link ErrorCode#TIMEOUT}
- *   <li>{@code SmartomException} thrown by ourselves -&gt; pass through (no double-wrap)
- *   <li>Anything else -&gt; {@link ErrorCode#INTERNAL}
+ *   <li>本服务自身抛出的 {@code SmartomException} -&gt; 透传（不重复包裹）
+ *   <li>其他异常 -&gt; {@link ErrorCode#INTERNAL}
  * </ul>
  *
- * <p>The Huawei Cloud {@code X-Request-Id} is extracted via {@code ServiceResponseException#getRequestId()}.
+ * <p>华为云的 {@code X-Request-Id} 通过 {@code ServiceResponseException#getRequestId()} 提取。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -40,10 +40,10 @@ import org.springframework.stereotype.Component;
 public class SdkExceptionMapper {
 
     /**
-     * Map an arbitrary throwable from the SDK call path to a {@link SmartomException}.
+     * 将 SDK 调用链中抛出的任意 throwable 映射为 {@link SmartomException}。
      *
-     * @param throwable the original throwable, must not be null
-     * @return a {@link SmartomException} (or {@link UpstreamException}) preserving the cause
+     * @param throwable 原始 throwable，不可为 null
+     * @return 一个保留原始 cause 的 {@link SmartomException}（可能为 {@link UpstreamException}）
      */
     public SmartomException map(Throwable throwable) {
         if (throwable == null) {

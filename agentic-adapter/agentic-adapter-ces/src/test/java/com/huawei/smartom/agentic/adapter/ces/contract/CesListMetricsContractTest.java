@@ -24,13 +24,12 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Type-contract tests for Huawei Cloud CES SDK v3.1.196.
+ * 华为云 CES SDK v3.1.196 的类型契约测试。
  *
- * <p>Purpose: detect breaking changes in SDK class shape (renamed / removed fields)
- * that the Java compiler would not catch (e.g. when accessed via reflection or builder).
+ * <p>用途：检测 SDK 类结构层面的破坏性变更（字段被改名或删除）。这类变更 Java 编译器无法捕获
+ * （例如通过反射或 builder 访问时）。
  *
- * <p>If these tests fail after an SDK upgrade, the adapter mapping logic in
- * {@code CesMetricsAdapterImpl} must be reviewed.
+ * <p>SDK 升级后如果这些用例失败，必须重新检视 {@code CesMetricsAdapterImpl} 中的映射逻辑。
  *
  * @author h00884391
  * @since 2026-05-21

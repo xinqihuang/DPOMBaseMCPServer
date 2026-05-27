@@ -16,10 +16,10 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 /**
- * MCP tool wrapping the {@code list_ces_metrics} capability.
+ * 封装 {@code list_ces_metrics} 能力的 MCP 工具。
  *
- * <p>Tool naming, description and parameter semantics follow
- * {@code docs/specs/tools/list_ces_metrics.md}.
+ * <p>工具命名、描述及参数语义遵循
+ * {@code docs/specs/tools/list_ces_metrics.md}。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -32,30 +32,29 @@ public class CesMetricsTool {
     private final CesMetricsService service;
 
     /**
-     * Constructs a new {@code CesMetricsTool} that delegates tool invocations to the
-     * underlying monitoring service.
+     * 构造 {@code CesMetricsTool} 实例，将工具调用委托给底层监控服务。
      *
-     * @param service the CES monitoring orchestration service performing validation and adapter dispatch
+     * @param service CES 监控编排服务，负责入参校验与 adapter 分发
      */
     public CesMetricsTool(CesMetricsService service) {
         this.service = service;
     }
 
     /**
-     * MCP entry point: lists CES metric definitions for the given namespace, metric name, or dimension.
+     * MCP 入口方法：根据指定的命名空间、指标名称或维度列出 CES 指标定义。
      *
-     * <p>Tool description text on the {@link Tool} annotation is mirrored from the spec; do not
-     * paraphrase casually — the Agent's tool selection depends on its precision.
+     * <p>{@link Tool} 注解中的描述文本与 spec 保持一致，请勿随意改写——
+     * Agent 的工具选择依赖该描述的精确度。
      *
-     * @param namespace  CES namespace such as {@code SYS.ECS}, optional
-     * @param metricName exact metric name, e.g. {@code cpu_util}, optional
-     * @param dimName    dimension name (e.g. {@code instance_id}); must be paired with {@code dimValue}
-     * @param dimValue   dimension value; must be paired with {@code dimName}
-     * @param limit      page size in [1, 1000], default 100 applied downstream when {@code null}
-     * @param start      pagination marker returned by a previous response, optional
-     * @param order      sort order, {@code "asc"} or {@code "desc"} (default {@code "desc"})
-     * @return the {@link com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse} on success,
-     *         or an {@link ErrorResponse} when a {@link SmartomException} is caught
+     * @param namespace  CES 命名空间，如 {@code SYS.ECS}，可选
+     * @param metricName 指标名称精确匹配，如 {@code cpu_util}，可选
+     * @param dimName    维度名称（如 {@code instance_id}），必须与 {@code dimValue} 成对出现
+     * @param dimValue   维度取值，必须与 {@code dimName} 成对出现
+     * @param limit      分页大小，取值范围 [1, 1000]，为 {@code null} 时由下游使用默认值 100
+     * @param start      上一次响应返回的分页标记，可选
+     * @param order      排序方式，{@code "asc"} 或 {@code "desc"}（默认 {@code "desc"}）
+     * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse}，
+     *         捕获 {@link SmartomException} 时返回 {@link ErrorResponse}
      */
     @Tool(
             name = "list_ces_metrics",

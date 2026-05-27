@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Aom Metrics Tool Test.
+ * AOM 指标工具单元测试。
  *
  * @author h00884391
  * @since 2026-05-21

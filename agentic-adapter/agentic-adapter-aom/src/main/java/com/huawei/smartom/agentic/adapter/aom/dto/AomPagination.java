@@ -7,15 +7,15 @@ package com.huawei.smartom.agentic.adapter.aom.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Pagination metadata returned by an AOM metrics listing.
+ * AOM 指标查询返回的分页元数据。
  *
- * <p>Note: {@code nextToken} is an {@link Integer} offset — unlike CES which uses a String marker.
+ * <p>注意：{@code nextToken} 是 {@link Integer} 类型的偏移量，与 CES 使用字符串 marker 的方式不同。
  *
- * @param count     number of items in the current page
- * @param total     total number of items across all pages, when known
- * @param offset    zero-based offset of the current page within the full result set, may be {@code null}
- * @param nextToken next-page offset marker; {@code null} when no more pages
- * @param hasMore   {@code true} when a subsequent page exists
+ * @param count     当前页的条目数量
+ * @param total     在已知的情况下，所有分页的总条目数
+ * @param offset    当前页在完整结果集中的零起始偏移，可能为 {@code null}
+ * @param nextToken 下一页的偏移标记；无后续页时为 {@code null}
+ * @param hasMore   当存在后续页时为 {@code true}
  *
  * @author h00884391
  * @since 2026-05-21

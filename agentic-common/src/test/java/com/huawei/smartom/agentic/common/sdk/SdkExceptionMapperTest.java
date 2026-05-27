@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Sdk Exception Mapper Test.
+ * SDK 异常映射器的单元测试。
  *
  * @author h00884391
  * @since 2026-05-21

@@ -7,10 +7,9 @@ package com.huawei.smartom.agentic.common.exception;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
 
 /**
- * Indicates a failure originating from a Huawei Cloud upstream service.
+ * 表示源自华为云上游服务的故障。
  *
- * <p>The {@link ErrorCode} narrows the failure type
- * (throttled / auth-failed / 5xx / timeout / etc).
+ * <p>{@link ErrorCode} 进一步细分故障类型（限流 / 鉴权失败 / 5xx / 超时 等）。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -20,12 +19,12 @@ public class UpstreamException extends SmartomException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a new {@code UpstreamException} representing a failure from a Huawei Cloud service.
+     * 构造一个新的 {@code UpstreamException}，表示来自华为云服务的故障。
      *
-     * @param errorCode       the classified error code (throttled / auth-failed / upstream-error / timeout)
-     * @param message         human-readable description of the failure
-     * @param upstreamTraceId the Huawei Cloud {@code X-Request-Id}, may be {@code null} when unavailable
-     * @param cause           the underlying SDK exception, may be {@code null}
+     * @param errorCode       分类后的错误码（限流 / 鉴权失败 / 上游错误 / 超时）
+     * @param message         可读的故障描述
+     * @param upstreamTraceId 华为云返回的 {@code X-Request-Id}，不可获取时可为 {@code null}
+     * @param cause           底层 SDK 异常，可为 {@code null}
      */
     public UpstreamException(ErrorCode errorCode, String message, String upstreamTraceId, Throwable cause) {
         super(errorCode, message, upstreamTraceId, cause);

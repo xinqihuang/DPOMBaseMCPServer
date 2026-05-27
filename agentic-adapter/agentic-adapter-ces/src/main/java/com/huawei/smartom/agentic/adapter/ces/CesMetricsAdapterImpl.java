@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Default {@link CesMetricsAdapter} implementation backed by Huawei Cloud Java SDK v3.1.196.
+ * 基于华为云 Java SDK v3.1.196 的 {@link CesMetricsAdapter} 默认实现。
  *
- * <p>Maps between our public DTOs and the SDK request/response classes. All SDK exceptions
- * are funnelled through {@link HuaweiCloudInvocation} to be mapped into {@code SmartomException}.
+ * <p>负责在对外 DTO 与 SDK 请求／响应类之间进行映射。所有 SDK 异常都通过
+ * {@link HuaweiCloudInvocation} 统一转换为 {@code SmartomException}。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -48,11 +48,10 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     private final HuaweiCloudInvocation invocation;
 
     /**
-     * Constructs a new {@code CesMetricsAdapterImpl} wired with the Huawei Cloud CES SDK client
-     * and the shared resilience/exception-mapping invocation helper.
+     * 构造 {@code CesMetricsAdapterImpl}，注入华为云 CES SDK 客户端，以及统一的容错与异常映射调用帮助类。
      *
-     * @param cesClient  configured Huawei Cloud CES SDK client
-     * @param invocation helper applying rate limiting, retry and SDK exception mapping
+     * @param cesClient  已配置的华为云 CES SDK 客户端
+     * @param invocation 负责限流、重试以及 SDK 异常映射的调用帮助类
      */
     public CesMetricsAdapterImpl(CesClient cesClient, HuaweiCloudInvocation invocation) {
         this.cesClient = cesClient;
@@ -74,11 +73,11 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     }
 
     /**
-     * Build the SDK request. Null fields are left unset; the SDK serialises with
-     * {@code NON_NULL} inclusion so absent fields will not appear on the wire.
+     * 构建 SDK 请求对象。为 null 的字段保持未设置状态；SDK 采用 {@code NON_NULL} 策略进行序列化，
+     * 因此缺省字段不会出现在请求报文中。
      *
-     * @param request the validated input DTO
-     * @return a fully populated SDK {@link ListMetricsRequest} ready to be dispatched
+     * @param request 已校验的入参 DTO
+     * @return 填充完毕、可直接下发的 SDK {@link ListMetricsRequest} 对象
      */
     private ListMetricsRequest toSdkRequest(CesListMetricsRequest request) {
         ListMetricsRequest sdk = new ListMetricsRequest();

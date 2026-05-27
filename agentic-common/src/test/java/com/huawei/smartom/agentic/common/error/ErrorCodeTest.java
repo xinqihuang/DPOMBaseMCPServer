@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Error Code Test.
+ * 错误码枚举的单元测试。
  *
  * @author h00884391
  * @since 2026-05-21

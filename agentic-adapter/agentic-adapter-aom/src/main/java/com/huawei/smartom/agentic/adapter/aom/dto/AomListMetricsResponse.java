@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * Result DTO for listing AOM metrics: a page of metric definitions plus pagination metadata.
+ * 列出 AOM 指标的结果 DTO，包含单页指标定义列表以及分页元数据。
  *
- * @param metrics    metric definitions returned in the current page
- * @param pagination pagination metadata for paging through the full result set
+ * @param metrics    当前页返回的指标定义列表
+ * @param pagination 用于遍历完整结果集的分页元数据
  *
  * @author h00884391
  * @since 2026-05-21

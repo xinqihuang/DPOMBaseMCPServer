@@ -17,14 +17,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Builds the {@link AomClient} bean from {@link HuaweiCloudProperties}.
+ * 基于 {@link HuaweiCloudProperties} 构建 {@link AomClient} Bean。
  *
- * <p>AOM requires a {@code projectId} in addition to AK/SK. The credentials are read from
- * environment variables {@code HUAWEICLOUD_AK}, {@code HUAWEICLOUD_SK}, and
- * {@code HUAWEICLOUD_PROJECT_ID}, injected via Vault at the pod level.
+ * <p>AOM 除 AK/SK 之外还需要 {@code projectId}。凭据从环境变量 {@code HUAWEICLOUD_AK}、
+ * {@code HUAWEICLOUD_SK} 与 {@code HUAWEICLOUD_PROJECT_ID} 读取，由 Vault 在 Pod 层面注入。
  *
- * <p>Region is resolved via {@link AomRegion#valueOf(String)}.
- * HTTP timeout is set on the SDK transport layer; Resilience4j handles retry/rate-limiting.
+ * <p>Region 通过 {@link AomRegion#valueOf(String)} 解析。
+ * HTTP 超时配置在 SDK 传输层，重试与限流由 Resilience4j 负责。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -38,11 +37,11 @@ public class AomClientConfig {
     private static final int HTTP_TIMEOUT_SECONDS = 10;
 
     /**
-     * Creates the AOM SDK client bean.
+     * 创建 AOM SDK 客户端 Bean。
      *
-     * @param properties Huawei Cloud connection properties; ak, sk, projectId and region must
-     *                   be non-blank (validated at startup by the health indicator)
-     * @return a configured {@link AomClient}
+     * @param properties 华为云连接配置；ak、sk、projectId 与 region 均不能为空
+     *                   （由健康检查在启动时校验）
+     * @return 已配置完成的 {@link AomClient}
      */
     @Bean
     public AomClient aomClient(HuaweiCloudProperties properties) {

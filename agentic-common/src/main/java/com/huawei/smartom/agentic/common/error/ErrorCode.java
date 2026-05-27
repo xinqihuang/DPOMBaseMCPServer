@@ -5,10 +5,9 @@
 package com.huawei.smartom.agentic.common.error;
 
 /**
- * Unified error codes returned to MCP clients.
+ * 返回给 MCP 客户端的统一错误码。
  *
- * <p>Each error code carries a {@code retryable} flag indicating whether the
- * MCP client (Agent) may safely retry the request.
+ * <p>每个错误码都携带 {@code retryable} 标记，指示 MCP 客户端（Agent）能否安全地重试请求。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -40,10 +39,10 @@ public enum ErrorCode {
     }
 
     /**
-     * Returns whether an operation that failed with this error code may be safely retried.
+     * 返回以本错误码失败的操作是否可以安全重试。
      *
-     * @return {@code true} if the MCP client (Agent) may retry the request after backoff,
-     *         {@code false} for terminal errors such as {@code INVALID_PARAM} or {@code UPSTREAM_AUTH_FAILED}
+     * @return {@code true} 表示 MCP 客户端（Agent）可以在退避后重试该请求；
+     *         {@code false} 表示终止性错误，例如 {@code INVALID_PARAM} 或 {@code UPSTREAM_AUTH_FAILED}
      */
     public boolean isRetryable() {
         return retryable;

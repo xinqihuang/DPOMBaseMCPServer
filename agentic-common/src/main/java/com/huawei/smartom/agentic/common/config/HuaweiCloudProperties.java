@@ -7,12 +7,11 @@ package com.huawei.smartom.agentic.common.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Huawei Cloud connection configuration.
+ * 华为云连接配置。
  *
- * <p>AK / SK are injected from environment variables {@code HUAWEICLOUD_AK} / {@code HUAWEICLOUD_SK}
- * via {@code application.yml} placeholders, populated by Vault at the pod level.
- * {@code projectId} is injected from {@code HUAWEICLOUD_PROJECT_ID} and is required by AOM.
- * The {@code region} is bound directly from configuration (e.g. {@code cn-southwest-2}).
+ * <p>AK / SK 通过 {@code application.yml} 中的占位符从环境变量 {@code HUAWEICLOUD_AK} / {@code HUAWEICLOUD_SK}
+ * 注入，由 Vault 在 Pod 层面写入。{@code projectId} 从 {@code HUAWEICLOUD_PROJECT_ID} 注入，AOM 调用必须依赖该值。
+ * {@code region} 直接绑定自配置项（例如 {@code cn-southwest-2}）。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -33,72 +32,72 @@ public class HuaweiCloudProperties {
     private String projectId;
 
     /**
-     * Returns the configured Huawei Cloud region id.
+     * 返回已配置的华为云 region id。
      *
-     * @return the region id, never {@code null} once Spring binding has run
+     * @return region id，Spring 完成绑定后不会为 {@code null}
      */
     public String getRegion() {
         return region;
     }
 
     /**
-     * Sets the Huawei Cloud region id.
+     * 设置华为云 region id。
      *
-     * @param region the region id, e.g. {@code cn-southwest-2}
+     * @param region region id，例如 {@code cn-southwest-2}
      */
     public void setRegion(String region) {
         this.region = region;
     }
 
     /**
-     * Returns the Huawei Cloud Access Key.
+     * 返回华为云 Access Key。
      *
-     * @return the access key, never {@code null} once Spring binding has run
+     * @return access key，Spring 完成绑定后不会为 {@code null}
      */
     public String getAk() {
         return ak;
     }
 
     /**
-     * Sets the Huawei Cloud Access Key.
+     * 设置华为云 Access Key。
      *
-     * @param ak the access key, injected from env {@code HUAWEICLOUD_AK}
+     * @param ak access key，从环境变量 {@code HUAWEICLOUD_AK} 注入
      */
     public void setAk(String ak) {
         this.ak = ak;
     }
 
     /**
-     * Returns the Huawei Cloud Secret Key.
+     * 返回华为云 Secret Key。
      *
-     * @return the secret key, never {@code null} once Spring binding has run
+     * @return secret key，Spring 完成绑定后不会为 {@code null}
      */
     public String getSk() {
         return sk;
     }
 
     /**
-     * Sets the Huawei Cloud Secret Key.
+     * 设置华为云 Secret Key。
      *
-     * @param sk the secret key, injected from env {@code HUAWEICLOUD_SK}
+     * @param sk secret key，从环境变量 {@code HUAWEICLOUD_SK} 注入
      */
     public void setSk(String sk) {
         this.sk = sk;
     }
 
     /**
-     * Returns the Huawei Cloud project id.
+     * 返回华为云 project id。
      *
-     * @return the project id, required by AOM APIs
+     * @return project id，AOM 接口必须依赖该值
      */
     public String getProjectId() {
         return projectId;
     }
 
     /**
-     * Sets the Huawei Cloud project id.
+     * 设置华为云 project id。
      *
-     * @param projectId the project id, injected from env {@code HUAWEICLOUD_PROJECT_ID}
+     * @param projectId project id，从环境变量 {@code HUAWEICLOUD_PROJECT_ID} 注入
      */
     public void setProjectId(String projectId) {
         this.projectId = projectId;

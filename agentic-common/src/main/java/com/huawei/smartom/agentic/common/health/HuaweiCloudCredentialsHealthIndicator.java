@@ -11,14 +11,13 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 /**
- * Reports DOWN if required Huawei Cloud credentials are not configured, blocking pod readiness.
+ * 当必需的华为云凭据未配置时返回 DOWN，从而阻断 Pod 的 readiness 探针。
  *
- * <p>Bean name resolves to {@code huaweiCloudCredentials}, included via
- * {@code management.endpoint.health.group.readiness.include} in {@code application.yml}.
+ * <p>Bean 名为 {@code huaweiCloudCredentials}，通过 {@code application.yml} 中的
+ * {@code management.endpoint.health.group.readiness.include} 加入 readiness 组。
  *
- * <p>projectId is checked here because AOM APIs require it. CES does not need projectId and will
- * continue to work even when projectId is missing; however, the overall readiness probe will report
- * DOWN until all required credentials are present.
+ * <p>这里会一并检查 projectId，原因是 AOM 接口必须依赖该值。CES 不需要 projectId，即使缺失也能继续工作；
+ * 但整体 readiness 探针在所有必需凭据齐全之前都会报告 DOWN。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -29,9 +28,9 @@ public class HuaweiCloudCredentialsHealthIndicator implements HealthIndicator {
     private final HuaweiCloudProperties properties;
 
     /**
-     * Constructs a new {@code HuaweiCloudCredentialsHealthIndicator} backed by the given properties.
+     * 基于给定的配置属性构造一个新的 {@code HuaweiCloudCredentialsHealthIndicator}。
      *
-     * @param properties the resolved Huawei Cloud credential/region properties to be checked
+     * @param properties 已解析的华为云凭据 / region 配置属性，将被本组件用于健康检查
      */
     public HuaweiCloudCredentialsHealthIndicator(HuaweiCloudProperties properties) {
         this.properties = properties;

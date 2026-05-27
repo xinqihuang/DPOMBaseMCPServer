@@ -23,13 +23,12 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Type-contract tests for Huawei Cloud AOM SDK v3.1.177.
+ * 华为云 AOM SDK v3.1.177 的类型契约测试。
  *
- * <p>Purpose: detect breaking changes in SDK class shape (renamed / removed fields)
- * that the Java compiler would not catch (e.g. when accessed via reflection or builder).
+ * <p>目的：检测 SDK 类结构上 Java 编译器无法捕获的破坏性变更（例如通过反射或 builder 访问时
+ * 出现的字段重命名/删除）。
  *
- * <p>If these tests fail after an SDK upgrade, the adapter mapping logic in
- * {@code AomMetricsAdapterImpl} must be reviewed before releasing.
+ * <p>若 SDK 升级后这些测试失败，则必须在发布前重新审视 {@code AomMetricsAdapterImpl} 中的映射逻辑。
  *
  * @author h00884391
  * @since 2026-05-21

@@ -8,11 +8,10 @@ import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse;
 
 /**
- * Port for querying AOM metric definitions.
+ * 用于查询 AOM 指标定义的端口接口。
  *
- * <p>Implementations wrap the Huawei Cloud AOM SDK and convert SDK types to our own DTOs.
- * SDK exceptions must be mapped to {@link com.huawei.smartom.agentic.common.exception.SmartomException}
- * before leaving the implementation.
+ * <p>实现类负责封装华为云 AOM SDK，并将 SDK 类型转换为本项目自定义的 DTO。
+ * SDK 异常必须在离开实现之前被映射为 {@link com.huawei.smartom.agentic.common.exception.SmartomException}。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -20,11 +19,11 @@ import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse;
 public interface AomMetricsAdapter {
 
     /**
-     * List available AOM metric definitions matching the given request.
+     * 列出与给定请求匹配的 AOM 指标定义。
      *
-     * @param request the query parameters; must not be null
-     * @return a page of metric definitions with pagination metadata
-     * @throws com.huawei.smartom.agentic.common.exception.SmartomException on SDK or upstream error
+     * @param request 查询参数，不能为 null
+     * @return 单页指标定义列表，附带分页元数据
+     * @throws com.huawei.smartom.agentic.common.exception.SmartomException 当 SDK 或上游发生错误时抛出
      */
     AomListMetricsResponse listMetrics(AomListMetricsRequest request);
 }

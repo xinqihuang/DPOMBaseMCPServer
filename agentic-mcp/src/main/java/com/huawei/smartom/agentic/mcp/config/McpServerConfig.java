@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Registers MCP tool beans with the Spring AI MCP server.
+ * 向 Spring AI MCP Server 注册 MCP 工具 Bean。
  *
- * <p>Add new tool components to the {@code toolObjects(...)} list as they are introduced.
+ * <p>新增工具组件时，请将其加入 {@code toolObjects(...)} 列表。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -25,13 +25,13 @@ import org.springframework.context.annotation.Configuration;
 public class McpServerConfig {
 
     /**
-     * Aggregates all MCP tool component beans into a single {@link ToolCallbackProvider}
-     * consumed by the Spring AI MCP server for tool discovery and invocation.
+     * 将所有 MCP 工具组件 Bean 聚合为单个 {@link ToolCallbackProvider}，
+     * 供 Spring AI MCP Server 进行工具发现与调用。
      *
-     * @param helloWorldTool the trivial reachability test tool
-     * @param cesMetricsTool the CES metrics listing tool
-     * @param aomMetricsTool the AOM metrics listing tool
-     * @return a {@link MethodToolCallbackProvider} exposing every registered tool object
+     * @param helloWorldTool 用于连通性测试的简易工具
+     * @param cesMetricsTool CES 指标列表查询工具
+     * @param aomMetricsTool AOM 指标列表查询工具
+     * @return 暴露所有已注册工具对象的 {@link MethodToolCallbackProvider}
      */
     @Bean
     public ToolCallbackProvider toolCallbackProvider(

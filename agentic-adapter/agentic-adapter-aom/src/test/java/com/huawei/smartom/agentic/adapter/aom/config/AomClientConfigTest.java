@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
- * Aom Client Config Test.
+ * AomClientConfig 的单元测试。
  *
  * @author h00884391
  * @since 2026-05-21

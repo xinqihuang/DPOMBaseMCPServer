@@ -16,17 +16,16 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Business orchestration for AOM metric discovery.
+ * AOM 指标发现的业务编排。
  *
- * <p>Responsibilities:
+ * <p>职责：
  * <ul>
- *   <li>Validate input per {@code list_aom_metrics} spec §3.2 (7 rules), throwing
- *       {@link InvalidParamException} on violation — before calling the adapter.</li>
- *   <li>Delegate to the adapter for the actual SDK call.</li>
+ *   <li>按 {@code list_aom_metrics} 规约 §3.2 的 7 条规则校验入参，若违反则抛出
+ *       {@link InvalidParamException}，校验通过后再调用 adapter。</li>
+ *   <li>将实际的 SDK 调用委托给 adapter。</li>
  * </ul>
  *
- * <p>Validation uses short-circuit evaluation: rules are checked in order and the first violation
- * throws immediately, avoiding potential NPEs in later rules.
+ * <p>校验采用短路求值：规则按顺序逐条检查，首个违反立即抛出，避免在后续规则中触发空指针。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -54,20 +53,20 @@ public class AomMetricsService {
     private final AomMetricsAdapter adapter;
 
     /**
-     * Constructs a new {@code AomMetricsService} backed by the given adapter.
+     * 构造一个由指定 adapter 支撑的 {@code AomMetricsService}。
      *
-     * @param adapter the AOM adapter that performs the actual SDK call
+     * @param adapter 执行实际 SDK 调用的 AOM adapter
      */
     public AomMetricsService(AomMetricsAdapter adapter) {
         this.adapter = adapter;
     }
 
     /**
-     * Validate input then delegate to the adapter.
+     * 校验入参，随后委托给 adapter 执行。
      *
-     * @param request the query parameters; must not be null
-     * @return the listing result
-     * @throws InvalidParamException on input constraint violation
+     * @param request 查询参数，不能为 null
+     * @return 列表查询结果
+     * @throws InvalidParamException 入参约束违反时抛出
      */
     public AomListMetricsResponse listMetrics(AomListMetricsRequest request) {
         if (request == null) {

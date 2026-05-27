@@ -29,15 +29,15 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Default {@link AomMetricsAdapter} implementation backed by Huawei Cloud Java SDK v3.1.177.
+ * 基于华为云 Java SDK v3.1.177 实现的 {@link AomMetricsAdapter} 默认实现。
  *
- * <p>Two call paths depending on input:
+ * <p>根据入参不同存在两条调用路径：
  * <ul>
- *   <li>Path A (inventoryId): {@code type=inventory} — body carries only inventoryId.</li>
- *   <li>Path B (namespace): body carries a {@code metricItems} list with namespace/metricName/dims.</li>
+ *   <li>路径 A（inventoryId）：{@code type=inventory}，请求体仅携带 inventoryId。</li>
+ *   <li>路径 B（namespace）：请求体携带 {@code metricItems} 列表，包含 namespace/metricName/dims。</li>
  * </ul>
- * When both inventoryId and namespace are provided, path A is used and a WARN is logged.
- * SDK exceptions are funnelled through {@link HuaweiCloudInvocation} into SmartomException.
+ * 当同时提供 inventoryId 与 namespace 时，使用路径 A 并打印 WARN 日志。
+ * SDK 异常会通过 {@link HuaweiCloudInvocation} 统一转换为 SmartomException。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -55,11 +55,10 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
     private final HuaweiCloudInvocation invocation;
 
     /**
-     * Constructs a new {@code AomMetricsAdapterImpl} wired with the Huawei Cloud AOM SDK client
-     * and the shared resilience/exception-mapping invocation helper.
+     * 构造 {@code AomMetricsAdapterImpl}，注入华为云 AOM SDK 客户端以及共享的容错与异常映射调用助手。
      *
-     * @param aomClient  configured Huawei Cloud AOM SDK client
-     * @param invocation helper applying rate limiting, retry and SDK exception mapping
+     * @param aomClient  已配置好的华为云 AOM SDK 客户端
+     * @param invocation 提供限流、重试以及 SDK 异常映射能力的调用助手
      */
     public AomMetricsAdapterImpl(AomClient aomClient, HuaweiCloudInvocation invocation) {
         this.aomClient = aomClient;
@@ -81,11 +80,11 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
     }
 
     /**
-     * Build the SDK request. Path A uses {@code type=inventory}; path B uses metricItems in body.
-     * When inventoryId is present it takes precedence over namespace.
+     * 构造 SDK 请求对象。路径 A 使用 {@code type=inventory}；路径 B 在请求体中携带 metricItems。
+     * 当 inventoryId 存在时优先于 namespace。
      *
-     * @param request the validated input DTO
-     * @return a fully populated SDK {@link ListMetricItemsRequest} ready to be dispatched
+     * @param request 已校验的输入 DTO
+     * @return 已填充完毕、可直接发送的 SDK {@link ListMetricItemsRequest}
      */
     private ListMetricItemsRequest toSdkRequest(AomListMetricsRequest request) {
         if (request.inventoryId() != null) {

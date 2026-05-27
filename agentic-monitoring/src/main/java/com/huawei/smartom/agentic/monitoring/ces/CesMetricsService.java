@@ -14,13 +14,12 @@ import org.springframework.stereotype.Service;
 import java.util.regex.Pattern;
 
 /**
- * Business orchestration for CES metric queries.
+ * CES 指标查询的业务编排。
  *
- * <p>Responsibilities:
+ * <p>职责：
  * <ul>
- *   <li>Validate input per the {@code list_ces_metrics} spec, throwing
- *       {@link InvalidParamException} on violation</li>
- *   <li>Delegate to the adapter layer for the actual SDK call</li>
+ *   <li>按 {@code list_ces_metrics} 规约校验入参，若违反则抛出 {@link InvalidParamException}</li>
+ *   <li>将实际的 SDK 调用委托给 adapter 层</li>
  * </ul>
  *
  * @author h00884391
@@ -42,20 +41,20 @@ public class CesMetricsService {
     private final CesMetricsAdapter adapter;
 
     /**
-     * Constructs a new {@code CesMetricsService} backed by the given adapter.
+     * 构造一个由指定 adapter 支撑的 {@code CesMetricsService}。
      *
-     * @param adapter the CES adapter that performs the actual SDK call
+     * @param adapter 执行实际 SDK 调用的 CES adapter
      */
     public CesMetricsService(CesMetricsAdapter adapter) {
         this.adapter = adapter;
     }
 
     /**
-     * Validate input then delegate to the adapter.
+     * 校验入参，随后委托给 adapter 执行。
      *
-     * @param request the request DTO, must not be null
-     * @return the listing result
-     * @throws InvalidParamException on input violation
+     * @param request 请求 DTO，不能为 null
+     * @return 列表查询结果
+     * @throws InvalidParamException 入参违反约束时抛出
      */
     public CesListMetricsResponse listMetrics(CesListMetricsRequest request) {
         if (request == null) {

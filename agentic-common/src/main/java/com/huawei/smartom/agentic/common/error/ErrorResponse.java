@@ -7,14 +7,14 @@ package com.huawei.smartom.agentic.common.error;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Structured error payload returned by MCP tools.
+ * MCP tool 返回的结构化错误负载。
  *
- * <p>JSON field names use snake_case to align with the Huawei Cloud API style.
+ * <p>JSON 字段名采用 snake_case，与华为云 API 风格保持一致。
  *
- * @param errorCode        machine-readable error code (see {@link ErrorCode})
- * @param errorMessage     human-readable description
- * @param upstreamTraceId  Huawei Cloud X-Request-Id (nullable when error originates locally)
- * @param retryable        whether the caller may retry
+ * @param errorCode        机器可读的错误码（参见 {@link ErrorCode}）
+ * @param errorMessage     可读的错误描述
+ * @param upstreamTraceId  华为云 X-Request-Id（错误源自本地时可为 null）
+ * @param retryable        调用方是否可重试
  *
  * @author h00884391
  * @since 2026-05-21
@@ -26,12 +26,12 @@ public record ErrorResponse(
         @JsonProperty("retryable") boolean retryable) {
 
     /**
-     * Convenience factory deriving {@code errorCode} string and {@code retryable} from the enum.
+     * 便捷工厂方法，从枚举派生 {@code errorCode} 字符串和 {@code retryable} 字段。
      *
-     * @param code             the error code
-     * @param message          human-readable message
-     * @param upstreamTraceId  upstream trace id (nullable)
-     * @return populated ErrorResponse
+     * @param code             错误码
+     * @param message          可读的错误消息
+     * @param upstreamTraceId  上游 trace id（可为 null）
+     * @return 已填充字段的 ErrorResponse
      */
     public static ErrorResponse of(ErrorCode code, String message, String upstreamTraceId) {
         return new ErrorResponse(code.name(), message, upstreamTraceId, code.isRetryable());

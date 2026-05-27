@@ -19,10 +19,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * MCP tool wrapping the {@code list_aom_metrics} capability.
+ * 封装 {@code list_aom_metrics} 能力的 MCP 工具。
  *
- * <p>Tool naming, description and parameter semantics follow
- * {@code docs/specs/tools/list_aom_metrics_v0.2.md}.
+ * <p>工具命名、描述及参数语义遵循
+ * {@code docs/specs/tools/list_aom_metrics_v0.2.md}。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -35,30 +35,29 @@ public class AomMetricsTool {
     private final AomMetricsService service;
 
     /**
-     * Constructs a new {@code AomMetricsTool} that delegates tool invocations to the
-     * underlying monitoring service.
+     * 构造 {@code AomMetricsTool} 实例，将工具调用委托给底层监控服务。
      *
-     * @param service the AOM monitoring orchestration service performing validation and adapter dispatch
+     * @param service AOM 监控编排服务，负责入参校验与 adapter 分发
      */
     public AomMetricsTool(AomMetricsService service) {
         this.service = service;
     }
 
     /**
-     * MCP entry point: lists AOM metric definitions for the given namespace or inventory id.
+     * MCP 入口方法：根据指定的 namespace 或 inventoryId 列出 AOM 指标定义。
      *
-     * <p>Tool description text on the {@link Tool} annotation is mirrored from the spec; do not
-     * paraphrase casually — the Agent's tool selection depends on its precision.
+     * <p>{@link Tool} 注解中的描述文本与 spec 保持一致，请勿随意改写——
+     * Agent 的工具选择依赖该描述的精确度。
      *
-     * @param namespace   AOM namespace (one of the predefined PAAS.* values, CUSTOMMETRICS, or a custom
-     *                    namespace); required unless {@code inventoryId} is set
-     * @param metricName  exact metric name filter, optional
-     * @param dimensions  AND-combined dimension filter list, optional
-     * @param inventoryId resource inventory id ({@code resType_resId}); required unless {@code namespace} is set
-     * @param limit       page size in [1, 1000], default applied downstream when {@code null}
-     * @param start       page offset (0-based), default applied downstream when {@code null}
-     * @return the {@link com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse} on success,
-     *         or an {@link ErrorResponse} when a {@link SmartomException} is caught
+     * @param namespace   AOM 命名空间（预定义的 PAAS.* 取值、CUSTOMMETRICS 或自定义命名空间）；
+     *                    未提供 {@code inventoryId} 时必填
+     * @param metricName  指标名称精确过滤，可选
+     * @param dimensions  维度过滤列表，多个维度按 AND 组合，可选
+     * @param inventoryId 资源清单 ID（{@code resType_resId}）；未提供 {@code namespace} 时必填
+     * @param limit       分页大小，取值范围 [1, 1000]，为 {@code null} 时由下游使用默认值
+     * @param start       分页偏移（从 0 开始），为 {@code null} 时由下游使用默认值
+     * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse}，
+     *         捕获 {@link SmartomException} 时返回 {@link ErrorResponse}
      */
     @Tool(
             name = "list_aom_metrics",

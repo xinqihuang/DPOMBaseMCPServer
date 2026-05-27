@@ -14,11 +14,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * Boots the full application context to ensure all wiring (MCP starter, tools,
- * CES adapter, AOM adapter, common beans) is valid.
+ * 启动完整 Spring 应用上下文，验证 MCP starter、工具、CES adapter、AOM adapter 及通用 Bean 等
+ * 所有依赖装配正确。
  *
- * <p>Test credentials are injected so the health indicator and SDK client beans construct
- * without calling live Huawei Cloud IAM endpoints.
+ * <p>注入测试用凭据，使健康检查与 SDK 客户端 Bean 能正常构造，避免实际调用华为云 IAM 端点。
  *
  * @author h00884391
  * @since 2026-05-21

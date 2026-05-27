@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * Output DTO for {@code list_ces_metrics}.
+ * {@code list_ces_metrics} 的出参 DTO。
  *
- * @param metrics     metric definitions, never null (empty when no result)
- * @param pagination  pagination metadata, never null
+ * @param metrics     指标定义列表，永不为 null（无结果时为空列表）
+ * @param pagination  分页元数据，永不为 null
  *
  * @author h00884391
  * @since 2026-05-21

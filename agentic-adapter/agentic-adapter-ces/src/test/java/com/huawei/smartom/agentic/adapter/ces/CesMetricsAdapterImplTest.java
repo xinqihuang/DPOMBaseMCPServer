@@ -45,10 +45,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link CesMetricsAdapterImpl}.
+ * {@link CesMetricsAdapterImpl} 的单元测试。
  *
- * <p>Covers UT-01/02/03/09/10/11/12/13/14/15 from the list_ces_metrics spec.
- * Parameter-validation cases (UT-04..08) belong to {@code CesMetricsServiceTest}.
+ * <p>覆盖 list_ces_metrics 规约中的 UT-01/02/03/09/10/11/12/13/14/15 用例。
+ * 参数校验相关用例（UT-04..08）由 {@code CesMetricsServiceTest} 覆盖。
  *
  * @author h00884391
  * @since 2026-05-21

@@ -9,16 +9,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * Metadata for a single AOM metric definition.
+ * 单条 AOM 指标定义的元数据。
  *
- * <p>{@code dimensionValueHash} is an AOM-specific stable hash of the dimension value set,
- * useful for correlating the same metric dimension combination across calls.
+ * <p>{@code dimensionValueHash} 是 AOM 针对维度值集合生成的稳定哈希，便于在多次调用之间关联同一维度组合的指标。
  *
- * @param namespace          AOM namespace such as {@code PAAS.CONTAINER}
- * @param metricName         metric name (e.g. {@code cpuUsage})
- * @param unit               human-readable unit string, may be {@code null}
- * @param dimensions         dimension list identifying the resource this metric applies to
- * @param dimensionValueHash AOM-specific stable hash of the dimension value set
+ * @param namespace          AOM 命名空间，例如 {@code PAAS.CONTAINER}
+ * @param metricName         指标名称，例如 {@code cpuUsage}
+ * @param unit               可读的单位字符串，可能为 {@code null}
+ * @param dimensions         标识该指标所属资源的维度列表
+ * @param dimensionValueHash AOM 针对维度值集合生成的稳定哈希
  *
  * @author h00884391
  * @since 2026-05-21

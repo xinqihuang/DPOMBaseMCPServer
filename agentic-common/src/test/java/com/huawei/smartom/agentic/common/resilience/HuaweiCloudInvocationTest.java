@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Huawei Cloud Invocation Test.
+ * 华为云 SDK 调用封装的单元测试。
  *
  * @author h00884391
  * @since 2026-05-21

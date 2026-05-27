@@ -17,13 +17,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Builds the {@link CesClient} bean from {@link HuaweiCloudProperties}.
+ * 基于 {@link HuaweiCloudProperties} 构建 {@link CesClient} Bean。
  *
- * <p>Region is resolved via {@link CesRegion#valueOf(String)} from the configured region id
- * (e.g. {@code "cn-southwest-2"} for Guiyang One).
+ * <p>region 通过 {@link CesRegion#valueOf(String)} 从配置的 region id 解析得到
+ * （例如贵阳一区为 {@code "cn-southwest-2"}）。
  *
- * <p>HTTP timeout is set on the underlying SDK transport here, in addition to the
- * application-level Resilience4j retry / rate-limiter applied per call.
+ * <p>此处在底层 SDK 传输层设置 HTTP 超时，与按调用维度生效的应用层 Resilience4j 重试／限流相互独立。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -37,10 +36,10 @@ public class CesClientConfig {
     private static final int HTTP_TIMEOUT_SECONDS = 10;
 
     /**
-     * Builds the singleton {@link CesClient} from the configured AK/SK, region and SDK HTTP timeout.
+     * 基于配置的 AK/SK、region 以及 SDK HTTP 超时，构建单例 {@link CesClient}。
      *
-     * @param properties resolved Huawei Cloud credential and region properties
-     * @return a ready-to-use {@link CesClient} pointing at the configured region
+     * @param properties 已解析的华为云凭证与 region 配置
+     * @return 指向配置 region 的可直接使用的 {@link CesClient}
      */
     @Bean
     public CesClient cesClient(HuaweiCloudProperties properties) {

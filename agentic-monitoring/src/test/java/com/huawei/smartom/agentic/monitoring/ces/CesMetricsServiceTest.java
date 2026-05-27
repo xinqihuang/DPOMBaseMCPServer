@@ -26,9 +26,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link CesMetricsService}.
+ * {@link CesMetricsService} 的单元测试。
  *
- * <p>Covers UT-04..08 (parameter validation) from the spec.
+ * <p>覆盖规约中 UT-04 至 UT-08（入参校验）用例。
  *
  * @author h00884391
  * @since 2026-05-21

@@ -7,11 +7,10 @@ package com.huawei.smartom.agentic.common.exception;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
 
 /**
- * Base business exception for the DPOMBaseMCPServer.
+ * DPOMBaseMCPServer 的业务异常基类。
  *
- * <p>All exceptions thrown across module boundaries should extend this class.
- * Carries a structured {@link ErrorCode} and the upstream trace id (when applicable)
- * so MCP tools can render a stable error payload regardless of where the failure originated.
+ * <p>所有跨模块边界抛出的异常都应继承本类。它携带结构化的 {@link ErrorCode} 以及上游 trace id
+ * （如有），从而无论故障源自何处，MCP tool 都能输出稳定一致的错误负载。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -24,13 +23,13 @@ public class SmartomException extends RuntimeException {
     private final String upstreamTraceId;
 
     /**
-     * Full constructor.
+     * 全参构造函数。
      *
-     * @param errorCode        the unified error code, must not be null
-     * @param message          human-readable message
-     * @param upstreamTraceId  Huawei Cloud X-Request-Id, may be null when error is local
-     * @param cause            the underlying cause, may be null
-     * @throws IllegalArgumentException if {@code errorCode} is {@code null}
+     * @param errorCode        统一错误码，不可为 null
+     * @param message          可读的错误消息
+     * @param upstreamTraceId  华为云 X-Request-Id，错误源自本地时可为 null
+     * @param cause            底层 cause，可为 null
+     * @throws IllegalArgumentException 当 {@code errorCode} 为 {@code null}
      */
     public SmartomException(ErrorCode errorCode, String message, String upstreamTraceId, Throwable cause) {
         super(message, cause);
@@ -42,26 +41,26 @@ public class SmartomException extends RuntimeException {
     }
 
     /**
-     * Local-error convenience constructor (no upstream trace id).
+     * 本地错误的便捷构造函数（不携带上游 trace id）。
      *
-     * @param errorCode the unified error code
-     * @param message   human-readable message
+     * @param errorCode 统一错误码
+     * @param message   可读的错误消息
      */
     public SmartomException(ErrorCode errorCode, String message) {
         this(errorCode, message, null, null);
     }
 
     /**
-     * Returns the structured error code carried by this exception.
+     * 返回本异常携带的结构化错误码。
      *
-     * @return the {@link ErrorCode}, never {@code null}
+     * @return {@link ErrorCode}，不会为 {@code null}
      */
     public ErrorCode getErrorCode() {
         return errorCode;
     }
 
     /**
-     * @return Huawei Cloud upstream X-Request-Id, may be {@code null}
+     * @return 华为云上游的 X-Request-Id，可能为 {@code null}
      */
     public String getUpstreamTraceId() {
         return upstreamTraceId;

@@ -20,12 +20,12 @@ import org.springframework.stereotype.Component;
 import java.util.function.Supplier;
 
 /**
- * Unified wrapper for Huawei Cloud SDK calls.
+ * 华为云 SDK 调用的统一封装。
  *
- * <p>Applies in order: rate limiting -&gt; SDK call -&gt; exception mapping (to SmartomException)
- * -&gt; retry (only on retryable {@link com.huawei.smartom.agentic.common.error.ErrorCode}s).
+ * <p>处理顺序为：限流 -&gt; SDK 调用 -&gt; 异常映射（转为 SmartomException）
+ * -&gt; 重试（仅对可重试的 {@link com.huawei.smartom.agentic.common.error.ErrorCode} 触发）。
  *
- * <p>Logs the API identifier, duration and final result (success or error code) on every call.
+ * <p>每次调用都会记录 API 标识、耗时以及最终结果（成功或错误码）。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -40,12 +40,12 @@ public class HuaweiCloudInvocation {
     private final SdkExceptionMapper exceptionMapper;
 
     /**
-     * Constructs a new {@code HuaweiCloudInvocation} wired with the resilience registries
-     * and SDK exception mapper used to decorate every Huawei Cloud SDK call.
+     * 构造一个新的 {@code HuaweiCloudInvocation}，注入用于装饰每次华为云 SDK 调用的容错注册表
+     * 和 SDK 异常映射器。
      *
-     * @param rateLimiterRegistry registry providing named RateLimiter instances per service scope
-     * @param retryRegistry       registry providing named Retry instances (e.g. huaweicloud-retryable)
-     * @param exceptionMapper     mapper that converts SDK exceptions into {@link SmartomException}
+     * @param rateLimiterRegistry 按服务作用域提供命名 RateLimiter 实例的注册表
+     * @param retryRegistry       提供命名 Retry 实例的注册表（例如 huaweicloud-retryable）
+     * @param exceptionMapper     将 SDK 异常转换为 {@link SmartomException} 的映射器
      */
     public HuaweiCloudInvocation(
             RateLimiterRegistry rateLimiterRegistry,
@@ -57,16 +57,16 @@ public class HuaweiCloudInvocation {
     }
 
     /**
-     * Execute an SDK call under rate-limiting + retry + exception mapping.
+     * 在限流、重试与异常映射的组合下执行一次 SDK 调用。
      *
-     * @param rateLimiterName  rate limiter instance name (e.g. {@code "ces-readonly"})
-     * @param retryName        retry instance name (typically {@code "huaweicloud-retryable"})
-     * @param api              free-form API id for logging/metrics (e.g. {@code "ces.listMetrics"})
-     * @param call             the actual SDK invocation
-     * @param <T>              SDK response type
-     * @return the SDK response
-     * @throws IllegalArgumentException if any argument is {@code null}
-     * @throws SmartomException with a mapped {@link com.huawei.smartom.agentic.common.error.ErrorCode}
+     * @param rateLimiterName  限流器实例名（例如 {@code "ces-readonly"}）
+     * @param retryName        重试实例名（通常为 {@code "huaweicloud-retryable"}）
+     * @param api              用于日志与监控的自由格式 API 标识（例如 {@code "ces.listMetrics"}）
+     * @param call             实际的 SDK 调用
+     * @param <T>              SDK 响应类型
+     * @return SDK 响应
+     * @throws IllegalArgumentException 当任一参数为 {@code null}
+     * @throws SmartomException 携带已映射的 {@link com.huawei.smartom.agentic.common.error.ErrorCode}
      */
     public <T> T execute(String rateLimiterName, String retryName, String api, Supplier<T> call) {
         if (rateLimiterName == null || retryName == null || api == null || call == null) {

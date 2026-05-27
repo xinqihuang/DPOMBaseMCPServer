@@ -160,6 +160,30 @@ mcp 不能直接 import huaweicloud SDK
 - 调华为云 SDK 的地方必须在 finally 里记录 `upstreamTraceId`（华为云返回的 `X-Request-Id`）
 - 敏感信息（AK/SK、token）**永远不打日志**
 
+### 3.6 Javadoc 语言
+
+- **类级 Javadoc 和方法级 Javadoc 一律用中文写**——描述正文、`@param` / `@return` / `@throws` 的说明文本，都用中文。
+- **不翻译的部分**：
+  - Javadoc 标签名本身（`@param` / `@return` / `@throws` / `@since` / `@author` 等）
+  - 标识符（类名、方法名、参数名、字段名、常量名）
+  - `{@code ...}` / `{@link ...}` 内部的代码引用
+  - HTML 标记（`<p>` / `<ul>` / `<li>` / `<code>` 等）
+  - `@since` 后的日期值、`@author` 后的作者标识
+- 字段级 Javadoc、行内 `//` 注释、TODO 注释——本规则不强制，但建议同样用中文以保持一致。
+- 反例：
+  ```java
+  /** Returns the configured region. @return the region */   // ❌ 英文
+  ```
+- 正例：
+  ```java
+  /**
+   * 返回已配置的华为云 region 标识。
+   *
+   * @return region 标识，Spring 绑定完成后不会为 {@code null}
+   */
+  ```
+- 理由：本项目交付给华为云内部团队，代码评审、运维 Wiki、故障排查全部用中文；Javadoc 用中文降低跨人员理解成本。
+
 ---
 
 ## 4. 关键架构决策
@@ -259,6 +283,7 @@ INTERNAL                // 序列化/未分类异常
 - [ ] 没有打印敏感信息
 - [ ] 所有 `if`/`for`/`while` 都带 `{}`
 - [ ] 所有 public 方法都有 Javadoc（参数、返回值、异常）
+- [ ] 所有类级和方法级 Javadoc 用**中文**编写（标识符 / `{@code}` / `{@link}` / HTML 标记保留英文）
 - [ ] 行宽不超过 120
 - [ ] import 分组符合规范
 - [ ] 测试覆盖 spec 中列出的所有 UT/TC 用例

@@ -11,10 +11,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
- * Entry point for DPOMBaseMCPServer.
+ * DPOMBaseMCPServer 启动入口。
  *
- * <p>The component scan base is set to the project root package so beans declared in
- * {@code agentic-common} / {@code agentic-adapter-*} / {@code agentic-monitoring} are picked up.
+ * <p>组件扫描根包设为项目顶层包，确保 {@code agentic-common} / {@code agentic-adapter-*} /
+ * {@code agentic-monitoring} 中声明的 Bean 均能被正确加载。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -24,9 +24,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 public class DpomBaseMcpServerApplication {
 
     /**
-     * Spring Boot entry point that bootstraps the DPOMBaseMCPServer application context.
+     * Spring Boot 启动入口，负责初始化 DPOMBaseMCPServer 应用上下文。
      *
-     * @param args JVM command-line arguments forwarded to {@link SpringApplication#run}
+     * @param args JVM 命令行参数，将原样转发给 {@link SpringApplication#run}
      */
     public static void main(String[] args) {
         SpringApplication.run(DpomBaseMcpServerApplication.class, args);

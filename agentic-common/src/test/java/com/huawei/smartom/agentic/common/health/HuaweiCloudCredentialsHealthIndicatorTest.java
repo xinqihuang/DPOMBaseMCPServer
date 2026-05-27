@@ -14,7 +14,7 @@ import org.springframework.boot.actuate.health.Status;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Huawei Cloud Credentials Health Indicator Test.
+ * 华为云凭据健康检查器的单元测试。
  *
  * @author h00884391
  * @since 2026-05-21

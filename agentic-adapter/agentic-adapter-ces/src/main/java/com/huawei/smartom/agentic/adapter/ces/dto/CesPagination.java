@@ -7,12 +7,12 @@ package com.huawei.smartom.agentic.adapter.ces.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Pagination metadata for CES list-style responses.
+ * CES 列表类响应的分页元数据。
  *
- * @param count       items in the current page
- * @param total       total items available
- * @param nextMarker  opaque marker for the next page (null when exhausted)
- * @param hasMore     convenience flag, true iff there is at least one more page
+ * @param count       当前页的条目数
+ * @param total       总条目数
+ * @param nextMarker  下一页的不透明分页标记，无更多数据时为 null
+ * @param hasMore     便捷标志，仅当还有下一页时为 true
  *
  * @author h00884391
  * @since 2026-05-21

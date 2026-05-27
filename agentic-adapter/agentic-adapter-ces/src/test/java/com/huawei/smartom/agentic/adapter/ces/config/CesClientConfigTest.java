@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
- * Ces Client Config Test.
+ * CES 客户端配置类的单元测试。
  *
  * @author h00884391
  * @since 2026-05-21
