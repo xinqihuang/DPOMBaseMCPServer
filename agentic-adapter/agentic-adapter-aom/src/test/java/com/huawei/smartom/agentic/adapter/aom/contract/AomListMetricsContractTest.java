@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
  */
 
 package com.huawei.smartom.agentic.adapter.aom.contract;
@@ -67,7 +67,7 @@ class AomListMetricsContractTest {
     void tc04NamespaceEnumHasRequiredConstants() throws Exception {
         Class<?> outerClass = QueryMetricItemOptionParam.class;
         Class<?> enumClass = Arrays.stream(outerClass.getDeclaredClasses())
-                .filter(c -> c.getSimpleName().equals("NamespaceEnum"))
+                .filter(cls -> cls.getSimpleName().equals("NamespaceEnum"))
                 .findFirst()
                 .orElse(null);
         assertThat(enumClass).as("NamespaceEnum nested class must exist in QueryMetricItemOptionParam")
@@ -117,7 +117,7 @@ class AomListMetricsContractTest {
 
     private void assertHasStaticField(Class<?> clazz, String fieldName) {
         boolean found = Arrays.stream(clazz.getDeclaredFields())
-                .filter(f -> java.lang.reflect.Modifier.isStatic(f.getModifiers()))
+                .filter(field -> java.lang.reflect.Modifier.isStatic(field.getModifiers()))
                 .map(Field::getName)
                 .anyMatch(name -> name.equals(fieldName));
         assertThat(found)

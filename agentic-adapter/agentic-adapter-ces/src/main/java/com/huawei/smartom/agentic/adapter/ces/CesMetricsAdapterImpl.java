@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
  */
 
 package com.huawei.smartom.agentic.adapter.ces;
@@ -138,7 +138,7 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
         List<MetricsDimension> sdkDims =
                 sdkMetric.getDimensions() == null ? Collections.emptyList() : sdkMetric.getDimensions();
         List<CesMetricDimension> dims = sdkDims.stream()
-                .map(d -> new CesMetricDimension(d.getName(), d.getValue()))
+                .map(dim -> new CesMetricDimension(dim.getName(), dim.getValue()))
                 .toList();
         return new CesMetricInfo(
                 sdkMetric.getNamespace(),

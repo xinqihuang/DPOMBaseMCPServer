@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
  */
 
 package com.huawei.smartom.agentic.adapter.aom;
@@ -109,7 +109,7 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
         }
         if (request.dimensions() != null && !request.dimensions().isEmpty()) {
             List<Dimension> sdkDims = request.dimensions().stream()
-                    .map(d -> new Dimension().withName(d.name()).withValue(d.value()))
+                    .map(dim -> new Dimension().withName(dim.name()).withValue(dim.value()))
                     .toList();
             item.setDimensions(sdkDims);
         }
@@ -154,7 +154,7 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
         List<Dimension> sdkDims =
                 sdkMetric.getDimensions() == null ? Collections.emptyList() : sdkMetric.getDimensions();
         List<AomMetricDimension> dims = sdkDims.stream()
-                .map(d -> new AomMetricDimension(d.getName(), d.getValue()))
+                .map(dim -> new AomMetricDimension(dim.getName(), dim.getValue()))
                 .toList();
         return new AomMetricInfo(
                 sdkMetric.getNamespace(),

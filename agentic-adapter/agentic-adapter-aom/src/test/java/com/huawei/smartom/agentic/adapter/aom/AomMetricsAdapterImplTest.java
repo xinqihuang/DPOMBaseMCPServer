@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
  */
 
 package com.huawei.smartom.agentic.adapter.aom;
@@ -79,8 +79,8 @@ class AomMetricsAdapterImplTest {
         RetryRegistry retryReg = RetryRegistry.of(RetryConfig.custom()
                 .maxAttempts(3)
                 .waitDuration(Duration.ofMillis(10))
-                .retryOnException(t ->
-                        t instanceof SmartomException s && s.getErrorCode().isRetryable())
+                .retryOnException(throwable ->
+                        throwable instanceof SmartomException smartomEx && smartomEx.getErrorCode().isRetryable())
                 .build());
         retryReg.retry(RETRY);
 
@@ -224,8 +224,8 @@ class AomMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new AomListMetricsRequest("PAAS.CONTAINER", null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED)
-                .matches(e -> "req-xyz".equals(((SmartomException) e).getUpstreamTraceId()));
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED)
+                .matches(ex -> "req-xyz".equals(((SmartomException) ex).getUpstreamTraceId()));
         assertThat(calls.get()).isEqualTo(3);
     }
 
@@ -242,7 +242,7 @@ class AomMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new AomListMetricsRequest("PAAS.CONTAINER", null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_AUTH_FAILED);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_AUTH_FAILED);
         assertThat(calls.get()).isEqualTo(1);
     }
 
@@ -259,7 +259,7 @@ class AomMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new AomListMetricsRequest("PAAS.CONTAINER", null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_ERROR);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_ERROR);
         assertThat(calls.get()).isEqualTo(3);
     }
 
@@ -272,7 +272,7 @@ class AomMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new AomListMetricsRequest("PAAS.CONTAINER", null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.TIMEOUT);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.TIMEOUT);
     }
 
     // ---- UT-19 to UT-20: SDK type mapping details ----

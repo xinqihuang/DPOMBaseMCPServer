@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
  */
 
 package com.huawei.smartom.agentic.adapter.ces;
@@ -76,8 +76,8 @@ class CesMetricsAdapterImplTest {
         RetryRegistry retryReg = RetryRegistry.of(RetryConfig.custom()
                 .maxAttempts(3)
                 .waitDuration(Duration.ofMillis(10))
-                .retryOnException(t ->
-                        t instanceof SmartomException s && s.getErrorCode().isRetryable())
+                .retryOnException(throwable ->
+                        throwable instanceof SmartomException smartomEx && smartomEx.getErrorCode().isRetryable())
                 .build());
         retryReg.retry(RETRY);
 
@@ -185,8 +185,8 @@ class CesMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new CesListMetricsRequest(null, null, null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED)
-                .matches(e -> "req-429".equals(((SmartomException) e).getUpstreamTraceId()));
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED)
+                .matches(ex -> "req-429".equals(((SmartomException) ex).getUpstreamTraceId()));
         assertThat(calls.get()).isEqualTo(3);
     }
 
@@ -203,7 +203,7 @@ class CesMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new CesListMetricsRequest(null, null, null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_AUTH_FAILED);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_AUTH_FAILED);
         assertThat(calls.get()).isEqualTo(1);
     }
 
@@ -220,7 +220,7 @@ class CesMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new CesListMetricsRequest(null, null, null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_ERROR);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_ERROR);
         assertThat(calls.get()).isEqualTo(3);
     }
 
@@ -233,7 +233,7 @@ class CesMetricsAdapterImplTest {
         assertThatThrownBy(() -> adapter.listMetrics(
                 new CesListMetricsRequest(null, null, null, null, null, null, null)))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.TIMEOUT);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.TIMEOUT);
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
  */
 
 package com.huawei.smartom.agentic.common.resilience;
@@ -56,8 +56,8 @@ class HuaweiCloudInvocationTest {
         RetryConfig retryConfig = RetryConfig.custom()
                 .maxAttempts(3)
                 .waitDuration(Duration.ofMillis(10))
-                .retryOnException(t ->
-                        t instanceof SmartomException s && s.getErrorCode().isRetryable())
+                .retryOnException(throwable ->
+                        throwable instanceof SmartomException smartomEx && smartomEx.getErrorCode().isRetryable())
                 .build();
         retryRegistry = RetryRegistry.of(retryConfig);
         retryRegistry.retry(RETRY);
@@ -82,7 +82,7 @@ class HuaweiCloudInvocationTest {
             throw new ClientRequestException(429, "CES.0429", "throttled", "req-429");
         }))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED);
         assertThat(attempts.get()).isEqualTo(3);
     }
 
@@ -95,7 +95,7 @@ class HuaweiCloudInvocationTest {
             throw new ClientRequestException(401, "APIGW.0301", "unauthorized", "req-401");
         }))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_AUTH_FAILED);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_AUTH_FAILED);
         assertThat(attempts.get()).isEqualTo(1);
     }
 
@@ -108,7 +108,7 @@ class HuaweiCloudInvocationTest {
             throw new ServerResponseException(503, "CES.5030", "unavailable", "req-503");
         }))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_ERROR);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_ERROR);
         assertThat(attempts.get()).isEqualTo(3);
     }
 
@@ -144,7 +144,7 @@ class HuaweiCloudInvocationTest {
         // Second call should be rejected by the rate limiter
         assertThatThrownBy(() -> tightInvocation.execute(RL, RETRY, API, () -> "blocked"))
                 .isInstanceOf(UpstreamException.class)
-                .matches(e -> ((SmartomException) e).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED);
+                .matches(ex -> ((SmartomException) ex).getErrorCode() == ErrorCode.UPSTREAM_THROTTLED);
     }
 
     @Test

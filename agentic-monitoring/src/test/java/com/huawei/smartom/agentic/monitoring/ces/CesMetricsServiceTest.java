@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
  */
 
 package com.huawei.smartom.agentic.monitoring.ces;
@@ -51,7 +51,7 @@ class CesMetricsServiceTest {
                 null, null, "instance_id", null, null, null, null);
         assertThatThrownBy(() -> service.listMetrics(req))
                 .isInstanceOf(InvalidParamException.class)
-                .matches(e -> ((InvalidParamException) e).getErrorCode() == ErrorCode.INVALID_PARAM)
+                .matches(ex -> ((InvalidParamException) ex).getErrorCode() == ErrorCode.INVALID_PARAM)
                 .hasMessageContaining("dim_name and dim_value");
         verify(adapter, never()).listMetrics(any());
     }
