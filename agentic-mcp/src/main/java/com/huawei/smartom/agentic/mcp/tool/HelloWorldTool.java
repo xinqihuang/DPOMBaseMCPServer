@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026, All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026. All rights reserved.
  */
 
 package com.huawei.smartom.agentic.mcp.tool;
@@ -26,7 +26,7 @@ public class HelloWorldTool {
      * @return 形如 {@code "Hello, <name>!"} 的问候语
      */
     @Tool(name = "hello_world",
-          description = "Test tool. Returns a greeting. Used to verify the MCP server is reachable.")
+            description = "Test tool. Returns a greeting. Used to verify the MCP server is reachable.")
     public String helloWorld(
             @ToolParam(description = "Name to greet") String name) {
         String safeName = (name == null || name.isBlank()) ? "World" : name;

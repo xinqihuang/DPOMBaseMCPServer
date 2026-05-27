@@ -34,13 +34,13 @@
       File header must carry the Huawei copyright notice.
       Required format (first three lines of every .java file):
           /*
-           * Copyright (c) Huawei Technologies Co., Ltd 2026-2026, All rights reserved.
+           * Copyright (c) Huawei Technologies Co., Ltd 2026-2026. All rights reserved.
            */
     -->
     <module name="RegexpHeader">
         <property name="fileExtensions" value="java"/>
         <property name="header"
-                  value="^/\*$\n^ \* Copyright \(c\) Huawei Technologies Co\., Ltd\. 2026-2026, All rights reserved\.$\n^ \*/$"/>
+                  value="^/\*$\n^ \* Copyright \(c\) Huawei Technologies Co\., Ltd\. 2026-2026. All rights reserved\.$\n^ \*/$"/>
     </module>
 
     <module name="TreeWalker">
