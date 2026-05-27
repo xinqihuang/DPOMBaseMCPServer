@@ -136,7 +136,8 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
             total = metrics.size();
             offset = null;
             nextToken = null;
-        } else {
+        }
+        else {
             count = meta.getCount() == null ? metrics.size() : meta.getCount();
             total = meta.getTotal() == null ? metrics.size() : meta.getTotal();
             offset = meta.getOffset();

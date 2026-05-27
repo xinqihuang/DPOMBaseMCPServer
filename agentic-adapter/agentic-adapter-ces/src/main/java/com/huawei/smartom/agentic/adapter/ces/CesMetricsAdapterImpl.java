@@ -121,7 +121,8 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
             count = metrics.size();
             total = metrics.size();
             nextMarker = null;
-        } else {
+        }
+        else {
             count = meta.getCount() == null ? metrics.size() : meta.getCount();
             total = meta.getTotal() == null ? metrics.size() : meta.getTotal();
             nextMarker = meta.getMarker();

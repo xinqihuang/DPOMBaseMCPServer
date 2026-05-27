@@ -110,6 +110,22 @@ mcp 不能直接 import huaweicloud SDK
 - **缩进 4 空格**（不用 tab）
 - **大括号强制**：`if` `else` `for` `while` `do-while` 都必须带 `{}`，即使单行
 - **`{` `}` 内有空格**：`if (a) { return; }`
+- **块的左大括号在行尾、右大括号独占一行**：非空块的左 `{` 放在首行末尾，右 `}` 必须单独占一行（或与左 `{` 在同一行，构成真正的单行块 `if (a) { return; }`）。**不允许 `} else {` / `} catch (...) {` / `} finally {` 这类紧凑写法**，必须换行写成：
+  ```java
+  if (...) {
+      ...
+  }
+  else {
+      ...
+  }
+
+  try {
+      ...
+  }
+  catch (FooException e) {
+      ...
+  }
+  ```
 - **不用 `import *`**：所有 import 单独列出
 - **import 分组顺序**（每组之间空行）：
   ```

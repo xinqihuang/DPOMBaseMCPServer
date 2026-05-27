@@ -84,14 +84,16 @@ public class HuaweiCloudInvocation {
             LOG.info("Huawei Cloud SDK call success, api={}, durationMs={}",
                     api, System.currentTimeMillis() - start);
             return result;
-        } catch (SmartomException e) {
+        }
+        catch (SmartomException e) {
             LOG.warn("Huawei Cloud SDK call failed, api={}, durationMs={}, errorCode={}, upstreamTraceId={}",
                     api,
                     System.currentTimeMillis() - start,
                     e.getErrorCode(),
                     e.getUpstreamTraceId());
             throw e;
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             // Defensive: any unexpected exception from the decorator chain
             SmartomException mapped = exceptionMapper.map(e);
             LOG.warn("Huawei Cloud SDK call failed (unexpected), api={}, durationMs={}, errorCode={}",
@@ -105,7 +107,8 @@ public class HuaweiCloudInvocation {
     private <T> T invokeAndMap(Supplier<T> call) {
         try {
             return call.get();
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             // Map BEFORE the retry layer sees it, so retryOnException predicate works on SmartomException.
             throw exceptionMapper.map(e);
         }

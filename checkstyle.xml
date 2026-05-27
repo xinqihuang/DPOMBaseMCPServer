@@ -68,8 +68,16 @@
         <module name="LeftCurly">
             <property name="option" value="eol"/>
         </module>
+        <!--
+          Right brace must be alone on its own line (or, for a true
+          single-line block like {@code if (x) { return; }}, on the same
+          single line). This rules out the {@code } else {} /
+          {@code } catch {} / {@code } finally {} compound-statement
+          style — the closing brace of a try/if block must precede
+          else/catch/finally on a new line.
+        -->
         <module name="RightCurly">
-            <property name="option" value="same"/>
+            <property name="option" value="alone_or_singleline"/>
         </module>
 
         <!-- Spaces -->

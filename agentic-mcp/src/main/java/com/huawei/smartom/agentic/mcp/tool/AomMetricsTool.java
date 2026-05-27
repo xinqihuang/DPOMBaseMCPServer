@@ -103,7 +103,8 @@ public class AomMetricsTool {
                 namespace, metricName, dimensions, inventoryId, limit, start);
         try {
             return service.listMetrics(req);
-        } catch (SmartomException e) {
+        }
+        catch (SmartomException e) {
             LOG.warn("list_aom_metrics failed, errorCode={}, upstreamTraceId={}",
                     e.getErrorCode(), e.getUpstreamTraceId());
             return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());

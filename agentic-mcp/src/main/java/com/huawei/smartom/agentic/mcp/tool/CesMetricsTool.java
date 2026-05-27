@@ -85,7 +85,8 @@ public class CesMetricsTool {
                 namespace, metricName, dimName, dimValue, limit, start, order);
         try {
             return service.listMetrics(req);
-        } catch (SmartomException e) {
+        }
+        catch (SmartomException e) {
             LOG.warn("list_ces_metrics failed, errorCode={}, upstreamTraceId={}",
                     e.getErrorCode(), e.getUpstreamTraceId());
             return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
