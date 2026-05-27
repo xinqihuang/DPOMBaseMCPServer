@@ -45,6 +45,8 @@ huaweicloud:
   ak: ${HUAWEICLOUD_AK:}
   sk: ${HUAWEICLOUD_SK:}
   project-id: ${HUAWEICLOUD_PROJECT_ID:}
+  apm-region: ${HUAWEICLOUD_APM_REGION:cn-north-4}
+  apm-business-id: ${HUAWEICLOUD_APM_BUSINESS_ID:}
 
 logging:
   level:

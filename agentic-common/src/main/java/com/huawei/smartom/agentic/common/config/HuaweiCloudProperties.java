@@ -32,6 +32,19 @@ public class HuaweiCloudProperties {
     private String projectId;
 
     /**
+     * APM region id (e.g. {@code cn-north-4}). APM service is currently available in a smaller
+     * set of regions than AOM/CES, so this is decoupled from {@link #region}. Defaults to
+     * {@code cn-north-4}.
+     */
+    private String apmRegion = "cn-north-4";
+
+    /**
+     * APM business id (the {@code x-business-id} HTTP header required by trace search APIs).
+     * Optional — when null the adapter will not set the header.
+     */
+    private Long apmBusinessId;
+
+    /**
      * 返回已配置的华为云 region id。
      *
      * @return region id，Spring 完成绑定后不会为 {@code null}
@@ -101,5 +114,41 @@ public class HuaweiCloudProperties {
      */
     public void setProjectId(String projectId) {
         this.projectId = projectId;
+    }
+
+    /**
+     * 返回 APM service 使用的 region id（与 {@link #region} 独立配置）。
+     *
+     * @return APM region id，默认 {@code cn-north-4}
+     */
+    public String getApmRegion() {
+        return apmRegion;
+    }
+
+    /**
+     * 设置 APM service 使用的 region id。
+     *
+     * @param apmRegion APM region id，例如 {@code cn-north-4}
+     */
+    public void setApmRegion(String apmRegion) {
+        this.apmRegion = apmRegion;
+    }
+
+    /**
+     * 返回 APM trace 搜索接口需要的 {@code x-business-id} 头部值。
+     *
+     * @return APM 应用 id，可能为 {@code null}
+     */
+    public Long getApmBusinessId() {
+        return apmBusinessId;
+    }
+
+    /**
+     * 设置 APM trace 搜索接口需要的 {@code x-business-id} 头部值。
+     *
+     * @param apmBusinessId APM 应用 id
+     */
+    public void setApmBusinessId(Long apmBusinessId) {
+        this.apmBusinessId = apmBusinessId;
     }
 }

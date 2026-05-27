@@ -5,6 +5,7 @@
 package com.huawei.smartom.agentic.mcp;
 
 import com.huaweicloud.sdk.aom.v2.AomClient;
+import com.huaweicloud.sdk.apm.v1.ApmClient;
 import com.huaweicloud.sdk.ces.v1.CesClient;
 
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +28,8 @@ import org.springframework.test.context.TestPropertySource;
     "huaweicloud.region=cn-southwest-2",
     "huaweicloud.ak=test-ak",
     "huaweicloud.sk=test-sk",
-    "huaweicloud.project-id=test-project-id"
+    "huaweicloud.project-id=test-project-id",
+    "huaweicloud.apm-region=cn-north-4"
 })
 class DpomBaseMcpServerApplicationTests {
 
@@ -36,6 +38,9 @@ class DpomBaseMcpServerApplicationTests {
 
     @MockBean
     private AomClient aomClient;
+
+    @MockBean
+    private ApmClient apmClient;
 
     @Test
     @DisplayName("Spring application context loads")
