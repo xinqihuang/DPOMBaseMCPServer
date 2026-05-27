@@ -36,6 +36,9 @@ class DpomBaseMcpServerApplicationTests {
     @MockBean
     private CesClient cesClient;
 
+    @MockBean(name = "cesV2Client")
+    private com.huaweicloud.sdk.ces.v2.CesClient cesV2Client;
+
     @MockBean
     private AomClient aomClient;
 

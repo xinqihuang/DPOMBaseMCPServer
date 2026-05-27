@@ -10,6 +10,9 @@ import com.huawei.smartom.agentic.mcp.tool.AomMetricsTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTopologyTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTraceTool;
 import com.huawei.smartom.agentic.mcp.tool.CesAlarmTool;
+import com.huawei.smartom.agentic.mcp.tool.CesCreateNotificationMaskTool;
+import com.huawei.smartom.agentic.mcp.tool.CesDeleteNotificationMasksTool;
+import com.huawei.smartom.agentic.mcp.tool.CesListNotificationMasksTool;
 import com.huawei.smartom.agentic.mcp.tool.CesMetricDataTool;
 import com.huawei.smartom.agentic.mcp.tool.CesMetricsTool;
 import com.huawei.smartom.agentic.mcp.tool.CorrelateIncidentTool;
@@ -35,16 +38,19 @@ public class McpServerConfig {
      * 将所有 MCP 工具组件 Bean 聚合为单个 {@link ToolCallbackProvider}，
      * 供 Spring AI MCP Server 进行工具发现与调用。
      *
-     * @param helloWorldTool       连通性测试工具
-     * @param cesMetricsTool       CES 指标定义查询工具
-     * @param cesMetricDataTool    CES 指标数据查询工具（T07）
-     * @param cesAlarmTool         CES 告警历史查询工具（T09）
-     * @param aomMetricsTool       AOM 指标定义查询工具
-     * @param aomMetricDataTool    AOM 时序数据查询工具（T08）
-     * @param aomLogTool           AOM 日志查询工具（T13）
-     * @param apmTraceTool         APM trace 搜索工具（T10）
-     * @param apmTopologyTool      APM 拓扑查询工具（T11）
-     * @param correlateIncidentTool 跨组件事故关联工具（T12）
+     * @param helloWorldTool                  连通性测试工具
+     * @param cesMetricsTool                  CES 指标定义查询工具
+     * @param cesMetricDataTool               CES 指标数据查询工具（T07）
+     * @param cesAlarmTool                    CES 告警历史查询工具（T09）
+     * @param aomMetricsTool                  AOM 指标定义查询工具
+     * @param aomMetricDataTool               AOM 时序数据查询工具（T08）
+     * @param aomLogTool                      AOM 日志查询工具（T13）
+     * @param apmTraceTool                    APM trace 搜索工具（T10）
+     * @param apmTopologyTool                 APM 拓扑查询工具（T11）
+     * @param correlateIncidentTool           跨组件事故关联工具（T12）
+     * @param cesCreateNotificationMaskTool   创建告警屏蔽规则工具
+     * @param cesDeleteNotificationMasksTool  批量删除告警屏蔽规则工具
+     * @param cesListNotificationMasksTool    查询告警屏蔽规则工具
      * @return 暴露所有已注册工具对象的 {@link MethodToolCallbackProvider}
      */
     @Bean
@@ -58,7 +64,10 @@ public class McpServerConfig {
             AomLogTool aomLogTool,
             ApmTraceTool apmTraceTool,
             ApmTopologyTool apmTopologyTool,
-            CorrelateIncidentTool correlateIncidentTool) {
+            CorrelateIncidentTool correlateIncidentTool,
+            CesCreateNotificationMaskTool cesCreateNotificationMaskTool,
+            CesDeleteNotificationMasksTool cesDeleteNotificationMasksTool,
+            CesListNotificationMasksTool cesListNotificationMasksTool) {
         return MethodToolCallbackProvider.builder()
                 .toolObjects(
                         helloWorldTool,
@@ -70,7 +79,10 @@ public class McpServerConfig {
                         aomLogTool,
                         apmTraceTool,
                         apmTopologyTool,
-                        correlateIncidentTool)
+                        correlateIncidentTool,
+                        cesCreateNotificationMaskTool,
+                        cesDeleteNotificationMasksTool,
+                        cesListNotificationMasksTool)
                 .build();
     }
 }

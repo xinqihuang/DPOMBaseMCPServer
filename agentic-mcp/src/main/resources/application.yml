@@ -61,6 +61,10 @@ resilience4j:
         limit-for-period: 10
         limit-refresh-period: 1s
         timeout-duration: 0
+      ces-write:
+        limit-for-period: 5
+        limit-refresh-period: 1s
+        timeout-duration: 0
       aom-readonly:
         limit-for-period: 10
         limit-refresh-period: 1s
