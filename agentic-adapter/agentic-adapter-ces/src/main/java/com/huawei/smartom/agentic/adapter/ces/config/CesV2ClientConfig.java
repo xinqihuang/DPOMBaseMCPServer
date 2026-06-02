@@ -5,11 +5,10 @@
 package com.huawei.smartom.agentic.adapter.ces.config;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
+import com.huawei.smartom.agentic.common.sdk.HuaweiCloudClientFactory;
 
 import com.huaweicloud.sdk.ces.v2.CesClient;
 import com.huaweicloud.sdk.ces.v2.region.CesRegion;
-import com.huaweicloud.sdk.core.auth.BasicCredentials;
-import com.huaweicloud.sdk.core.http.HttpConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +19,9 @@ import org.springframework.context.annotation.Configuration;
  * 基于 {@link HuaweiCloudProperties} 构建华为云 CES V2 SDK 客户端 Bean。
  *
  * <p>V2 客户端在 v1 之上提供新一代接口，包括告警屏蔽规则（{@code BatchUpdateNotificationMasks} /
- * {@code BatchDeleteNotificationMasks} / {@code ListNotificationMasks}）。与 V1 客户端独立
- * 共存。
+ * {@code BatchDeleteNotificationMasks} / {@code ListNotificationMasks}）。与 V1 客户端独立共存。
+ *
+ * <p>凭据与 HTTP 超时由 {@link HuaweiCloudClientFactory} 统一构造。
  *
  * @author h00884391
  * @since 2026-05-28
@@ -31,9 +31,6 @@ public class CesV2ClientConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(CesV2ClientConfig.class);
 
-    /** SDK transport timeout in seconds. */
-    private static final int HTTP_TIMEOUT_SECONDS = 10;
-
     /**
      * 创建 CES V2 SDK 客户端 Bean。
      *
@@ -42,16 +39,9 @@ public class CesV2ClientConfig {
      */
     @Bean
     public CesClient cesV2Client(HuaweiCloudProperties properties) {
-        BasicCredentials credentials = new BasicCredentials()
-                .withAk(properties.getAk())
-                .withSk(properties.getSk());
-
-        HttpConfig httpConfig = HttpConfig.getDefaultHttpConfig()
-                .withTimeout(HTTP_TIMEOUT_SECONDS);
-
         CesClient client = CesClient.newBuilder()
-                .withCredential(credentials)
-                .withHttpConfig(httpConfig)
+                .withCredential(HuaweiCloudClientFactory.credentials(properties))
+                .withHttpConfig(HuaweiCloudClientFactory.defaultHttpConfig())
                 .withRegion(CesRegion.valueOf(properties.getRegion()))
                 .build();
 

@@ -6,9 +6,11 @@ package com.huawei.smartom.agentic.monitoring.aom;
 
 import com.huawei.smartom.agentic.adapter.aom.AomMetricsAdapter;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDimension;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomPatterns;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataResponse;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
+import com.huawei.smartom.agentic.common.validation.Validations;
 
 import org.springframework.stereotype.Service;
 
@@ -26,9 +28,6 @@ import java.util.regex.Pattern;
  */
 @Service
 public class AomMetricDataService {
-
-    private static final Pattern NAMESPACE_PATTERN = Pattern.compile(
-            "^(PAAS\\.(CONTAINER|NODE|SLA|AGGR)|CUSTOMMETRICS|[A-Za-z][A-Za-z0-9_]{2,63})$");
 
     private static final Pattern TIME_RANGE_PATTERN =
             Pattern.compile("^(-1|\\d{1,16})\\.(-1|\\d{1,16})\\.\\d{1,7}$");
@@ -70,22 +69,19 @@ public class AomMetricDataService {
     }
 
     private void validate(AomQueryMetricDataRequest request) {
-        if (isBlank(request.namespace())) {
-            throw new InvalidParamException("namespace is required");
-        }
-        if (!NAMESPACE_PATTERN.matcher(request.namespace()).matches()) {
+        Validations.requireNonBlank(request.namespace(), "namespace");
+        if (!AomPatterns.NAMESPACE.matcher(request.namespace()).matches()) {
             throw new InvalidParamException(
                     "namespace format invalid, expected PAAS.* / CUSTOMMETRICS or [A-Za-z]..., got: "
                             + request.namespace());
         }
-        if (isBlank(request.metricName())) {
-            throw new InvalidParamException("metric_name is required");
-        }
+        Validations.requireNonBlank(request.metricName(), "metric_name");
         if (request.period() == null || !ALLOWED_PERIODS.contains(request.period())) {
             throw new InvalidParamException(
                     "period must be 60/300/900/3600 (seconds), got: " + request.period());
         }
-        if (isBlank(request.timeRange()) || !TIME_RANGE_PATTERN.matcher(request.timeRange()).matches()) {
+        if (Validations.isBlank(request.timeRange())
+                || !TIME_RANGE_PATTERN.matcher(request.timeRange()).matches()) {
             throw new InvalidParamException(
                     "time_range must follow 'startMs.endMs.durationMin' (use -1 as placeholder), got: "
                             + request.timeRange());
@@ -110,15 +106,11 @@ public class AomMetricDataService {
                         "dimensions length must be <= 20, got: " + dims.size());
             }
             for (AomMetricDimension dim : dims) {
-                if (dim == null || isBlank(dim.name()) || isBlank(dim.value())) {
+                if (dim == null || Validations.isBlank(dim.name()) || Validations.isBlank(dim.value())) {
                     throw new InvalidParamException(
                             "each dimension must have non-blank name and value");
                 }
             }
         }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 }

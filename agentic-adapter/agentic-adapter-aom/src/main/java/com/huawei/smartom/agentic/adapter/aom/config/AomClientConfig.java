@@ -5,11 +5,10 @@
 package com.huawei.smartom.agentic.adapter.aom.config;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
+import com.huawei.smartom.agentic.common.sdk.HuaweiCloudClientFactory;
 
 import com.huaweicloud.sdk.aom.v2.AomClient;
 import com.huaweicloud.sdk.aom.v2.region.AomRegion;
-import com.huaweicloud.sdk.core.auth.BasicCredentials;
-import com.huaweicloud.sdk.core.http.HttpConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +21,8 @@ import org.springframework.context.annotation.Configuration;
  * <p>AOM 除 AK/SK 之外还需要 {@code projectId}。凭据从环境变量 {@code HUAWEICLOUD_AK}、
  * {@code HUAWEICLOUD_SK} 与 {@code HUAWEICLOUD_PROJECT_ID} 读取，由 Vault 在 Pod 层面注入。
  *
- * <p>Region 通过 {@link AomRegion#valueOf(String)} 解析。
- * HTTP 超时配置在 SDK 传输层，重试与限流由 Resilience4j 负责。
+ * <p>Region 通过 {@link AomRegion#valueOf(String)} 解析。凭据与 HTTP 超时由
+ * {@link HuaweiCloudClientFactory} 统一构造，重试与限流由 Resilience4j 负责。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -32,9 +31,6 @@ import org.springframework.context.annotation.Configuration;
 public class AomClientConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(AomClientConfig.class);
-
-    /** SDK transport timeout in seconds. */
-    private static final int HTTP_TIMEOUT_SECONDS = 10;
 
     /**
      * 创建 AOM SDK 客户端 Bean。
@@ -45,21 +41,14 @@ public class AomClientConfig {
      */
     @Bean
     public AomClient aomClient(HuaweiCloudProperties properties) {
-        BasicCredentials credentials = new BasicCredentials()
-                .withProjectId(properties.getProjectId())
-                .withAk(properties.getAk())
-                .withSk(properties.getSk());
-
-        HttpConfig httpConfig = HttpConfig.getDefaultHttpConfig()
-                .withTimeout(HTTP_TIMEOUT_SECONDS);
-
         AomClient client = AomClient.newBuilder()
-                .withCredential(credentials)
-                .withHttpConfig(httpConfig)
+                .withCredential(HuaweiCloudClientFactory.credentialsWithProjectId(properties))
+                .withHttpConfig(HuaweiCloudClientFactory.defaultHttpConfig())
                 .withRegion(AomRegion.valueOf(properties.getRegion()))
                 .build();
 
-        LOG.info("AomClient initialized, region={}, projectId={}", properties.getRegion(), properties.getProjectId());
+        LOG.info("AomClient initialized, region={}, projectId={}",
+                properties.getRegion(), properties.getProjectId());
         return client;
     }
 }

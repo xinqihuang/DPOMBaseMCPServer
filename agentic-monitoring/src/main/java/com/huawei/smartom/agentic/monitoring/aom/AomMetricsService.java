@@ -8,7 +8,9 @@ import com.huawei.smartom.agentic.adapter.aom.AomMetricsAdapter;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDimension;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomPatterns;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
+import com.huawei.smartom.agentic.common.validation.Validations;
 
 import org.springframework.stereotype.Service;
 
@@ -32,13 +34,6 @@ import java.util.regex.Pattern;
  */
 @Service
 public class AomMetricsService {
-
-    /**
-     * AOM namespace format: predefined PAAS.* values, CUSTOMMETRICS, or a custom namespace
-     * matching {@code ^[A-Za-z][A-Za-z0-9_.]{2,63}$}.
-     */
-    private static final Pattern NAMESPACE_PATTERN = Pattern.compile(
-            "^(PAAS\\.(CONTAINER|NODE|SLA|AGGR)|CUSTOMMETRICS|[A-Za-z][A-Za-z0-9_]{2,63})$");
 
     /**
      * AOM inventory ID format: {@code resType_resId}, where resType is one of the AOM-defined
@@ -78,7 +73,7 @@ public class AomMetricsService {
 
     private void validate(AomListMetricsRequest request) {
         // Rule 1: namespace or inventory_id required
-        if (isBlank(request.namespace()) && isBlank(request.inventoryId())) {
+        if (Validations.isBlank(request.namespace()) && Validations.isBlank(request.inventoryId())) {
             throw new InvalidParamException(
                     "namespace or inventory_id must be provided (AOM API rejects empty body)");
         }
@@ -98,7 +93,7 @@ public class AomMetricsService {
         List<AomMetricDimension> dims = request.dimensions();
         if (dims != null) {
             for (AomMetricDimension dim : dims) {
-                if (isBlank(dim.name()) || isBlank(dim.value())) {
+                if (Validations.isBlank(dim.name()) || Validations.isBlank(dim.value())) {
                     throw new InvalidParamException(
                             "each dimension must have non-blank name and value; "
                             + "got name='" + dim.name() + "', value='" + dim.value() + "'");
@@ -107,7 +102,8 @@ public class AomMetricsService {
         }
 
         // Rule 6: namespace format (only validated when provided)
-        if (!isBlank(request.namespace()) && !NAMESPACE_PATTERN.matcher(request.namespace()).matches()) {
+        if (!Validations.isBlank(request.namespace())
+                && !AomPatterns.NAMESPACE.matcher(request.namespace()).matches()) {
             throw new InvalidParamException(
                     "namespace format invalid: '" + request.namespace()
                     + "'; expected PAAS.CONTAINER/PAAS.NODE/PAAS.SLA/PAAS.AGGR/CUSTOMMETRICS "
@@ -115,16 +111,12 @@ public class AomMetricsService {
         }
 
         // Rule 7: inventory_id format (only validated when provided)
-        if (!isBlank(request.inventoryId())
+        if (!Validations.isBlank(request.inventoryId())
                 && !INVENTORY_ID_PATTERN.matcher(request.inventoryId()).matches()) {
             throw new InvalidParamException(
                     "inventory_id format invalid: '" + request.inventoryId()
                     + "'; expected resType_resId where resType is one of: "
                     + "host/application/instance/container/process/network/storage/volume");
         }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 }

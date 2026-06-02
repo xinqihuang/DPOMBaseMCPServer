@@ -7,11 +7,10 @@ package com.huawei.smartom.agentic.monitoring.ces;
 import com.huawei.smartom.agentic.adapter.ces.CesMetricsAdapter;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesPatterns;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
 import org.springframework.stereotype.Service;
-
-import java.util.regex.Pattern;
 
 /**
  * CES 指标查询的业务编排。
@@ -27,13 +26,6 @@ import java.util.regex.Pattern;
  */
 @Service
 public class CesMetricsService {
-
-    /**
-     * Per the CES API doc: namespace format is {@code service.item}, both starting with a letter,
-     * total length [3,32] for service.
-     */
-    private static final Pattern NAMESPACE_PATTERN =
-            Pattern.compile("^[A-Z][A-Za-z0-9]{2,31}\\.[A-Za-z0-9_]+$");
 
     private static final int LIMIT_MIN = 1;
     private static final int LIMIT_MAX = 1000;
@@ -79,7 +71,7 @@ public class CesMetricsService {
         }
 
         // namespace format
-        if (request.namespace() != null && !NAMESPACE_PATTERN.matcher(request.namespace()).matches()) {
+        if (request.namespace() != null && !CesPatterns.NAMESPACE.matcher(request.namespace()).matches()) {
             throw new InvalidParamException(
                     "namespace format invalid, expected like 'SYS.ECS'");
         }

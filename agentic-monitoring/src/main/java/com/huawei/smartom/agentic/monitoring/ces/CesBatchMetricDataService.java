@@ -9,12 +9,13 @@ import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricQuery;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricDimension;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesPatterns;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
+import com.huawei.smartom.agentic.common.validation.Validations;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * CES 批量指标数据查询的业务编排。
@@ -34,9 +35,6 @@ import java.util.regex.Pattern;
  */
 @Service
 public class CesBatchMetricDataService {
-
-    private static final Pattern NAMESPACE_PATTERN =
-            Pattern.compile("^[A-Z][A-Za-z0-9]{2,31}\\.[A-Za-z0-9_]+$");
 
     private static final int MAX_METRICS = 500;
     private static final int MAX_DIMENSIONS = 4;
@@ -68,12 +66,8 @@ public class CesBatchMetricDataService {
     }
 
     private void validate(CesBatchQueryMetricDataRequest request) {
-        if (request.filter() == null) {
-            throw new InvalidParamException("filter is required");
-        }
-        if (request.period() == null) {
-            throw new InvalidParamException("period is required");
-        }
+        Validations.requireNonNull(request.filter(), "filter");
+        Validations.requireNonNull(request.period(), "period");
         if (request.from() == null || request.to() == null) {
             throw new InvalidParamException("from and to are required");
         }
@@ -99,16 +93,12 @@ public class CesBatchMetricDataService {
         if (query == null) {
             throw new InvalidParamException("metrics[" + idx + "] must not be null");
         }
-        if (isBlank(query.namespace())) {
-            throw new InvalidParamException("metrics[" + idx + "].namespace is required");
-        }
-        if (!NAMESPACE_PATTERN.matcher(query.namespace()).matches()) {
+        Validations.requireNonBlank(query.namespace(), "metrics[" + idx + "].namespace");
+        if (!CesPatterns.NAMESPACE.matcher(query.namespace()).matches()) {
             throw new InvalidParamException(
                     "metrics[" + idx + "].namespace format invalid, expected like 'SYS.ECS'");
         }
-        if (isBlank(query.metricName())) {
-            throw new InvalidParamException("metrics[" + idx + "].metric_name is required");
-        }
+        Validations.requireNonBlank(query.metricName(), "metrics[" + idx + "].metric_name");
         List<CesMetricDimension> dims = query.dimensions();
         if (dims == null || dims.isEmpty()) {
             throw new InvalidParamException(
@@ -120,14 +110,10 @@ public class CesBatchMetricDataService {
                             + "], got: " + dims.size());
         }
         for (CesMetricDimension dim : dims) {
-            if (dim == null || isBlank(dim.name()) || isBlank(dim.value())) {
+            if (dim == null || Validations.isBlank(dim.name()) || Validations.isBlank(dim.value())) {
                 throw new InvalidParamException(
                         "metrics[" + idx + "] each dimension must have non-blank name and value");
             }
         }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 }

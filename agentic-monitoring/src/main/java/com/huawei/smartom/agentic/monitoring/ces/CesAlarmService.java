@@ -7,12 +7,12 @@ package com.huawei.smartom.agentic.monitoring.ces;
 import com.huawei.smartom.agentic.adapter.ces.CesMetricsAdapter;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsResponse;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesPatterns;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * CES 告警历史查询的业务编排。
@@ -30,9 +30,6 @@ import java.util.regex.Pattern;
  */
 @Service
 public class CesAlarmService {
-
-    private static final Pattern NAMESPACE_PATTERN =
-            Pattern.compile("^[A-Z][A-Za-z0-9]{2,31}\\.[A-Za-z0-9_]+$");
 
     private static final Set<String> ALLOWED_STATUSES =
             Set.of("ok", "alarm", "insufficient_data", "invalid");
@@ -85,7 +82,7 @@ public class CesAlarmService {
             throw new InvalidParamException(
                     "alarm_level must be 1/2/3/4, got: " + request.alarmLevel());
         }
-        if (request.namespace() != null && !NAMESPACE_PATTERN.matcher(request.namespace()).matches()) {
+        if (request.namespace() != null && !CesPatterns.NAMESPACE.matcher(request.namespace()).matches()) {
             throw new InvalidParamException(
                     "namespace format invalid, expected like 'SYS.ECS'");
         }

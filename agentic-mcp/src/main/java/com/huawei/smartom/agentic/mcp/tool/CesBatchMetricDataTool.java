@@ -6,10 +6,7 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricQuery;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataRequest;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricFilter;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricPeriod;
 import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.ces.CesBatchMetricDataService;
 
@@ -88,37 +85,16 @@ public class CesBatchMetricDataTool {
 
         try {
             CesBatchQueryMetricDataRequest req = new CesBatchQueryMetricDataRequest(
-                    metrics, parseFilter(filter), parsePeriod(period), from, to);
+                    metrics,
+                    ToolValidations.requireCesFilter(filter),
+                    ToolValidations.requireCesPeriod(period),
+                    from, to);
             return service.batchQueryMetricData(req);
         }
         catch (SmartomException e) {
             LOG.warn("batch_query_ces_metric_data failed, errorCode={}, upstreamTraceId={}",
                     e.getErrorCode(), e.getUpstreamTraceId());
             return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
-    }
-
-    private CesMetricFilter parseFilter(String filter) {
-        if (filter == null) {
-            throw new InvalidParamException("filter is required");
-        }
-        try {
-            return CesMetricFilter.fromValue(filter);
-        }
-        catch (IllegalArgumentException e) {
-            throw new InvalidParamException(e.getMessage());
-        }
-    }
-
-    private CesMetricPeriod parsePeriod(Integer period) {
-        if (period == null) {
-            throw new InvalidParamException("period is required");
-        }
-        try {
-            return CesMetricPeriod.fromSeconds(period);
-        }
-        catch (IllegalArgumentException e) {
-            throw new InvalidParamException(e.getMessage());
         }
     }
 }

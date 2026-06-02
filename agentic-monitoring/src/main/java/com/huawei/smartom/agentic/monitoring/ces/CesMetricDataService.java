@@ -6,14 +6,15 @@ package com.huawei.smartom.agentic.monitoring.ces;
 
 import com.huawei.smartom.agentic.adapter.ces.CesMetricsAdapter;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricDimension;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesPatterns;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataResponse;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
+import com.huawei.smartom.agentic.common.validation.Validations;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * CES 指标数据查询的业务编排。
@@ -33,9 +34,6 @@ import java.util.regex.Pattern;
  */
 @Service
 public class CesMetricDataService {
-
-    private static final Pattern NAMESPACE_PATTERN =
-            Pattern.compile("^[A-Z][A-Za-z0-9]{2,31}\\.[A-Za-z0-9_]+$");
 
     private static final int MAX_DIMENSIONS = 4;
 
@@ -66,22 +64,14 @@ public class CesMetricDataService {
     }
 
     private void validate(CesQueryMetricDataRequest request) {
-        if (isBlank(request.namespace())) {
-            throw new InvalidParamException("namespace is required");
-        }
-        if (!NAMESPACE_PATTERN.matcher(request.namespace()).matches()) {
+        Validations.requireNonBlank(request.namespace(), "namespace");
+        if (!CesPatterns.NAMESPACE.matcher(request.namespace()).matches()) {
             throw new InvalidParamException(
                     "namespace format invalid, expected like 'SYS.ECS'");
         }
-        if (isBlank(request.metricName())) {
-            throw new InvalidParamException("metric_name is required");
-        }
-        if (request.filter() == null) {
-            throw new InvalidParamException("filter is required");
-        }
-        if (request.period() == null) {
-            throw new InvalidParamException("period is required");
-        }
+        Validations.requireNonBlank(request.metricName(), "metric_name");
+        Validations.requireNonNull(request.filter(), "filter");
+        Validations.requireNonNull(request.period(), "period");
         if (request.from() == null || request.to() == null) {
             throw new InvalidParamException("from and to are required");
         }
@@ -99,14 +89,10 @@ public class CesMetricDataService {
                     "dimensions length must be in [1, 4], got: " + dims.size());
         }
         for (CesMetricDimension dim : dims) {
-            if (dim == null || isBlank(dim.name()) || isBlank(dim.value())) {
+            if (dim == null || Validations.isBlank(dim.name()) || Validations.isBlank(dim.value())) {
                 throw new InvalidParamException(
                         "each dimension must have non-blank name and value");
             }
         }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 }
