@@ -17,6 +17,9 @@
 | [T03](T03-common.md) | common 模块（错误码 / 异常 / 限流重试 / 健康检查） | Ready | 0.5d | T01 |
 | [T04](T04-ces-adapter-base.md) | CES Adapter 基座（CesClient + 接口） | Ready | 0.3d | T03 |
 | [T05](T05-list-ces-metrics.md) | 实现 list_ces_metrics tool | Ready | 1d | T01-T04 |
+| [T06](T06-list-aom-metrics.md) | 实现 list_aom_metrics tool | Draft | 1.5d | T01-T03 |
+| T07-T13 | query_metric_data / list_alarms / traces / topology / logs / correlate_incident | Done（提交 `4c346d6`，未补 spec/task 卡） | — | T04-T06 |
+| [T14](T14-batch-query-ces-metric-data.md) | 实现 batch_query_ces_metric_data + CES 参数枚举目录 | Done（提交 `ce6fd6c`） | 1d | T04, T07 |
 
 ## 推荐执行顺序
 
@@ -26,14 +29,9 @@
 
 ## 后续任务（未来 sprint）
 
-- T06: list_aom_metrics
-- T07: query_ces_metric_data
-- T08: query_aom_metric_data
-- T09: list_alarms (CES)
-- T10: query_traces (APM)
-- T11: get_service_topology (APM)
-- T12: correlate_incident（跨组件编排，依赖前面所有 query 类 tool）
-- T13: query_logs (AOM)
+- T07-T13 的"补齐 spec / task 卡"工作（当前已实现但缺规约文档）
+- T14 的 Service / Adapter UT、Contract Test、冒烟脚本（spec §6 列出但未交付）
+- 其他华为云服务的 namespace / metric 枚举扩展（按 ADR-004 宽容目录策略增量补）
 
 每个任务卡按本目录格式编写。
 
