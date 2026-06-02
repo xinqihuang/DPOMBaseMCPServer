@@ -4,6 +4,8 @@
 
 package com.huawei.smartom.agentic.adapter.ces;
 
+import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataRequest;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
@@ -48,4 +50,16 @@ public interface CesMetricsAdapter {
      * @throws SmartomException 携带对应的 {@link com.huawei.smartom.agentic.common.error.ErrorCode}
      */
     CesListAlarmsResponse listAlarms(CesListAlarmsRequest request);
+
+    /**
+     * 按时间区间与聚合粒度批量查询多条 CES 指标的监控数据点。
+     *
+     * <p>对应华为云 CES {@code BatchListMetricData} 接口，可在单次请求中查询最多 500 条指标，
+     * 适合在跨资源关联分析或大盘渲染场景使用，能显著减少调用次数。
+     *
+     * @param request 批量查询请求（不能为 null），含 metrics / filter / period / from / to
+     * @return 批量查询结果列表（顺序与请求中 {@code metrics} 一致）
+     * @throws SmartomException 携带对应的 {@link com.huawei.smartom.agentic.common.error.ErrorCode}
+     */
+    CesBatchQueryMetricDataResponse batchQueryMetricData(CesBatchQueryMetricDataRequest request);
 }

@@ -5,6 +5,10 @@
 package com.huawei.smartom.agentic.adapter.ces;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesAlarmHistory;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricQuery;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricResult;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataRequest;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesDatapoint;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsResponse;
@@ -19,13 +23,20 @@ import com.huawei.smartom.agentic.common.resilience.HuaweiCloudInvocation;
 
 import com.huaweicloud.sdk.ces.v1.CesClient;
 import com.huaweicloud.sdk.ces.v1.model.AlarmHistoryInfoResp;
+import com.huaweicloud.sdk.ces.v1.model.BatchListMetricDataRequest;
+import com.huaweicloud.sdk.ces.v1.model.BatchListMetricDataRequestBody;
+import com.huaweicloud.sdk.ces.v1.model.BatchListMetricDataResponse;
+import com.huaweicloud.sdk.ces.v1.model.BatchMetricData;
 import com.huaweicloud.sdk.ces.v1.model.Datapoint;
+import com.huaweicloud.sdk.ces.v1.model.DatapointForBatchMetric;
+import com.huaweicloud.sdk.ces.v1.model.Filter;
 import com.huaweicloud.sdk.ces.v1.model.ListAlarmHistoriesRequest;
 import com.huaweicloud.sdk.ces.v1.model.ListAlarmHistoriesResponse;
 import com.huaweicloud.sdk.ces.v1.model.ListMetricsRequest;
 import com.huaweicloud.sdk.ces.v1.model.ListMetricsResponse;
 import com.huaweicloud.sdk.ces.v1.model.MetaData;
 import com.huaweicloud.sdk.ces.v1.model.MetaDataForAlarmHistoryResp;
+import com.huaweicloud.sdk.ces.v1.model.MetricInfo;
 import com.huaweicloud.sdk.ces.v1.model.MetricInfoList;
 import com.huaweicloud.sdk.ces.v1.model.MetricInfoResp;
 import com.huaweicloud.sdk.ces.v1.model.MetricsDimension;
@@ -59,6 +70,7 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     private static final String API_LIST_METRICS = "ces.listMetrics";
     private static final String API_SHOW_METRIC_DATA = "ces.showMetricData";
     private static final String API_LIST_ALARM_HISTORIES = "ces.listAlarmHistories";
+    private static final String API_BATCH_LIST_METRIC_DATA = "ces.batchListMetricData";
 
     private final CesClient cesClient;
     private final HuaweiCloudInvocation invocation;
@@ -101,6 +113,21 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
                 () -> cesClient.showMetricData(sdkRequest));
 
         return toQueryMetricDataResponseDto(sdkResponse);
+    }
+
+    @Override
+    public CesBatchQueryMetricDataResponse batchQueryMetricData(CesBatchQueryMetricDataRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+        int metricCount = request.metrics() == null ? 0 : request.metrics().size();
+        LOG.info("ces.batchListMetricData start, metricCount={}, filter={}, period={}, from={}, to={}",
+                metricCount, request.filter(), request.period(), request.from(), request.to());
+
+        BatchListMetricDataRequest sdkRequest = toBatchListMetricDataSdkRequest(request);
+        BatchListMetricDataResponse sdkResponse = invocation.execute(
+                RATE_LIMITER_NAME, RETRY_NAME, API_BATCH_LIST_METRIC_DATA,
+                () -> cesClient.batchListMetricData(sdkRequest));
+
+        return toBatchQueryMetricDataResponseDto(sdkResponse);
     }
 
     @Override
@@ -189,8 +216,8 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
         ShowMetricDataRequest sdk = new ShowMetricDataRequest()
                 .withNamespace(request.namespace())
                 .withMetricName(request.metricName())
-                .withFilter(ShowMetricDataRequest.FilterEnum.fromValue(request.filter()))
-                .withPeriod(ShowMetricDataRequest.PeriodEnum.fromValue(request.period()))
+                .withFilter(ShowMetricDataRequest.FilterEnum.fromValue(request.filter().getValue()))
+                .withPeriod(ShowMetricDataRequest.PeriodEnum.fromValue(request.period().getSeconds()))
                 .withFrom(request.from())
                 .withTo(request.to());
 
@@ -226,6 +253,76 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
         return new CesDatapoint(
                 sdk.getTimestamp(),
                 sdk.getUnit(),
+                sdk.getMax(),
+                sdk.getMin(),
+                sdk.getAverage(),
+                sdk.getSum(),
+                sdk.getVariance());
+    }
+
+    private BatchListMetricDataRequest toBatchListMetricDataSdkRequest(CesBatchQueryMetricDataRequest request) {
+        List<CesBatchMetricQuery> metrics = request.metrics() == null
+                ? Collections.emptyList()
+                : request.metrics();
+        List<MetricInfo> sdkMetrics = metrics.stream()
+                .map(this::toSdkMetricInfo)
+                .toList();
+
+        BatchListMetricDataRequestBody body = new BatchListMetricDataRequestBody()
+                .withMetrics(sdkMetrics)
+                .withPeriod(BatchListMetricDataRequestBody.PeriodEnum.fromValue(
+                        String.valueOf(request.period().getSeconds())))
+                .withFilter(Filter.fromValue(request.filter().getValue()))
+                .withFrom(request.from())
+                .withTo(request.to());
+        return new BatchListMetricDataRequest().withBody(body);
+    }
+
+    private MetricInfo toSdkMetricInfo(CesBatchMetricQuery query) {
+        List<CesMetricDimension> dims = query.dimensions() == null
+                ? Collections.emptyList()
+                : query.dimensions();
+        List<MetricsDimension> sdkDims = dims.stream()
+                .map(dim -> new MetricsDimension().withName(dim.name()).withValue(dim.value()))
+                .toList();
+        return new MetricInfo()
+                .withNamespace(query.namespace())
+                .withMetricName(query.metricName())
+                .withDimensions(sdkDims);
+    }
+
+    private CesBatchQueryMetricDataResponse toBatchQueryMetricDataResponseDto(BatchListMetricDataResponse sdkResp) {
+        List<BatchMetricData> sdkMetrics =
+                sdkResp.getMetrics() == null ? Collections.emptyList() : sdkResp.getMetrics();
+        List<CesBatchMetricResult> results = sdkMetrics.stream()
+                .map(this::toBatchMetricResult)
+                .toList();
+        return new CesBatchQueryMetricDataResponse(results);
+    }
+
+    private CesBatchMetricResult toBatchMetricResult(BatchMetricData sdk) {
+        List<MetricsDimension> sdkDims =
+                sdk.getDimensions() == null ? Collections.emptyList() : sdk.getDimensions();
+        List<CesMetricDimension> dims = sdkDims.stream()
+                .map(dim -> new CesMetricDimension(dim.getName(), dim.getValue()))
+                .toList();
+        List<DatapointForBatchMetric> sdkPoints =
+                sdk.getDatapoints() == null ? Collections.emptyList() : sdk.getDatapoints();
+        List<CesDatapoint> points = sdkPoints.stream()
+                .map(this::toBatchDatapoint)
+                .toList();
+        return new CesBatchMetricResult(
+                sdk.getNamespace(),
+                sdk.getMetricName(),
+                dims,
+                sdk.getUnit(),
+                points);
+    }
+
+    private CesDatapoint toBatchDatapoint(DatapointForBatchMetric sdk) {
+        return new CesDatapoint(
+                sdk.getTimestamp(),
+                null,
                 sdk.getMax(),
                 sdk.getMin(),
                 sdk.getAverage(),

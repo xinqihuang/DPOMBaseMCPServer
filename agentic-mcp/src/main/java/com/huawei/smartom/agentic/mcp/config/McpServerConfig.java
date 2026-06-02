@@ -10,6 +10,7 @@ import com.huawei.smartom.agentic.mcp.tool.AomMetricsTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTopologyTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTraceTool;
 import com.huawei.smartom.agentic.mcp.tool.CesAlarmTool;
+import com.huawei.smartom.agentic.mcp.tool.CesBatchMetricDataTool;
 import com.huawei.smartom.agentic.mcp.tool.CesCreateNotificationMaskTool;
 import com.huawei.smartom.agentic.mcp.tool.CesDeleteNotificationMasksTool;
 import com.huawei.smartom.agentic.mcp.tool.CesListNotificationMasksTool;
@@ -41,6 +42,7 @@ public class McpServerConfig {
      * @param helloWorldTool                  连通性测试工具
      * @param cesMetricsTool                  CES 指标定义查询工具
      * @param cesMetricDataTool               CES 指标数据查询工具（T07）
+     * @param cesBatchMetricDataTool          CES 批量指标数据查询工具
      * @param cesAlarmTool                    CES 告警历史查询工具（T09）
      * @param aomMetricsTool                  AOM 指标定义查询工具
      * @param aomMetricDataTool               AOM 时序数据查询工具（T08）
@@ -58,6 +60,7 @@ public class McpServerConfig {
             HelloWorldTool helloWorldTool,
             CesMetricsTool cesMetricsTool,
             CesMetricDataTool cesMetricDataTool,
+            CesBatchMetricDataTool cesBatchMetricDataTool,
             CesAlarmTool cesAlarmTool,
             AomMetricsTool aomMetricsTool,
             AomMetricDataTool aomMetricDataTool,
@@ -73,6 +76,7 @@ public class McpServerConfig {
                         helloWorldTool,
                         cesMetricsTool,
                         cesMetricDataTool,
+                        cesBatchMetricDataTool,
                         cesAlarmTool,
                         aomMetricsTool,
                         aomMetricDataTool,
