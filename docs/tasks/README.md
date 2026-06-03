@@ -28,7 +28,8 @@
 | [T14](T14-batch-query-ces-metric-data.md) | 实现 batch_query_ces_metric_data + CES 参数枚举目录 | Done（`ce6fd6c`） | 1d | T04, T07 |
 | [T15](T15-ces-notification-masks.md) | CES 告警屏蔽三件套（create / delete / list） | Done（`7bf5907`） | 1d | T04 |
 | [T16](T16-lts-adapter-base.md) | LTS Adapter 基座 + listLogs / listLogContext | Done（`abd1a8d`） | 1d | T03 |
-| [T17](T17-query-lts-logs.md) | 实现 query_lts_logs tool（LTS 日志搜索） | Done | 0.5d | T16 |
+| [T17](T17-query-lts-logs.md) | 实现 query_lts_logs tool（LTS 日志搜索） | Done（`ba0b31e`） | 0.5d | T16 |
+| [T18](T18-query-lts-log-context.md) | 实现 query_lts_log_context tool（LTS 日志上下文） | Done | 0.3d | T16, T17 |
 
 > 注：T07–T13 与 T15 的 spec/task 卡是 2026-06-02 回填的，原始实现在更早的 commit 中（见各任务卡引用的 hash）。回填内容反映"已交付现状"而非"理想 DoD"，遗留测试 / 冒烟 / 指标看板等项目列在各任务卡的"不做（本期未交付）"段落，并汇总在下文「后续任务 / 遗留项」。
 

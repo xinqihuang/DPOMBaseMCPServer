@@ -18,6 +18,7 @@ import com.huawei.smartom.agentic.mcp.tool.CesMetricDataTool;
 import com.huawei.smartom.agentic.mcp.tool.CesMetricsTool;
 import com.huawei.smartom.agentic.mcp.tool.CorrelateIncidentTool;
 import com.huawei.smartom.agentic.mcp.tool.HelloWorldTool;
+import com.huawei.smartom.agentic.mcp.tool.LtsLogContextTool;
 import com.huawei.smartom.agentic.mcp.tool.LtsLogTool;
 
 import org.springframework.ai.tool.ToolCallbackProvider;
@@ -55,6 +56,7 @@ public class McpServerConfig {
      * @param cesDeleteNotificationMasksTool  批量删除告警屏蔽规则工具
      * @param cesListNotificationMasksTool    查询告警屏蔽规则工具
      * @param ltsLogTool                      LTS 日志检索工具（T17）
+     * @param ltsLogContextTool               LTS 日志上下文工具（T18）
      * @return 暴露所有已注册工具对象的 {@link MethodToolCallbackProvider}
      */
     @Bean
@@ -73,7 +75,8 @@ public class McpServerConfig {
             CesCreateNotificationMaskTool cesCreateNotificationMaskTool,
             CesDeleteNotificationMasksTool cesDeleteNotificationMasksTool,
             CesListNotificationMasksTool cesListNotificationMasksTool,
-            LtsLogTool ltsLogTool) {
+            LtsLogTool ltsLogTool,
+            LtsLogContextTool ltsLogContextTool) {
         return MethodToolCallbackProvider.builder()
                 .toolObjects(
                         helloWorldTool,
@@ -90,7 +93,8 @@ public class McpServerConfig {
                         cesCreateNotificationMaskTool,
                         cesDeleteNotificationMasksTool,
                         cesListNotificationMasksTool,
-                        ltsLogTool)
+                        ltsLogTool,
+                        ltsLogContextTool)
                 .build();
     }
 }
