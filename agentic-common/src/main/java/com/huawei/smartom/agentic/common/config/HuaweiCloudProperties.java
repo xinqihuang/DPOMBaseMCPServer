@@ -45,6 +45,12 @@ public class HuaweiCloudProperties {
     private Long apmBusinessId;
 
     /**
+     * LTS region id（例如 {@code cn-north-9}、{@code af-north-1}）。LTS 在部分 region 提供，
+     * 与主 region 解耦。默认在 {@code application.yml} 给出 {@code cn-north-9}。
+     */
+    private String ltsRegion = "cn-north-9";
+
+    /**
      * 返回已配置的华为云 region id。
      *
      * @return region id，Spring 完成绑定后不会为 {@code null}
@@ -150,5 +156,23 @@ public class HuaweiCloudProperties {
      */
     public void setApmBusinessId(Long apmBusinessId) {
         this.apmBusinessId = apmBusinessId;
+    }
+
+    /**
+     * 返回 LTS service 使用的 region id（与 {@link #region} 独立配置）。
+     *
+     * @return LTS region id，默认 {@code cn-north-9}
+     */
+    public String getLtsRegion() {
+        return ltsRegion;
+    }
+
+    /**
+     * 设置 LTS service 使用的 region id。
+     *
+     * @param ltsRegion LTS region id，例如 {@code cn-north-9}
+     */
+    public void setLtsRegion(String ltsRegion) {
+        this.ltsRegion = ltsRegion;
     }
 }

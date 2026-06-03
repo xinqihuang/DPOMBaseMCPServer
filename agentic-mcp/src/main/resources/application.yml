@@ -47,6 +47,7 @@ huaweicloud:
   project-id: ${HUAWEICLOUD_PROJECT_ID:}
   apm-region: ${HUAWEICLOUD_APM_REGION:cn-north-4}
   apm-business-id: ${HUAWEICLOUD_APM_BUSINESS_ID:}
+  lts-region: ${HUAWEICLOUD_LTS_REGION:cn-north-9}
 
 logging:
   level:
@@ -70,6 +71,10 @@ resilience4j:
         limit-refresh-period: 1s
         timeout-duration: 0
       apm-readonly:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0
+      lts-readonly:
         limit-for-period: 10
         limit-refresh-period: 1s
         timeout-duration: 0

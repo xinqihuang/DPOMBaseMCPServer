@@ -71,6 +71,11 @@
                 <artifactId>huaweicloud-sdk-apm</artifactId>
                 <version>${huaweicloud-sdk.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.huaweicloud.sdk</groupId>
+                <artifactId>huaweicloud-sdk-lts</artifactId>
+                <version>${huaweicloud-sdk.version}</version>
+            </dependency>
 
             <!-- Resilience4j -->
             <dependency>
@@ -125,6 +130,11 @@
             <dependency>
                 <groupId>com.huawei.smartom.agentic</groupId>
                 <artifactId>agentic-adapter-apm</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.huawei.smartom.agentic</groupId>
+                <artifactId>agentic-adapter-lts</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

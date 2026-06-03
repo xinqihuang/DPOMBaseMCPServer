@@ -20,6 +20,7 @@
         <module>agentic-adapter-ces</module>
         <module>agentic-adapter-aom</module>
         <module>agentic-adapter-apm</module>
+        <module>agentic-adapter-lts</module>
     </modules>
 
 </project>
