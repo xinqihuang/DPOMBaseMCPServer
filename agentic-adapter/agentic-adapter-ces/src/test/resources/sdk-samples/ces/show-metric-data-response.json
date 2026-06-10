@@ -1,0 +1,19 @@
+{
+  "metric_name": "cpu_util",
+  "datapoints": [
+    {
+      "max": 87.4,
+      "min": 21.2,
+      "average": 55.3,
+      "sum": 829.5,
+      "variance": 12.4,
+      "timestamp": 1718000000000,
+      "unit": "%"
+    },
+    {
+      "average": 42.0,
+      "timestamp": 1718000300000,
+      "unit": "%"
+    }
+  ]
+}

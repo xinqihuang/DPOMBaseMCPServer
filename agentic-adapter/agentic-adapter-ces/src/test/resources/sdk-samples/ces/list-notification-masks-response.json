@@ -1,0 +1,61 @@
+{
+  "notification_masks": [
+    {
+      "notification_mask_id": "nm123456789012345678zzzz",
+      "mask_name": "weekly-window-mask",
+      "relation_type": "ALARM_RULE",
+      "relation_id": "al1604473987569z6n6nkpm1",
+      "resource_type": "PRODUCT",
+      "metric_names": ["cpu_util", "mem_util"],
+      "product_metrics": [
+        { "dimension_name": "instance_id", "metric_name": "cpu_util" }
+      ],
+      "resource_level": "product",
+      "product_name": "ECS",
+      "resources": [
+        {
+          "namespace": "SYS.ECS",
+          "dimension_names": ["instance_id"]
+        }
+      ],
+      "mask_status": "MASK_EFFECTIVE",
+      "mask_type": "CYCLE_TIME",
+      "create_time": 1718000000000,
+      "update_time": 1718000600000,
+      "start_date": "2024-02-11",
+      "start_time": "10:00:00",
+      "end_date": "2024-02-12",
+      "end_time": "12:00:00",
+      "effective_timezone": "GMT+08:00",
+      "policies": [
+        {
+          "alarm_policy_id": "ap12345678901234567890xx",
+          "metric_name": "cpu_util",
+          "extra_info": {
+            "origin_metric_name": "cpu_util",
+            "metric_prefix": "",
+            "custom_proc_name": "",
+            "metric_type": "system"
+          },
+          "period": 300,
+          "filter": "average",
+          "comparison_operator": ">=",
+          "value": 80.0,
+          "hierarchical_value": {
+            "critical": 95.0,
+            "major": 90.0,
+            "minor": 85.0,
+            "info": 80.0
+          },
+          "unit": "%",
+          "count": 3,
+          "type": "static",
+          "suppress_duration": 3600,
+          "alarm_level": 2,
+          "selected_unit": "%"
+        }
+      ]
+    }
+  ],
+  "count": 1
+}

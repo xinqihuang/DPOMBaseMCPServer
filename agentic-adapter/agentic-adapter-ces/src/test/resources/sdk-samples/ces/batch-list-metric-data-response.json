@@ -1,0 +1,31 @@
+{
+  "metrics": [
+    {
+      "unit": "%",
+      "namespace": "SYS.ECS",
+      "metric_name": "cpu_util",
+      "dimensions": [
+        { "name": "instance_id", "value": "i-abc123" }
+      ],
+      "datapoints": [
+        {
+          "max": 87.4,
+          "min": 21.2,
+          "average": 55.3,
+          "sum": 829.5,
+          "variance": 12.4,
+          "timestamp": 1718000000000
+        }
+      ]
+    },
+    {
+      "unit": "%",
+      "namespace": "SYS.ECS",
+      "metric_name": "mem_util",
+      "dimensions": [
+        { "name": "instance_id", "value": "i-abc123" }
+      ],
+      "datapoints": []
+    }
+  ]
+}

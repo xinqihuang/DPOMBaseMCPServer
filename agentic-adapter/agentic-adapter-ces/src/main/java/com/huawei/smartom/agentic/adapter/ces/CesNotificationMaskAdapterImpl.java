@@ -11,6 +11,10 @@ import com.huawei.smartom.agentic.adapter.ces.dto.CesDeleteNotificationMasksResp
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListNotificationMasksRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListNotificationMasksResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMask;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMaskHierarchicalValue;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMaskMetricExtraInfo;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMaskPolicy;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMaskResourceCategory;
 import com.huawei.smartom.agentic.adapter.ces.dto.NotificationMaskProductMetric;
 import com.huawei.smartom.agentic.adapter.ces.dto.NotificationMaskResource;
 import com.huawei.smartom.agentic.common.resilience.HuaweiCloudInvocation;
@@ -22,15 +26,19 @@ import com.huaweicloud.sdk.ces.v2.model.BatchDeleteNotificationMasksResponse;
 import com.huaweicloud.sdk.ces.v2.model.BatchUpdateNotificationMasksRequest;
 import com.huaweicloud.sdk.ces.v2.model.BatchUpdateNotificationMasksRequestBody;
 import com.huaweicloud.sdk.ces.v2.model.BatchUpdateNotificationMasksResponse;
+import com.huaweicloud.sdk.ces.v2.model.HierarchicalValue;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMaskRequestBody;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMaskRespNotificationMasks;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMasksRequest;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMasksResponse;
 import com.huaweicloud.sdk.ces.v2.model.ListRelationType;
 import com.huaweicloud.sdk.ces.v2.model.MaskType;
+import com.huaweicloud.sdk.ces.v2.model.MetricExtraInfo;
+import com.huaweicloud.sdk.ces.v2.model.PoliciesInListResp;
 import com.huaweicloud.sdk.ces.v2.model.ProductMetric;
 import com.huaweicloud.sdk.ces.v2.model.RelationType;
 import com.huaweicloud.sdk.ces.v2.model.Resource;
+import com.huaweicloud.sdk.ces.v2.model.ResourceCategory;
 import com.huaweicloud.sdk.ces.v2.model.ResourceDimension;
 
 import org.slf4j.Logger;
@@ -266,21 +274,78 @@ public class CesNotificationMaskAdapterImpl implements CesNotificationMaskAdapte
                         .map(item -> new NotificationMaskProductMetric(
                                 item.getDimensionName(), item.getMetricName()))
                         .toList();
+        List<CesNotificationMaskResourceCategory> resources = sdk.getResources() == null ? null
+                : sdk.getResources().stream()
+                        .map(this::toResourceCategory)
+                        .toList();
+        List<CesNotificationMaskPolicy> policies = sdk.getPolicies() == null ? null
+                : sdk.getPolicies().stream()
+                        .map(this::toPolicy)
+                        .toList();
         return new CesNotificationMask(
                 sdk.getNotificationMaskId(),
                 sdk.getMaskName(),
                 sdk.getRelationType() == null ? null : sdk.getRelationType().getValue(),
                 sdk.getRelationId(),
-                sdk.getResourceLevel() == null ? null : sdk.getResourceLevel().getValue(),
-                sdk.getProductName(),
-                sdk.getMaskStatus() == null ? null : sdk.getMaskStatus().getValue(),
-                sdk.getMaskType() == null ? null : sdk.getMaskType().getValue(),
+                sdk.getResourceType() == null ? null : sdk.getResourceType().getValue(),
                 sdk.getMetricNames(),
                 productMetrics,
+                sdk.getResourceLevel() == null ? null : sdk.getResourceLevel().getValue(),
+                sdk.getProductName(),
+                resources,
+                sdk.getMaskStatus() == null ? null : sdk.getMaskStatus().getValue(),
+                sdk.getMaskType() == null ? null : sdk.getMaskType().getValue(),
+                sdk.getCreateTime(),
+                sdk.getUpdateTime(),
                 sdk.getStartDate() == null ? null : sdk.getStartDate().toString(),
                 sdk.getStartTime(),
                 sdk.getEndDate() == null ? null : sdk.getEndDate().toString(),
                 sdk.getEndTime(),
-                sdk.getEffectiveTimezone());
+                sdk.getEffectiveTimezone(),
+                policies);
+    }
+
+    private CesNotificationMaskResourceCategory toResourceCategory(ResourceCategory sdk) {
+        return new CesNotificationMaskResourceCategory(sdk.getNamespace(), sdk.getDimensionNames());
+    }
+
+    private CesNotificationMaskPolicy toPolicy(PoliciesInListResp sdk) {
+        return new CesNotificationMaskPolicy(
+                sdk.getAlarmPolicyId(),
+                sdk.getMetricName(),
+                toMetricExtraInfo(sdk.getExtraInfo()),
+                sdk.getPeriod() == null ? null : sdk.getPeriod().getValue(),
+                sdk.getFilter(),
+                sdk.getComparisonOperator(),
+                sdk.getValue(),
+                toHierarchicalValue(sdk.getHierarchicalValue()),
+                sdk.getUnit(),
+                sdk.getCount(),
+                sdk.getType(),
+                sdk.getSuppressDuration() == null ? null : sdk.getSuppressDuration().getValue(),
+                sdk.getAlarmLevel(),
+                sdk.getSelectedUnit());
+    }
+
+    private CesNotificationMaskMetricExtraInfo toMetricExtraInfo(MetricExtraInfo sdk) {
+        if (sdk == null) {
+            return null;
+        }
+        return new CesNotificationMaskMetricExtraInfo(
+                sdk.getOriginMetricName(),
+                sdk.getMetricPrefix(),
+                sdk.getCustomProcName(),
+                sdk.getMetricType());
+    }
+
+    private CesNotificationMaskHierarchicalValue toHierarchicalValue(HierarchicalValue sdk) {
+        if (sdk == null) {
+            return null;
+        }
+        return new CesNotificationMaskHierarchicalValue(
+                sdk.getCritical(),
+                sdk.getMajor(),
+                sdk.getMinor(),
+                sdk.getInfo());
     }
 }
