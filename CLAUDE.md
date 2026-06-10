@@ -204,17 +204,22 @@ mcp 不能直接 import huaweicloud SDK
 
 ## 4. 关键架构决策
 
-### 4.1 自定义 DTO 包裹 SDK 类型（重要）
+### 4.1 自定义 DTO 无损包裹 SDK 类型（重要）
 
-**绝不允许** 把华为云 SDK 的 Request/Response 类（如 `ListMetricsResponse`）泄漏到 `adapter` 之外的层。
+**绝不允许** 把华为云 SDK 的 Request/Response 类泄漏到 `adapter` 之外的层。每个 SDK 调用：
+adapter 把入参 DTO（我们的 record）转 SDK Request → 调 SDK → 把 SDK Response 转我们的输出 DTO → 返回上层。
 
-每个 SDK 调用必须：
-1. adapter 层把入参 DTO（我们自己定义的 `record`）转成 SDK Request
-2. 调 SDK
-3. 把 SDK Response 转成我们的输出 DTO（`record`）
-4. 返回给上层
+**DTO 是稳定契约，但必须对 SDK 响应做无损投影**：
 
-理由：SDK 字段命名长、嵌套深、版本升级可能改字段；我们的 DTO 是稳定契约。
+- **无损**：SDK 响应里的字段，DTO 必须全部覆盖。允许重命名贴齐 snake_case、允许把嵌套拆成子 record，但不允许丢字段。
+- **要砍字段必须在 spec 里显式列出并写理由**，否则一律保留。「Agent 当前用不到」不是理由——只读诊断工具默认全留。
+- **嵌套不拍平丢信息**：嵌套对象拆子 record（如 metric/condition/data_points），不要拍平成几个标量后丢其余。
+- **API 版本显式钉死**：每个工具对应的 SDK API 版本（v1/v2）写进 spec，不让实现自选。字段缺失先怀疑「打错版本」。
+- **权威 schema = SDK 源码 model 类**：写 DTO 前必须 sparse-checkout `huaweicloud-sdk-java-v3` 对应 model 类，按真实 @JsonProperty + 字段类型映射。console API Explorer 抓不到（登录+SPA），仅作语义参考。禁止凭记忆猜字段/类名/类型。
+- **类型贴齐 SDK**：时间用 SDK 的 OffsetDateTime（非 Long/String 臆测），SDK 枚举映射取 .getValue()。
+- **契约测试兜底**：每个有响应 DTO 的工具必须有 *ContractTest——真实 SDK 样本（test/resources/sdk-samples/<svc>/）反序列化经 adapter 映射，断言覆盖全字段，漂移即 fail。
+
+理由：DTO 提供稳定命名与防 SDK 泄漏的价值，但诊断 Agent 依赖完整信号；历史「最小子集」做法已造成系统性丢字段，本条予以纠正。
 
 ### 4.2 错误码统一映射
 
