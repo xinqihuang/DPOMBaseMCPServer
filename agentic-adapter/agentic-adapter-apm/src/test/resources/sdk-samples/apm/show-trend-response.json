@@ -1,0 +1,27 @@
+{
+  "line_list": [
+    {
+      "title": "avg(latency)",
+      "unit": "ms",
+      "precision": 2,
+      "data_type": "double",
+      "visible": true,
+      "point_list": [
+        { "time": 1717999800000, "value": 123.4 },
+        { "time": 1717999860000, "value": 130.1 }
+      ]
+    },
+    {
+      "title": "host_label",
+      "unit": "",
+      "precision": 0,
+      "data_type": "string",
+      "visible": false,
+      "point_list": [
+        { "time": 1717999800000, "value": "host-a" },
+        { "time": 1717999860000, "value": "host-b" }
+      ]
+    }
+  ],
+  "latest_data_Time": 1717999860000
+}

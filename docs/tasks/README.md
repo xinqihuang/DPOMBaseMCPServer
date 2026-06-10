@@ -32,6 +32,7 @@
 | [T18](T18-query-lts-log-context.md) | 实现 query_lts_log_context tool（LTS 日志上下文） | Done | 0.3d | T16, T17 |
 | [T20](T20-list-apm-alarm-data.md) | 实现 list_apm_alarm_data tool（APM 告警列表） | Done | 0.6d | T03 |
 | [T21](T21-list-alarm-notify.md) | 实现 list_alarm_notify tool（APM 告警通知投递） | Done | 0.3d | T20 |
+| [T22](T22-show-apm-trend.md) | 实现 show_apm_trend tool（APM 趋势图，嵌套 viewConfig） | Done | 1d | T03 |
 
 > 注：T07–T13 与 T15 的 spec/task 卡是 2026-06-02 回填的，原始实现在更早的 commit 中（见各任务卡引用的 hash）。回填内容反映"已交付现状"而非"理想 DoD"，遗留测试 / 冒烟 / 指标看板等项目列在各任务卡的"不做（本期未交付）"段落，并汇总在下文「后续任务 / 遗留项」。
 
