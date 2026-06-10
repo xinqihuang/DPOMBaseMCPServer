@@ -16,6 +16,11 @@ spring:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: non_null
 
+apm:
+  discovery-cache:
+    ttl: 1d
+    maximum-size: 1000
+
 server:
   port: 8080
 

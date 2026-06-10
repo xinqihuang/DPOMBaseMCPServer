@@ -240,13 +240,20 @@ INTERNAL                // 序列化/未分类异常
 - `retryable`: `true` / `false`
 - `upstreamTraceId`: 华为云返回的 `X-Request-Id`（可为 null）
 
-### 4.3 限流与重试
+### 4.3 面向 Agent 的工具入参：禁止凭先验捏造上游查询结构（重要）
 
-- 用 Resilience4j
-- RateLimiter key 命名规则：`<service>-<scope>`，如 `ces-readonly` / `aom-readonly`
-- Retry 仅对 `UPSTREAM_THROTTLED` / `UPSTREAM_ERROR` / `TIMEOUT` 重试，3 次指数退避（200ms / 800ms / 3.2s）
-- 不做熔断（MVP 阶段）
-- 不做查询缓存（MVP 阶段）
+§4.1 约束响应侧无损；本条约束请求侧。核心：Agent 不得用自身先验捏造上游的
+collector_name/collector_id/metric_set/function/查询 DSL 等。合法来源二选一：
+- (a) 受控枚举 / 带 allowed-values 的 key（服务端目录翻译）；或
+- (b) 先调只读「发现工具」拿到上游真实结构，再原样转发给查询工具
+  （show_env_monitor_items → show_apm_monitor_item_view_config → 选一个 view → show_apm_trend）。
+
+判定红线：被透传的结构若可能由模型凭记忆生成，违规；若必然来自前置发现工具的真实响应，合规。
+凡是 env 局部/会变的标识（如 collector_id），一律运行时发现，禁止硬编码或跨 env 复用。
+查询工具描述必须写明：入参取自哪个发现工具、调用顺序、禁止自行编造。
+
+> 限流 / 重试 / 缓存策略另见 `docs/architecture.md`（Resilience4j 配置、RateLimiter 命名规则、
+> Caffeine TTL 缓存策略）。
 
 ### 4.4 并发模型
 

@@ -59,14 +59,25 @@ public class ApmTrendTool {
     @Tool(
             name = "show_apm_trend",
             description = """
-                    Fetch APM monitor-item trend data (line points or aggregation table) for a \
-                    given time window. Use this AFTER you identify a monitor_item_id (e.g. from \
-                    an APM alarm's monitor_item_id returned by list_apm_alarm_data, or from a \
-                    known APM application's monitor config). The result contains one or more \
-                    lines, each with a list of {time, value} points; value is loosely typed \
-                    (number or string per SDK). Pair with list_apm_alarm_data when you need to \
-                    inspect the metric behind an alarm. start_time/end_time are forwarded to \
-                    upstream as-is (strings).""")
+                    STEP 3 (FINAL) of the APM trend discovery chain. Fetch APM trend data \
+                    (line points or aggregation table) for the given time window. \
+
+                    REQUIRED CALL ORDER: \
+                    (1) show_env_monitor_items(env_id) → resolve collector_id from the target \
+                        monitor_item_id (collector_id is ENV-LOCAL; never hard-code). \
+                    (2) show_apm_monitor_item_view_config(collector_id, env_id) → pick exactly \
+                        one view from view_row_list[*].view_list[*]. \
+                    (3) Call THIS tool: copy the chosen view's fields verbatim into view_config \
+                        (collector_name / metric_set / view_type / field_item_list with \
+                        function/as). NEVER invent collector_name, metric_set, or function \
+                        from prior knowledge — they must come from STEP 2's response. \
+
+                    Note: ViewBase.latest from STEP 2 is Boolean but TrendView.latest here is \
+                    String; convert ("true"/"false") when copying. \
+
+                    Returns line_list[*] with {time, value} points; value is loosely typed \
+                    (number or string per SDK). start_time/end_time are strings forwarded to \
+                    upstream as-is. Trend data is NOT cached (real-time).""")
     public Object showTrend(
             @ToolParam(description = "APM business id (HTTP x-business-id header). Falls back to "
                     + "huaweicloud.apm-business-id config when null.", required = false)

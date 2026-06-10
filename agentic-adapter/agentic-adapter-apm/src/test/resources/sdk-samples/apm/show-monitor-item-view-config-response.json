@@ -1,0 +1,51 @@
+{
+  "title": "JVM",
+  "collector_name": "JVM",
+  "view_row_list": [
+    { "view_list": [
+      { "collector_name": "JVM", "metric_set": "thread", "title": "线程", "group_by": "", "filter": "", "view_type": "trend",
+        "field_item_list": [
+          {"function": "MAX(threadCount)", "as": "当前线程数", "visible": true},
+          {"function": "MAX(totalStartedThreadCount)", "as": "所有启动线程数", "visible": true},
+          {"function": "MAX(peakThreadCount)", "as": "峰值线程数", "visible": true},
+          {"function": "MAX(deadlockedThreadsCount)", "as": "死锁线程数", "visible": true},
+          {"function": "MAX(daemonThreadCount)", "as": "守护线程数", "visible": true} ] },
+      { "collector_name": "JVM", "metric_set": "thread", "title": "线程状态", "group_by": "", "filter": "", "view_type": "trend",
+        "field_item_list": [
+          {"function": "MAX(newThreadCount)", "as": "NEW状态线程数", "visible": true},
+          {"function": "MAX(runnableThreadCount)", "as": "RUNNABLE状态线程数", "visible": true},
+          {"function": "MAX(blockedThreadCount)", "as": "BLOCKED状态线程数", "visible": true},
+          {"function": "MAX(waitingThreadCount)", "as": "WAITING状态线程数", "visible": true},
+          {"function": "MAX(timedWaitingThreadCount)", "as": "TIMED_WAITING状态线程数", "visible": true},
+          {"function": "MAX(terminatedThreadCount)", "as": "TERMINATED状态线程数", "visible": true} ] }
+    ], "title": "" },
+    { "view_list": [
+      { "collector_name": "JVM", "metric_set": "memory", "title": "内存", "group_by": "", "filter": "", "view_type": "trend",
+        "field_item_list": [
+          {"function": "AVG(heapMemoryUsage)", "as": "堆内存使用(MB)", "visible": true},
+          {"function": "AVG(nonHeapMemoryUsage)", "as": "非堆内存使用(MB)", "visible": true},
+          {"function": "AVG(directMemoryUsage)", "as": "直接内存使用(MB)", "visible": true},
+          {"function": "AVG(heapMemoryMax)", "as": "最大堆内存(MB)", "visible": true} ] },
+      { "collector_name": "JVM", "metric_set": "classLoading", "title": "类加载", "group_by": "", "filter": "", "view_type": "trend",
+        "field_item_list": [
+          {"function": "AVG(loadedClassCount)", "as": "当前类个数", "visible": true},
+          {"function": "AVG(totalLoadedClassCount)", "as": "总共加载类个数", "visible": true},
+          {"function": "AVG(unloadedClassCount)", "as": "卸载的类个数", "visible": true} ] }
+    ], "title": "" },
+    { "view_list": [
+      { "collector_name": "JVM", "metric_set": "memoryUsageRatio", "title": "内存使用率%", "filter": "", "view_type": "trend",
+        "field_item_list": [ {"function": "AVG(heapMemoryUsageRatio)", "as": "堆内存使用率%", "visible": true} ] },
+      { "collector_name": "JVM", "metric_set": "cpu", "title": "cpu(%)", "filter": "", "view_type": "trend",
+        "field_item_list": [ {"function": "AVG(cpuRatio)", "as": "使用率%", "visible": true} ] }
+    ], "title": "" },
+    { "view_list": [
+      { "latest": true, "collector_name": "JVM", "metric_set": "memoryPool", "title": "内存池", "table_direction": "H",
+        "group_by": "name", "filter": "", "order_by": "", "view_type": "sumtable",
+        "field_item_list": [
+          {"function": "AVG(max)", "as": "max(MB)", "visible": true},
+          {"function": "AVG(used)", "as": "used(MB)", "visible": true},
+          {"function": "AVG(init)", "as": "init(MB)", "visible": true},
+          {"function": "AVG(committed)", "as": "committed(MB)", "visible": true} ] }
+    ], "title": "" }
+  ]
+}

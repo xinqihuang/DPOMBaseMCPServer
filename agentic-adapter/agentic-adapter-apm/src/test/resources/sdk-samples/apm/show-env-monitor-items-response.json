@@ -1,0 +1,20 @@
+{
+  "category_info_list": [
+    {"category_id": 7, "category_name": "Url", "display_name": "接口调用", "sequence": 1},
+    {"category_id": 5, "category_name": "Base", "display_name": "基础监控", "sequence": 20},
+    {"category_id": 4, "category_name": "Exception", "display_name": "异常", "sequence": 30},
+    {"category_id": 11, "category_name": "Web", "display_name": "Web容器", "sequence": 80},
+    {"category_id": 10, "category_name": "ProbeInfo", "display_name": "探针监控", "sequence": 90}
+  ],
+  "monitor_item_info_list": [
+    {"monitor_item_id": 37, "disabled": false, "collector_id": 50, "sequence": 1,  "collect_interval": 60, "category_id": 7,  "collector_name": "Url",       "display_name": "URL监控",  "show_in_total": true},
+    {"monitor_item_id": 16, "disabled": false, "collector_id": 36, "sequence": 5,  "collect_interval": 60, "category_id": 5,  "collector_name": "JVMInfo",   "display_name": "JVM信息",  "show_in_total": true},
+    {"monitor_item_id": 14, "disabled": false, "collector_id": 28, "sequence": 10, "collect_interval": 60, "category_id": 5,  "collector_name": "JVM",       "display_name": "JVM监控",  "show_in_total": true},
+    {"monitor_item_id": 18, "disabled": false, "collector_id": 38, "sequence": 10, "collect_interval": 60, "category_id": 5,  "collector_name": "GC",        "display_name": "GC监控",   "show_in_total": true},
+    {"monitor_item_id": 20, "disabled": false, "collector_id": 48, "sequence": 10, "collect_interval": 60, "category_id": 5,  "collector_name": "Thread",    "display_name": "线程",     "show_in_total": true},
+    {"monitor_item_id": 13, "disabled": false, "collector_id": 20, "sequence": 15, "collect_interval": 60, "category_id": 5,  "collector_name": "JavaMethod","display_name": "JAVA方法", "show_in_total": true},
+    {"monitor_item_id": 12, "disabled": false, "collector_id": 18, "sequence": 20, "collect_interval": 60, "category_id": 4,  "collector_name": "Exception", "display_name": "异常日志", "show_in_total": true},
+    {"monitor_item_id": 41, "disabled": false, "collector_id": 24, "sequence": 55, "collect_interval": 60, "category_id": 11, "collector_name": "Tomcat",    "display_name": "Tomcat监控","show_in_total": true},
+    {"monitor_item_id": 11, "disabled": false, "collector_id": 16, "sequence": 60, "collect_interval": 60, "category_id": 10, "collector_name": "ProbeInfo", "display_name": "探针监控", "show_in_total": true}
+  ]
+}

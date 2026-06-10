@@ -9,6 +9,8 @@ import com.huawei.smartom.agentic.mcp.tool.AomMetricDataTool;
 import com.huawei.smartom.agentic.mcp.tool.AomMetricsTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmAlarmDataTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmAlarmNotifyTool;
+import com.huawei.smartom.agentic.mcp.tool.ApmEnvMonitorItemsTool;
+import com.huawei.smartom.agentic.mcp.tool.ApmMonitorItemViewConfigTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTopologyTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTraceTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTrendTool;
@@ -63,6 +65,8 @@ public class McpServerConfig {
      * @param apmAlarmDataTool                APM 告警列表工具（T20）
      * @param apmAlarmNotifyTool              APM 告警通知投递工具（T21）
      * @param apmTrendTool                    APM 趋势图查询工具（T22）
+     * @param apmEnvMonitorItemsTool          APM env 监控项发现工具（T23 链路第 1 步）
+     * @param apmMonitorItemViewConfigTool    APM 视图配置发现工具（T23 链路第 2 步）
      * @return 暴露所有已注册工具对象的 {@link MethodToolCallbackProvider}
      */
     @Bean
@@ -85,7 +89,9 @@ public class McpServerConfig {
             LtsLogContextTool ltsLogContextTool,
             ApmAlarmDataTool apmAlarmDataTool,
             ApmAlarmNotifyTool apmAlarmNotifyTool,
-            ApmTrendTool apmTrendTool) {
+            ApmTrendTool apmTrendTool,
+            ApmEnvMonitorItemsTool apmEnvMonitorItemsTool,
+            ApmMonitorItemViewConfigTool apmMonitorItemViewConfigTool) {
         return MethodToolCallbackProvider.builder()
                 .toolObjects(
                         helloWorldTool,
@@ -106,7 +112,9 @@ public class McpServerConfig {
                         ltsLogContextTool,
                         apmAlarmDataTool,
                         apmAlarmNotifyTool,
-                        apmTrendTool)
+                        apmTrendTool,
+                        apmEnvMonitorItemsTool,
+                        apmMonitorItemViewConfigTool)
                 .build();
     }
 }
