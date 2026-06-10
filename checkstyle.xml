@@ -99,6 +99,16 @@
         <module name="RedundantModifier"/>
 
         <!--
+          Method length: 单个方法体不超过 50 行（排除空行）。详见 CLAUDE.md §3.1。
+          countEmpty=false 排除空行；签名 / 大括号计入。
+        -->
+        <module name="MethodLength">
+            <property name="max" value="50"/>
+            <property name="countEmpty" value="false"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
+        </module>
+
+        <!--
           Naming.
           PackageName keeps its dotted-segment regex.
           All other identifiers must match \w{2,64} — 2 to 64 word
