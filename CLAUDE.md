@@ -104,7 +104,7 @@ mcp 不能直接 import huaweicloud SDK
 
 ### 3.1 格式
 
-由 `checkstyle.xml` 和 `.editorconfig` 强制：
+由 `checkstyle.xml` 和 `.editorconfig` 强制（checkstyle 绑定在 Maven `verify` phase——日常 `mvn -pl X -am test` 不跑 checkstyle，提 PR 前用 `mvn verify` 或 `mvn checkstyle:check` 全量校验）：
 
 - **行宽 120**
 - **缩进 4 空格**（不用 tab）
