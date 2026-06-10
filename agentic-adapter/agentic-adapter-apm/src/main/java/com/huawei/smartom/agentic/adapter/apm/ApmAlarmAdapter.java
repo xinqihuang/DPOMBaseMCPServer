@@ -6,6 +6,8 @@ package com.huawei.smartom.agentic.adapter.apm;
 
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyResponse;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
 
 /**
@@ -13,8 +15,6 @@ import com.huawei.smartom.agentic.common.exception.SmartomException;
  *
  * <p>与 {@link ApmTraceAdapter} 同模块、并列；trace / topology 与 alarm 是不同业务域，
  * 分两个接口保持职责清晰，共享同一 {@code ApmClient} Bean。
- *
- * <p>T21 会在此接口上追加 {@code listAlarmNotify} 方法。
  *
  * @author h00884391
  * @since 2026-06-10
@@ -34,4 +34,16 @@ public interface ApmAlarmAdapter {
      * @throws SmartomException 携带对应的 {@link com.huawei.smartom.agentic.common.error.ErrorCode}
      */
     ApmAlarmDataResponse listAlarmData(ApmAlarmDataRequest request);
+
+    /**
+     * 按 {@code alarmDataId} 拉取该告警的通知投递记录。
+     *
+     * <p>对应 SDK {@code ApmClient.listAlarmNotify(ListAlarmNotifyRequest)} ——
+     * {@code POST /v1/apm2/openapi/alarm/data/get-alarm-notify-list}。
+     *
+     * @param request 查询请求（不能为 null）
+     * @return 通知投递记录列表 + 总数（无损覆盖 SDK 8 个字段）
+     * @throws SmartomException 携带对应的 {@link com.huawei.smartom.agentic.common.error.ErrorCode}
+     */
+    ApmAlarmNotifyResponse listAlarmNotify(ApmAlarmNotifyRequest request);
 }

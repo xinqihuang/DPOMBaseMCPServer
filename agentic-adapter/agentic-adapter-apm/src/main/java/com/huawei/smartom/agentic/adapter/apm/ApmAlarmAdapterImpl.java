@@ -7,14 +7,21 @@ package com.huawei.smartom.agentic.adapter.apm;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarm;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotification;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyResponse;
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.resilience.HuaweiCloudInvocation;
 
 import com.huaweicloud.sdk.apm.v1.ApmClient;
 import com.huaweicloud.sdk.apm.v1.model.AlarmDataListRequest;
 import com.huaweicloud.sdk.apm.v1.model.AlarmDataVO;
+import com.huaweicloud.sdk.apm.v1.model.AlarmNotifyListRequest;
+import com.huaweicloud.sdk.apm.v1.model.FrontAlarmNotifyResult;
 import com.huaweicloud.sdk.apm.v1.model.ListAlarmDataRequest;
 import com.huaweicloud.sdk.apm.v1.model.ListAlarmDataResponse;
+import com.huaweicloud.sdk.apm.v1.model.ListAlarmNotifyRequest;
+import com.huaweicloud.sdk.apm.v1.model.ListAlarmNotifyResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +47,7 @@ public class ApmAlarmAdapterImpl implements ApmAlarmAdapter {
     private static final String RATE_LIMITER_NAME = "apm-readonly";
     private static final String RETRY_NAME = "huaweicloud-retryable";
     private static final String API_LIST_ALARM_DATA = "apm.listAlarmData";
+    private static final String API_LIST_ALARM_NOTIFY = "apm.listAlarmNotify";
 
     private final ApmClient apmClient;
     private final HuaweiCloudInvocation invocation;
@@ -108,6 +116,55 @@ public class ApmAlarmAdapterImpl implements ApmAlarmAdapter {
                 .map(this::toApmAlarm)
                 .toList();
         return new ApmAlarmDataResponse(alarms, sdkResp.getTotalCount());
+    }
+
+    @Override
+    public ApmAlarmNotifyResponse listAlarmNotify(ApmAlarmNotifyRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+        Long businessId = request.businessId() == null
+                ? properties.getApmBusinessId()
+                : request.businessId();
+        LOG.info("apm.listAlarmNotify start, businessId={}, alarmDataId={}, page={}, pageSize={}, region={}",
+                businessId, request.alarmDataId(), request.page(), request.pageSize(), request.region());
+
+        AlarmNotifyListRequest body = new AlarmNotifyListRequest()
+                .withPage(request.page())
+                .withPageSize(request.pageSize())
+                .withAlarmDataId(request.alarmDataId())
+                .withRegion(request.region());
+
+        ListAlarmNotifyRequest sdkRequest = new ListAlarmNotifyRequest().withBody(body);
+        if (businessId != null) {
+            sdkRequest.setXBusinessId(businessId);
+        }
+
+        ListAlarmNotifyResponse sdkResponse = invocation.execute(
+                RATE_LIMITER_NAME, RETRY_NAME, API_LIST_ALARM_NOTIFY,
+                () -> apmClient.listAlarmNotify(sdkRequest));
+
+        return toNotifyResponseDto(sdkResponse);
+    }
+
+    private ApmAlarmNotifyResponse toNotifyResponseDto(ListAlarmNotifyResponse sdkResp) {
+        List<FrontAlarmNotifyResult> sdkNotifications = sdkResp.getFrontAlarmNotifyResults() == null
+                ? Collections.emptyList()
+                : sdkResp.getFrontAlarmNotifyResults();
+        List<ApmAlarmNotification> notifications = sdkNotifications.stream()
+                .map(this::toApmAlarmNotification)
+                .toList();
+        return new ApmAlarmNotifyResponse(notifications, sdkResp.getTotalCount());
+    }
+
+    private ApmAlarmNotification toApmAlarmNotification(FrontAlarmNotifyResult sdk) {
+        return new ApmAlarmNotification(
+                sdk.getId(),
+                sdk.getGmtCreate(),
+                sdk.getNotifyType(),
+                sdk.getAlarmRuleId(),
+                sdk.getTemplateId(),
+                sdk.getAlarmDataEventId(),
+                sdk.getNotifyStatus(),
+                sdk.getAlarmContent());
     }
 
     private ApmAlarm toApmAlarm(AlarmDataVO sdk) {

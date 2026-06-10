@@ -8,6 +8,7 @@ import com.huawei.smartom.agentic.mcp.tool.AomLogTool;
 import com.huawei.smartom.agentic.mcp.tool.AomMetricDataTool;
 import com.huawei.smartom.agentic.mcp.tool.AomMetricsTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmAlarmDataTool;
+import com.huawei.smartom.agentic.mcp.tool.ApmAlarmNotifyTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTopologyTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTraceTool;
 import com.huawei.smartom.agentic.mcp.tool.CesAlarmTool;
@@ -59,6 +60,7 @@ public class McpServerConfig {
      * @param ltsLogTool                      LTS 日志检索工具（T17）
      * @param ltsLogContextTool               LTS 日志上下文工具（T18）
      * @param apmAlarmDataTool                APM 告警列表工具（T20）
+     * @param apmAlarmNotifyTool              APM 告警通知投递工具（T21）
      * @return 暴露所有已注册工具对象的 {@link MethodToolCallbackProvider}
      */
     @Bean
@@ -79,7 +81,8 @@ public class McpServerConfig {
             CesListNotificationMasksTool cesListNotificationMasksTool,
             LtsLogTool ltsLogTool,
             LtsLogContextTool ltsLogContextTool,
-            ApmAlarmDataTool apmAlarmDataTool) {
+            ApmAlarmDataTool apmAlarmDataTool,
+            ApmAlarmNotifyTool apmAlarmNotifyTool) {
         return MethodToolCallbackProvider.builder()
                 .toolObjects(
                         helloWorldTool,
@@ -98,7 +101,8 @@ public class McpServerConfig {
                         cesListNotificationMasksTool,
                         ltsLogTool,
                         ltsLogContextTool,
-                        apmAlarmDataTool)
+                        apmAlarmDataTool,
+                        apmAlarmNotifyTool)
                 .build();
     }
 }

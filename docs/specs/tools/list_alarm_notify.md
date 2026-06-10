@@ -1,6 +1,6 @@
 # Spec: list_alarm_notify
 
-> 状态: Draft · 版本: v1.0 · 所属服务: DPOMBaseMCPServer
+> 状态: Approved · 版本: v1.0 · 所属服务: DPOMBaseMCPServer
 
 ## 1. 意图与场景
 

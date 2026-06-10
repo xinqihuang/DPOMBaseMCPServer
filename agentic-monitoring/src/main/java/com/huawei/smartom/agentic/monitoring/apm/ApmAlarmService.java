@@ -7,6 +7,8 @@ package com.huawei.smartom.agentic.monitoring.apm;
 import com.huawei.smartom.agentic.adapter.apm.ApmAlarmAdapter;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyResponse;
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
@@ -65,7 +67,49 @@ public class ApmAlarmService {
         return adapter.listAlarmData(request);
     }
 
+    /**
+     * 校验入参后委托 adapter 查询告警通知投递记录。
+     *
+     * @param request 查询请求，不能为 null
+     * @return 通知投递列表 + 总数
+     * @throws InvalidParamException 入参不符合规约时抛出
+     */
+    public ApmAlarmNotifyResponse listAlarmNotify(ApmAlarmNotifyRequest request) {
+        if (request == null) {
+            throw new InvalidParamException("request must not be null");
+        }
+        validateNotify(request);
+        return adapter.listAlarmNotify(request);
+    }
+
     private void validate(ApmAlarmDataRequest request) {
+        Long effective = request.businessId() != null
+                ? request.businessId()
+                : properties.getApmBusinessId();
+        if (effective == null) {
+            throw new InvalidParamException(
+                    "business_id is required (request.business_id is null and "
+                            + "huaweicloud.apm-business-id is not configured)");
+        }
+        if (request.page() != null && request.page() < PAGE_MIN) {
+            throw new InvalidParamException("page must be >= " + PAGE_MIN + ", got: " + request.page());
+        }
+        if (request.pageSize() != null
+                && (request.pageSize() < PAGE_SIZE_MIN || request.pageSize() > PAGE_SIZE_MAX)) {
+            throw new InvalidParamException(
+                    "page_size must be in [" + PAGE_SIZE_MIN + ", " + PAGE_SIZE_MAX
+                            + "], got: " + request.pageSize());
+        }
+    }
+
+    private void validateNotify(ApmAlarmNotifyRequest request) {
+        if (request.alarmDataId() == null) {
+            throw new InvalidParamException("alarm_data_id is required");
+        }
+        if (request.alarmDataId() <= 0) {
+            throw new InvalidParamException(
+                    "alarm_data_id must be > 0, got: " + request.alarmDataId());
+        }
         Long effective = request.businessId() != null
                 ? request.businessId()
                 : properties.getApmBusinessId();

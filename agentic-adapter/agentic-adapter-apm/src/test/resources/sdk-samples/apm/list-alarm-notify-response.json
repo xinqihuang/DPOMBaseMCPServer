@@ -1,0 +1,25 @@
+{
+  "total_count": 4,
+  "front_alarm_notify_results": [
+    {
+      "id": 100001,
+      "gmt_create": "2026-06-10 10:00:05",
+      "notify_type": "SMS",
+      "alarm_rule_id": 22222,
+      "template_id": 444,
+      "alarm_data_event_id": 67890,
+      "notify_status": true,
+      "alarm_content": "[ALARM] order-svc latency > 500ms"
+    },
+    {
+      "id": 100002,
+      "gmt_create": "2026-06-10 10:00:06",
+      "notify_type": "EMAIL",
+      "alarm_rule_id": 22222,
+      "template_id": 445,
+      "alarm_data_event_id": 67890,
+      "notify_status": false,
+      "alarm_content": "[ALARM] order-svc latency > 500ms"
+    }
+  ]
+}

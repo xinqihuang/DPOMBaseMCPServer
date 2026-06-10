@@ -1,6 +1,6 @@
 # T21 — 实现 list_alarm_notify tool
 
-> 状态: **Draft（待用户确认后再开始编码）** · 估时: 0.3d · 依赖: T20（`ApmAlarmAdapter` + `ApmAlarmService` 骨架已存在）· 关联 spec: `docs/specs/tools/list_alarm_notify.md`
+> 状态: **Done** · 估时: 0.3d · 依赖: T20（`ApmAlarmAdapter` + `ApmAlarmService` 骨架已存在）· 关联 spec: `docs/specs/tools/list_alarm_notify.md`
 
 ## 目标
 
