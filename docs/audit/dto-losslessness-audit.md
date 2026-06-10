@@ -241,8 +241,55 @@
 
 ---
 
-## PR-5（待开工）
+## PR-5 — LTS（`ListLogs` + `ListLogContext`）
 
-- **PR-5 — LTS**：`ListLogsResponse / LogContents`、`ListLogContextResponse`
+**结论**：与 AOM 同例，T16 建 LTS adapter 时已按 §4.1 标准建，DTO 已无损。PR-5 只补契约测试 + 本审计段。
 
-每个 PR 完成后在本文档追加对应小节。
+### 1. `ListLogs`（v2）
+
+| 项 | 内容 |
+|---|---|
+| SDK 类 | `lts.v2.model.ListLogsResponse` → `LogContents` |
+| DTO | `LtsListLogsResponse` → `LtsLogEntry` |
+| 处置 | **OK** |
+
+| SDK 字段 | DTO 字段 |
+|---|---|
+| count / logs / isQueryComplete / analysisLogs | count / logs / isQueryComplete / analysisLogs |
+| LogContents.content / line_num / labels | content / lineNum / labels |
+
+契约测试（新增）：`LtsListLogsContractTest`，样本 `sdk-samples/lts/list-logs-response.json`。
+
+### 2. `ListLogContext`（v2）
+
+| 项 | 内容 |
+|---|---|
+| SDK 类 | `lts.v2.model.ListLogContextResponse` → `LogContents` |
+| DTO | `LtsListLogContextResponse` → `LtsLogEntry`（复用） |
+| 处置 | **OK** |
+
+| SDK 字段 | DTO 字段 |
+|---|---|
+| logs / total_count / backwards_count / forwards_count / isQueryComplete | logs / totalCount / backwardsCount / forwardsCount / isQueryComplete |
+
+契约测试（新增）：`LtsListLogContextContractTest`，样本 `sdk-samples/lts/list-log-context-response.json`。
+
+---
+
+## T19 总览（PR-0 ~ PR-5 全部 Done）
+
+| PR | 范围 | 主要工作 | Commit |
+|---|---|---|---|
+| PR-0 | CLAUDE.md §4.1 | 重写为「无损投影 + 钉死 API 版本 + SDK 源码为权威 + 契约测试兜底」 | `dddfbc7` |
+| PR-1 | CES alarm history | 切 v2 SDK；`CesAlarmHistory` 由 10 字段扩到 23（含 5 子 record）；契约测试 2 case | `181e08b` |
+| PR-2 | CES rest | metrics / metric-data / batch 已无损（加契约测试）；notification-masks 补 5 字段 + 4 子 record | `6573e07` |
+| PR-3 | APM | `ApmSpan` 补 9 字段；`ApmTopologyLine` 补 5 字段；APM 模块首次有测试 | `093ce6a` |
+| PR-4 | AOM | 3 路径全已无损，加 2 契约测试 | `1b7464b` |
+| PR-5 | LTS | 2 路径全已无损，加 2 契约测试 | （本提交） |
+
+总贡献：
+- 补字段：CES 5（notification-masks）+ APM 14（ApmSpan 9 + ApmTopologyLine 5） = **19 个之前丢失的 SDK 字段被恢复**
+- 新 sub-record：CES 9 个（PR-1 5 个 + PR-2 4 个）
+- 新契约测试：**12 个**（CES 5 + APM 2 + AOM 3 + LTS 2，AOM 含一个保留的结构反射测试）
+- 新 sample JSON：**11 个**（CES 4 + APM 2 + AOM 3 含一个保留 + LTS 2）
+- 所有契约测试都满足「删任一 DTO 字段会编译失败」防漂移保障

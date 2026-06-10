@@ -1,0 +1,24 @@
+{
+  "count": 2,
+  "isQueryComplete": true,
+  "logs": [
+    {
+      "content": "2026-06-10T10:15:21Z INFO  [order-svc] starting transaction id=tx-1",
+      "line_num": "1717400000000000000",
+      "labels": {
+        "host_name": "ecs-i-abc",
+        "container_name": "order-svc"
+      }
+    },
+    {
+      "content": "2026-06-10T10:15:23Z ERROR [order-svc] failed to commit transaction id=tx-1",
+      "line_num": "1717400000000000001",
+      "labels": {
+        "host_name": "ecs-i-abc",
+        "container_name": "order-svc",
+        "severity": "ERROR"
+      }
+    }
+  ],
+  "analysisLogs": []
+}

@@ -1,0 +1,23 @@
+{
+  "logs": [
+    {
+      "content": "2026-06-10T10:15:20Z INFO  [order-svc] received request id=req-9",
+      "line_num": "1717399999999999000",
+      "labels": { "host_name": "ecs-i-abc" }
+    },
+    {
+      "content": "2026-06-10T10:15:23Z ERROR [order-svc] failed to commit transaction id=tx-1",
+      "line_num": "1717400000000000001",
+      "labels": { "host_name": "ecs-i-abc", "severity": "ERROR" }
+    },
+    {
+      "content": "2026-06-10T10:15:24Z INFO  [order-svc] rolling back",
+      "line_num": "1717400000000000002",
+      "labels": { "host_name": "ecs-i-abc" }
+    }
+  ],
+  "total_count": 3,
+  "backwards_count": 1,
+  "forwards_count": 1,
+  "isQueryComplete": true
+}
