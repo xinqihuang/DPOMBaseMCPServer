@@ -48,6 +48,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Objects;
 
 /**
@@ -214,58 +215,45 @@ public class CesNotificationMaskAdapterImpl implements CesNotificationMaskAdapte
         if (request.sortDir() != null) {
             sdk.setSortDir(ListNotificationMasksRequest.SortDirEnum.fromValue(request.sortDir()));
         }
-
-        ListNotificationMaskRequestBody body = new ListNotificationMaskRequestBody();
-        boolean bodyHasValue = false;
-        if (request.relationType() != null) {
-            body.setRelationType(ListRelationType.fromValue(request.relationType()));
-            bodyHasValue = true;
-        }
-        if (request.relationIds() != null && !request.relationIds().isEmpty()) {
-            body.setRelationIds(request.relationIds());
-            bodyHasValue = true;
-        }
-        if (request.metricName() != null) {
-            body.setMetricName(request.metricName());
-            bodyHasValue = true;
-        }
-        if (request.resourceLevel() != null) {
-            body.setResourceLevel(
-                    ListNotificationMaskRequestBody.ResourceLevelEnum.fromValue(request.resourceLevel()));
-            bodyHasValue = true;
-        }
-        if (request.maskId() != null) {
-            body.setMaskId(request.maskId());
-            bodyHasValue = true;
-        }
-        if (request.maskName() != null) {
-            body.setMaskName(request.maskName());
-            bodyHasValue = true;
-        }
-        if (request.maskStatus() != null) {
-            body.setMaskStatus(
-                    ListNotificationMaskRequestBody.MaskStatusEnum.fromValue(request.maskStatus()));
-            bodyHasValue = true;
-        }
-        if (request.resourceId() != null) {
-            body.setResourceId(request.resourceId());
-            bodyHasValue = true;
-        }
-        if (request.namespace() != null) {
-            body.setNamespace(request.namespace());
-            bodyHasValue = true;
-        }
-        if (request.dimensions() != null && !request.dimensions().isEmpty()) {
-            List<ResourceDimension> dims = request.dimensions().stream()
-                    .map(dim -> new ResourceDimension().withName(dim.name()).withValue(dim.value()))
-                    .toList();
-            body.setDimensions(dims);
-            bodyHasValue = true;
-        }
-        if (bodyHasValue) {
+        ListNotificationMaskRequestBody body = toListSdkRequestBody(request);
+        if (body != null) {
             sdk.setBody(body);
         }
         return sdk;
+    }
+
+    private ListNotificationMaskRequestBody toListSdkRequestBody(CesListNotificationMasksRequest req) {
+        ListNotificationMaskRequestBody body = new ListNotificationMaskRequestBody();
+        boolean has = false;
+        has |= applyIfPresent(req.relationType(), val -> body.setRelationType(ListRelationType.fromValue(val)));
+        has |= applyIfPresent(nullIfEmpty(req.relationIds()), body::setRelationIds);
+        has |= applyIfPresent(req.metricName(), body::setMetricName);
+        has |= applyIfPresent(req.resourceLevel(),
+                val -> body.setResourceLevel(ListNotificationMaskRequestBody.ResourceLevelEnum.fromValue(val)));
+        has |= applyIfPresent(req.maskId(), body::setMaskId);
+        has |= applyIfPresent(req.maskName(), body::setMaskName);
+        has |= applyIfPresent(req.maskStatus(),
+                val -> body.setMaskStatus(ListNotificationMaskRequestBody.MaskStatusEnum.fromValue(val)));
+        has |= applyIfPresent(req.resourceId(), body::setResourceId);
+        has |= applyIfPresent(req.namespace(), body::setNamespace);
+        List<ResourceDimension> dims = req.dimensions() == null ? null
+                : req.dimensions().stream()
+                        .map(dim -> new ResourceDimension().withName(dim.name()).withValue(dim.value()))
+                        .toList();
+        has |= applyIfPresent(nullIfEmpty(dims), body::setDimensions);
+        return has ? body : null;
+    }
+
+    private static <T> boolean applyIfPresent(T value, Consumer<T> setter) {
+        if (value == null) {
+            return false;
+        }
+        setter.accept(value);
+        return true;
+    }
+
+    private static <T> List<T> nullIfEmpty(List<T> list) {
+        return (list == null || list.isEmpty()) ? null : list;
     }
 
     private CesNotificationMask toNotificationMask(ListNotificationMaskRespNotificationMasks sdk) {
