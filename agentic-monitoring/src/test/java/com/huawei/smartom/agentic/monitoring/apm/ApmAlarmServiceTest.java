@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2026-2026. All rights reserved.
+ */
+
+package com.huawei.smartom.agentic.monitoring.apm;
+
+import com.huawei.smartom.agentic.adapter.apm.ApmAlarmAdapter;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataResponse;
+import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
+import com.huawei.smartom.agentic.common.exception.InvalidParamException;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * {@link ApmAlarmService} 单元测试。覆盖 T20 任务卡 UT-S1 ~ UT-S5。
+ *
+ * @author h00884391
+ * @since 2026-06-10
+ */
+class ApmAlarmServiceTest {
+
+    private ApmAlarmAdapter adapter;
+    private HuaweiCloudProperties properties;
+    private ApmAlarmService service;
+
+    @BeforeEach
+    void setUp() {
+        adapter = mock(ApmAlarmAdapter.class);
+        properties = new HuaweiCloudProperties();
+        service = new ApmAlarmService(adapter, properties);
+    }
+
+    @Test
+    @DisplayName("UT-S1: null request -> INVALID_PARAM, adapter not called")
+    void ut01NullRequest() {
+        assertThatThrownBy(() -> service.listAlarmData(null))
+                .isInstanceOf(InvalidParamException.class);
+        verify(adapter, never()).listAlarmData(any());
+    }
+
+    @Test
+    @DisplayName("UT-S2: page < 1 -> INVALID_PARAM")
+    void ut02PageTooSmall() {
+        properties.setApmBusinessId(99999L);
+        ApmAlarmDataRequest req = new ApmAlarmDataRequest(
+                null, 0, null, null, null, null, null,
+                null, null, null, null, null, null, null, null);
+        assertThatThrownBy(() -> service.listAlarmData(req))
+                .isInstanceOf(InvalidParamException.class)
+                .hasMessageContaining("page");
+        verify(adapter, never()).listAlarmData(any());
+    }
+
+    @Test
+    @DisplayName("UT-S3: pageSize > 100 -> INVALID_PARAM")
+    void ut03PageSizeTooBig() {
+        properties.setApmBusinessId(99999L);
+        ApmAlarmDataRequest req = new ApmAlarmDataRequest(
+                null, null, 101, null, null, null, null,
+                null, null, null, null, null, null, null, null);
+        assertThatThrownBy(() -> service.listAlarmData(req))
+                .isInstanceOf(InvalidParamException.class)
+                .hasMessageContaining("page_size");
+        verify(adapter, never()).listAlarmData(any());
+    }
+
+    @Test
+    @DisplayName("UT-S4: businessId null AND no config default -> INVALID_PARAM")
+    void ut04NoBusinessId() {
+        // properties.apmBusinessId 默认 null（未调 setter）
+        ApmAlarmDataRequest req = new ApmAlarmDataRequest(
+                null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null);
+        assertThatThrownBy(() -> service.listAlarmData(req))
+                .isInstanceOf(InvalidParamException.class)
+                .hasMessageContaining("business_id");
+        verify(adapter, never()).listAlarmData(any());
+    }
+
+    @Test
+    @DisplayName("UT-S5: all valid -> delegate to adapter and return its response")
+    void ut05ValidDelegates() {
+        properties.setApmBusinessId(99999L);
+        ApmAlarmDataResponse expected = new ApmAlarmDataResponse(List.of(), 0);
+        when(adapter.listAlarmData(any(ApmAlarmDataRequest.class))).thenReturn(expected);
+
+        ApmAlarmDataRequest req = new ApmAlarmDataRequest(
+                7000L, 1, 50, "cn-north-4", null, null, null,
+                null, null, null, null, null, null, null, null);
+
+        ApmAlarmDataResponse out = service.listAlarmData(req);
+        assertThat(out).isSameAs(expected);
+        verify(adapter).listAlarmData(req);
+    }
+}
