@@ -161,7 +161,16 @@ public class ApmTraceAdapterImpl implements ApmTraceAdapter {
                 sdk.getHasError(),
                 sdk.getErrorReasons(),
                 sdk.getHttpMethod(),
-                tags);
+                tags,
+                sdk.getGlobalPath(),
+                sdk.getEnvId(),
+                sdk.getInstanceId(),
+                sdk.getAppId(),
+                sdk.getBizId(),
+                sdk.getDomainId(),
+                sdk.getIsAsync(),
+                sdk.getType(),
+                sdk.getBizCode());
     }
 
     private ApmTopologyLine toLine(TraceTopologyLine sdk) {
@@ -175,6 +184,11 @@ public class ApmTraceAdapterImpl implements ApmTraceAdapter {
                 client == null ? null : client.getTimeUsed(),
                 server == null ? null : server.getStartTime(),
                 server == null ? null : server.getTimeUsed(),
-                sdk.getHint());
+                sdk.getHint(),
+                sdk.getId(),
+                client == null ? null : client.getArgument(),
+                client == null ? null : client.getEventId(),
+                server == null ? null : server.getArgument(),
+                server == null ? null : server.getEventId());
     }
 }

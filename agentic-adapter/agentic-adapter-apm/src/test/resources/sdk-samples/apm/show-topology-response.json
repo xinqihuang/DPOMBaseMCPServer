@@ -1,0 +1,36 @@
+{
+  "global_trace_id": "gt-12345-67890",
+  "node_list": [
+    {
+      "node_id": 1,
+      "node_name": "frontend",
+      "hint": "entry node"
+    },
+    {
+      "node_id": 2,
+      "node_name": "order-svc",
+      "hint": null
+    }
+  ],
+  "line_list": [
+    {
+      "id": "edge-1-2",
+      "start_node_id": 1,
+      "end_node_id": 2,
+      "span_id": "sp-line-001",
+      "hint": "POST /api/orders",
+      "client_info": {
+        "start_time": 1718000000000,
+        "time_used": 1234,
+        "argument": "{\"user_id\":\"u-9001\"}",
+        "event_id": "evt-client-001"
+      },
+      "server_info": {
+        "start_time": 1718000000100,
+        "time_used": 1100,
+        "argument": "{\"order_id\":\"o-7777\"}",
+        "event_id": "evt-server-001"
+      }
+    }
+  ]
+}

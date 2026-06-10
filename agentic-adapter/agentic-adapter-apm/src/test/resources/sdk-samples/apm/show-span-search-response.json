@@ -1,0 +1,32 @@
+{
+  "total": 1,
+  "span_info_list": [
+    {
+      "global_trace_id": "gt-12345-67890",
+      "global_path": "frontend->order-svc->payment-svc",
+      "trace_id": "tr-abc123",
+      "span_id": "sp-xyz789",
+      "env_id": 1001,
+      "instance_id": 2002,
+      "app_id": 3003,
+      "biz_id": 4004,
+      "domain_id": 5,
+      "source": "POST /api/orders",
+      "real_source": "https://order.example.com/api/orders",
+      "start_time": 1718000000000,
+      "time_used": 1234,
+      "code": 500,
+      "class_name": "com.example.OrderController",
+      "is_async": false,
+      "tags": {
+        "user_id": "u-9001",
+        "region": "cn-north-9"
+      },
+      "has_error": true,
+      "error_reasons": "java.lang.NullPointerException at OrderController.create()",
+      "type": "HTTP",
+      "http_method": "POST",
+      "biz_code": "ORDER_CREATE_FAILED"
+    }
+  ]
+}

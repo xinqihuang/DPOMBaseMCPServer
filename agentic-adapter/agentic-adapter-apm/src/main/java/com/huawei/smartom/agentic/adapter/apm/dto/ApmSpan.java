@@ -7,7 +7,10 @@ package com.huawei.smartom.agentic.adapter.apm.dto;
 import java.util.Map;
 
 /**
- * APM 单条 span 摘要。
+ * APM 单条 span 记录，对应 SDK v1 {@code ClientSpanInfo} 的无损投影
+ * （T19 PR-3 在 13 个 v1-era 字段基础上补齐 9 个 SDK 字段：
+ * {@code globalPath} / {@code envId} / {@code instanceId} / {@code appId} / {@code bizId} /
+ * {@code domainId} / {@code isAsync} / {@code type} / {@code bizCode}）。
  *
  * @param traceId       trace id
  * @param spanId        span id
@@ -22,6 +25,15 @@ import java.util.Map;
  * @param errorReasons  错误原因摘要
  * @param httpMethod    HTTP 方法（仅 URL 监控项有值）
  * @param tags          自定义 tags 映射，可能为空但不会为 {@code null}
+ * @param globalPath    全链路调用路径标识（v2 新增覆盖）
+ * @param envId         APM 环境 ID（v2 新增覆盖）
+ * @param instanceId    APM 实例 ID（v2 新增覆盖）
+ * @param appId         APM 应用 ID（v2 新增覆盖）
+ * @param bizId         业务 ID（v2 新增覆盖）
+ * @param domainId      域 ID（v2 新增覆盖）
+ * @param isAsync       是否异步调用（v2 新增覆盖）
+ * @param type          span 类型字面量（v2 新增覆盖）
+ * @param bizCode       业务码（v2 新增覆盖）
  * @author h00884391
  * @since 2026-05-28
  */
@@ -38,5 +50,14 @@ public record ApmSpan(
         Boolean hasError,
         String errorReasons,
         String httpMethod,
-        Map<String, String> tags) {
+        Map<String, String> tags,
+        String globalPath,
+        Long envId,
+        Long instanceId,
+        Long appId,
+        Long bizId,
+        Integer domainId,
+        Boolean isAsync,
+        String type,
+        String bizCode) {
 }
