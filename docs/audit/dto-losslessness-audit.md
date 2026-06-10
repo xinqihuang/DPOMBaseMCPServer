@@ -181,9 +181,68 @@
 
 ---
 
-## PR-4 / PR-5（待开工）
+## PR-4 — AOM（`ListMetricItems` + `ListSample` + `ListLogItems`）
 
-- **PR-4 — AOM**：`ListLogItemsResponse`、`ListMetricItemsResponse / MetricItemResultAPI`、`ListSampleResponse / QuerySample / SampleDataValue / MetricDataPoints / StatisticValue`
+**惊喜结论**：3 个 AOM response 路径**已经无损**——只补契约测试与本审计段。
+
+### 1. `ListMetricItems`（v2）
+
+| 项 | 内容 |
+|---|---|
+| SDK 类 | `aom.v2.model.ListMetricItemsResponse` → `MetricItemResultAPI`(+ `Dimension`) + `MetaDataSeries` |
+| DTO | `AomListMetricsResponse` → `AomMetricInfo`(+ `AomMetricDimension`) + `AomPagination` |
+| 处置 | **OK** |
+
+| SDK 字段 | DTO 字段 |
+|---|---|
+| metaData (MetaDataSeries) | pagination |
+| MetaDataSeries.count / offset / total / nextToken | count / offset / nextToken / total |
+| metrics | metrics |
+| MetricItemResultAPI.namespace / metricName / unit / dimensions / dimensionvaluehash | namespace / metricName / unit / dimensions / dimensionValueHash |
+| Dimension.name / value | name / value |
+| —（DTO 新增便利字段） | pagination.hasMore（`nextToken != null && count > 0`） |
+
+契约测试：现有 `AomListMetricsContractTest`（5 个 cases，含结构反射 + 样本反序列化）已足够，PR-4 不再扩展。
+
+### 2. `ListSample`（v2）
+
+| 项 | 内容 |
+|---|---|
+| SDK 类 | `aom.v2.model.ListSampleResponse` → `SampleDataValue` → `QuerySample` / `MetricDataPoints` → `StatisticValue` |
+| DTO | `AomQueryMetricDataResponse` → `AomSampleSeries`(+ `AomMetricDimension`) → `AomMetricDatapoint` → `AomStatisticValue` |
+| 处置 | **OK** |
+
+| SDK 字段 | DTO 字段 | 备注 |
+|---|---|---|
+| samples | series | |
+| SampleDataValue.sample (QuerySample) | AomSampleSeries（拍平自 sample） | 3 字段（namespace / metricName / dimensions）拍平到 AomSampleSeries 顶层 |
+| QuerySample.dimensions (DimensionSeries) | dimensions | DimensionSeries 与 Dimension 同 shape（name/value），DTO 复用 AomMetricDimension |
+| SampleDataValue.data_points (MetricDataPoints) | datapoints | |
+| MetricDataPoints.timestamp / unit / statistics | timestamp / unit / statistics | |
+| StatisticValue.statistic / value | statistic / value | |
+
+契约测试（新增）：`AomListSampleContractTest`，样本 `sdk-samples/aom/list-sample-response.json`。
+
+### 3. `ListLogItems`（v2）
+
+| 项 | 内容 |
+|---|---|
+| SDK 类 | `aom.v2.model.ListLogItemsResponse` |
+| DTO | `AomQueryLogsResponse` |
+| 处置 | **OK** |
+
+| SDK 字段 | DTO 字段 |
+|---|---|
+| errorCode / errorMessage / result | errorCode / errorMessage / result |
+
+`result` 在 SDK 中是未结构化 JSON 字符串，DTO 保持原样透传（上层 service / tool 自行解析；spec 已说明）。
+
+契约测试（新增）：`AomListLogItemsContractTest`，样本 `sdk-samples/aom/list-log-items-response.json`。
+
+---
+
+## PR-5（待开工）
+
 - **PR-5 — LTS**：`ListLogsResponse / LogContents`、`ListLogContextResponse`
 
 每个 PR 完成后在本文档追加对应小节。

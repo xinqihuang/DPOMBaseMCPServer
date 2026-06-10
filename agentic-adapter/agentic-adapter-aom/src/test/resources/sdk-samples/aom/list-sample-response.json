@@ -1,0 +1,32 @@
+{
+  "samples": [
+    {
+      "sample": {
+        "namespace": "PAAS.CONTAINER",
+        "metric_name": "aom_process_cpu_usage",
+        "dimensions": [
+          { "name": "appName", "value": "aomApp" },
+          { "name": "podName", "value": "aomApp-7d8b-xyz" }
+        ]
+      },
+      "data_points": [
+        {
+          "timestamp": 1718000000000,
+          "unit": "Percent",
+          "statistics": [
+            { "statistic": "maximum", "value": 87.4 },
+            { "statistic": "average", "value": 55.3 },
+            { "statistic": "minimum", "value": 21.2 }
+          ]
+        },
+        {
+          "timestamp": 1718000060000,
+          "unit": "Percent",
+          "statistics": [
+            { "statistic": "average", "value": 42.0 }
+          ]
+        }
+      ]
+    }
+  ]
+}

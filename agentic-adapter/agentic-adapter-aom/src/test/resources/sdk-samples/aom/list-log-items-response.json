@@ -1,0 +1,5 @@
+{
+  "errorCode": "SVCSTG_AMS_2000000",
+  "errorMessage": "success",
+  "result": "{\"logs\":[{\"line\":\"2026-06-10 12:00:00 INFO startup ok\",\"timestamp\":1718000000000},{\"line\":\"2026-06-10 12:00:05 ERROR boom\",\"timestamp\":1718000005000}],\"total\":2}"
+}
