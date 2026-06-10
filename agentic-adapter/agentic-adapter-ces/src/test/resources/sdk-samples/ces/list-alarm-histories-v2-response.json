@@ -1,0 +1,61 @@
+{
+  "alarm_histories": [
+    {
+      "alarm_id": "al1604473987569z6n6nkpm1",
+      "record_id": "ah251222T092004SAD2yARym",
+      "name": "TC_CES_FunctionBaseline_Alarm_008",
+      "metric": {
+        "namespace": "SYS.VPC",
+        "dimensions": [
+          { "name": "bandwidth_id", "value": "79a9cc0c-f626-4f15-bf99-a1f184107f88" }
+        ],
+        "metric_name": "downstream_bandwidth"
+      },
+      "condition": {
+        "period": 1,
+        "filter": "average",
+        "comparison_operator": ">=",
+        "value": 0,
+        "unit": "",
+        "count": 3,
+        "suppress_duration": 3600
+      },
+      "level": 2,
+      "type": "ALL_INSTANCE",
+      "begin_time": "2024-02-11T05:48:08+08:00",
+      "end_time": "2024-02-11T08:48:08+08:00",
+      "first_alarm_time": "2024-02-11T06:48:08+08:00",
+      "last_alarm_time": "2024-02-11T08:48:08+08:00",
+      "alarm_recovery_time": "2024-02-11T08:48:08+08:00",
+      "action_enabled": false,
+      "alarm_actions": [
+        {
+          "type": "notification",
+          "notification_list": [
+            "urn:smn:cn-north-4:abc123:topic-prod-alarm"
+          ]
+        }
+      ],
+      "ok_actions": [
+        {
+          "type": "notification",
+          "notification_list": [
+            "urn:smn:cn-north-4:abc123:topic-prod-ok"
+          ]
+        }
+      ],
+      "status": "alarm",
+      "data_points": [
+        { "time": "2022-06-22T16:38:02+08:00", "value": 873.1507798960139 },
+        { "time": "2022-06-22T16:28:02+08:00", "value": 883.1507798960139 },
+        { "time": "2022-06-22T16:18:02+08:00", "value": 873.4 }
+      ],
+      "additional_info": {
+        "resource_id": "",
+        "resource_name": "",
+        "event_id": ""
+      }
+    }
+  ],
+  "count": 103
+}

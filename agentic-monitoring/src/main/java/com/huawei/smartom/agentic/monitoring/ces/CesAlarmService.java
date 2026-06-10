@@ -19,10 +19,12 @@ import java.util.Set;
  *
  * <p>对 {@code list_alarms} 工具入参进行规约校验：
  * <ul>
- *   <li>{@code limit} 范围 [1, 100]，{@code start} 非负</li>
- *   <li>{@code alarmStatus}（若提供）必须为 {@code ok/alarm/insufficient_data/invalid}</li>
+ *   <li>{@code limit} 范围 [1, 100]，{@code start}（v2 中即 {@code offset}）非负</li>
+ *   <li>{@code alarmStatus}（若提供）必须为 {@code ok/alarm/invalid}（v2 取值集合，
+ *       v1 的 {@code insufficient_data} 在 v2 接口中已废弃）</li>
  *   <li>{@code alarmLevel}（若提供）必须为 1/2/3/4</li>
  *   <li>{@code namespace}（若提供）必须形如 {@code SYS.ECS}</li>
+ *   <li>{@code groupId}（v1 概念）在 v2 API 中已不再支持，若被设置则直接拒绝以避免误用</li>
  * </ul>
  *
  * @author h00884391
@@ -32,7 +34,7 @@ import java.util.Set;
 public class CesAlarmService {
 
     private static final Set<String> ALLOWED_STATUSES =
-            Set.of("ok", "alarm", "insufficient_data", "invalid");
+            Set.of("ok", "alarm", "invalid");
 
     private static final Set<Integer> ALLOWED_LEVELS = Set.of(1, 2, 3, 4);
 
@@ -66,16 +68,22 @@ public class CesAlarmService {
     }
 
     private void validate(CesListAlarmsRequest request) {
+        if (request.groupId() != null) {
+            throw new InvalidParamException(
+                    "group_id filtering is not supported by CES v2 ListAlarmHistories; "
+                            + "set group_id=null and rely on namespace / resource_id (resource_id "
+                            + "passthrough is a follow-up enhancement).");
+        }
         if (request.limit() == null || request.limit() < LIMIT_MIN || request.limit() > LIMIT_MAX) {
             throw new InvalidParamException(
                     "limit must be in [" + LIMIT_MIN + "," + LIMIT_MAX + "]");
         }
         if (request.start() == null || request.start() < 0) {
-            throw new InvalidParamException("start must be >= 0");
+            throw new InvalidParamException("start (offset) must be >= 0");
         }
         if (request.alarmStatus() != null && !ALLOWED_STATUSES.contains(request.alarmStatus())) {
             throw new InvalidParamException(
-                    "alarm_status must be one of ok/alarm/insufficient_data/invalid, got: "
+                    "alarm_status must be one of ok/alarm/invalid (v2; insufficient_data deprecated), got: "
                             + request.alarmStatus());
         }
         if (request.alarmLevel() != null && !ALLOWED_LEVELS.contains(request.alarmLevel())) {

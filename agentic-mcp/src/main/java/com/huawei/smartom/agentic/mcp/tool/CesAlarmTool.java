@@ -57,30 +57,36 @@ public class CesAlarmTool {
             name = "list_alarms",
             description = """
                     List CES (Cloud Eye Service) alarm history events for Huawei Cloud resources. \
-                    Filter by resource group, alarm rule id/name, status (ok / alarm / \
-                    insufficient_data / invalid), severity (1=critical, 2=major, 3=minor, \
-                    4=info), namespace (e.g. SYS.ECS), or time range. Use this to surface \
-                    recent alarm triggers when correlating an incident. Returns alarm metadata \
-                    only — no datapoints.""")
+                    Returns rich alarm metadata: rule identity, status (ok / alarm / invalid), \
+                    severity (1=critical, 2=major, 3=minor, 4=info), the full trigger condition \
+                    (period / filter / comparison / threshold / suppress), all five lifecycle \
+                    timestamps (begin / end / first / last / recovery), associated metric \
+                    (namespace + dimensions), additional resource info, and alarm/ok action \
+                    configurations. Use this to surface recent alarm triggers when correlating \
+                    an incident. Filter by alarm rule id/name, status, severity, namespace, or \
+                    time range. group_id filtering was a v1-only concept and is no longer \
+                    supported; from/to are ISO 8601 datetimes (e.g. 2024-02-11T10:00:00+08:00).""")
     public Object listAlarms(
-            @ToolParam(description = "Resource group id (rg-prefixed, length 24).", required = false)
+            @ToolParam(description = "Deprecated. Not supported by v2 API; must be null.",
+                    required = false)
             String groupId,
             @ToolParam(description = "Alarm rule id (al-prefixed, length 24).", required = false)
             String alarmId,
             @ToolParam(description = "Alarm rule name, length [1, 128].", required = false)
             String alarmName,
-            @ToolParam(description = "Alarm status: ok / alarm / insufficient_data / invalid.",
-                    required = false)
+            @ToolParam(description = "Alarm status: ok / alarm / invalid (v2; insufficient_data "
+                    + "is no longer supported).", required = false)
             String alarmStatus,
             @ToolParam(description = "Alarm severity: 1=critical, 2=major, 3=minor, 4=info.",
                     required = false)
             Integer alarmLevel,
             @ToolParam(description = "Namespace like SYS.ECS.", required = false)
             String namespace,
-            @ToolParam(description = "Start timestamp in millis (string, length [1, 13]).",
+            @ToolParam(description = "Start time as ISO 8601 datetime (e.g. "
+                    + "2024-02-11T10:00:00+08:00); v2 API replaced v1 millis-string semantics.",
                     required = false)
             String from,
-            @ToolParam(description = "End timestamp in millis (string, length [1, 13]).",
+            @ToolParam(description = "End time as ISO 8601 datetime (see 'from').",
                     required = false)
             String to,
             @ToolParam(description = "Page offset (>= 0), default 0.", required = false)

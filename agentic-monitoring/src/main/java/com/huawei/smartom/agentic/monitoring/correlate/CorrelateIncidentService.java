@@ -18,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -101,6 +104,8 @@ public class CorrelateIncidentService {
 
     private CorrelateBranchResult runCesAlarms(CorrelateIncidentRequest request) {
         return runBranch("ces_alarms", () -> {
+            // CES v2 ListAlarmHistories 要求 from/to 为 ISO 8601 datetime（含偏移量），
+            // 与 v1 的 millis-string 形态不同，详见 docs/tasks/T19-lossless-dto-remediation.md
             CesListAlarmsRequest req = new CesListAlarmsRequest(
                     null,
                     null,
@@ -108,12 +113,17 @@ public class CorrelateIncidentService {
                     null,
                     null,
                     request.cesNamespace(),
-                    String.valueOf(request.startTimeMillis()),
-                    String.valueOf(request.endTimeMillis()),
+                    toIsoOffsetDateTime(request.startTimeMillis()),
+                    toIsoOffsetDateTime(request.endTimeMillis()),
                     0,
                     100);
             return cesAlarmService.listAlarms(req);
         });
+    }
+
+    private static String toIsoOffsetDateTime(long epochMillis) {
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(
+                Instant.ofEpochMilli(epochMillis).atOffset(ZoneOffset.UTC));
     }
 
     private CorrelateBranchResult runAomLogs(CorrelateIncidentRequest request) {

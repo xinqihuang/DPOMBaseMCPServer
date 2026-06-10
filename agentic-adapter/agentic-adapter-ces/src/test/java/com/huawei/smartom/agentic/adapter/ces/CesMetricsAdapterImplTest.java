@@ -59,12 +59,14 @@ class CesMetricsAdapterImplTest {
     private static final String RETRY = "huaweicloud-retryable";
 
     private CesClient cesClient;
+    private com.huaweicloud.sdk.ces.v2.CesClient cesV2Client;
     private HuaweiCloudInvocation invocation;
     private CesMetricsAdapterImpl adapter;
 
     @BeforeEach
     void setUp() {
         cesClient = mock(CesClient.class);
+        cesV2Client = mock(com.huaweicloud.sdk.ces.v2.CesClient.class);
 
         RateLimiterRegistry rlReg = RateLimiterRegistry.of(RateLimiterConfig.custom()
                 .limitForPeriod(1000)
@@ -82,7 +84,7 @@ class CesMetricsAdapterImplTest {
         retryReg.retry(RETRY);
 
         invocation = new HuaweiCloudInvocation(rlReg, retryReg, new SdkExceptionMapper());
-        adapter = new CesMetricsAdapterImpl(cesClient, invocation);
+        adapter = new CesMetricsAdapterImpl(cesClient, cesV2Client, invocation);
     }
 
     @Test

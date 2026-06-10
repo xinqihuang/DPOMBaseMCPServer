@@ -4,7 +4,12 @@
 
 package com.huawei.smartom.agentic.adapter.ces;
 
+import com.huawei.smartom.agentic.adapter.ces.dto.CesAlarmAction;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesAlarmAdditionalInfo;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesAlarmCondition;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesAlarmDataPoint;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesAlarmHistory;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesAlarmMetric;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricQuery;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricResult;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataRequest;
@@ -22,7 +27,6 @@ import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataResponse;
 import com.huawei.smartom.agentic.common.resilience.HuaweiCloudInvocation;
 
 import com.huaweicloud.sdk.ces.v1.CesClient;
-import com.huaweicloud.sdk.ces.v1.model.AlarmHistoryInfoResp;
 import com.huaweicloud.sdk.ces.v1.model.BatchListMetricDataRequest;
 import com.huaweicloud.sdk.ces.v1.model.BatchListMetricDataRequestBody;
 import com.huaweicloud.sdk.ces.v1.model.BatchListMetricDataResponse;
@@ -30,23 +34,30 @@ import com.huaweicloud.sdk.ces.v1.model.BatchMetricData;
 import com.huaweicloud.sdk.ces.v1.model.Datapoint;
 import com.huaweicloud.sdk.ces.v1.model.DatapointForBatchMetric;
 import com.huaweicloud.sdk.ces.v1.model.Filter;
-import com.huaweicloud.sdk.ces.v1.model.ListAlarmHistoriesRequest;
-import com.huaweicloud.sdk.ces.v1.model.ListAlarmHistoriesResponse;
 import com.huaweicloud.sdk.ces.v1.model.ListMetricsRequest;
 import com.huaweicloud.sdk.ces.v1.model.ListMetricsResponse;
 import com.huaweicloud.sdk.ces.v1.model.MetaData;
-import com.huaweicloud.sdk.ces.v1.model.MetaDataForAlarmHistoryResp;
 import com.huaweicloud.sdk.ces.v1.model.MetricInfo;
 import com.huaweicloud.sdk.ces.v1.model.MetricInfoList;
-import com.huaweicloud.sdk.ces.v1.model.MetricInfoResp;
 import com.huaweicloud.sdk.ces.v1.model.MetricsDimension;
 import com.huaweicloud.sdk.ces.v1.model.ShowMetricDataRequest;
 import com.huaweicloud.sdk.ces.v1.model.ShowMetricDataResponse;
+import com.huaweicloud.sdk.ces.v2.model.AdditionalInfo;
+import com.huaweicloud.sdk.ces.v2.model.AlarmHistoryItemV2;
+import com.huaweicloud.sdk.ces.v2.model.AlarmHistoryItemV2AlarmActions;
+import com.huaweicloud.sdk.ces.v2.model.AlarmHistoryItemV2Condition;
+import com.huaweicloud.sdk.ces.v2.model.AlarmHistoryItemV2Metric;
+import com.huaweicloud.sdk.ces.v2.model.AlarmHistoryItemV2MetricDimensions;
+import com.huaweicloud.sdk.ces.v2.model.DataPointInfo;
+import com.huaweicloud.sdk.ces.v2.model.ListAlarmHistoriesRequest;
+import com.huaweicloud.sdk.ces.v2.model.ListAlarmHistoriesResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -73,16 +84,24 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     private static final String API_BATCH_LIST_METRIC_DATA = "ces.batchListMetricData";
 
     private final CesClient cesClient;
+    private final com.huaweicloud.sdk.ces.v2.CesClient cesV2Client;
     private final HuaweiCloudInvocation invocation;
 
     /**
-     * 构造 {@code CesMetricsAdapterImpl}，注入华为云 CES SDK 客户端，以及统一的容错与异常映射调用帮助类。
+     * 构造 {@code CesMetricsAdapterImpl}，注入华为云 CES v1 / v2 SDK 客户端，以及统一的容错与异常映射调用帮助类。
      *
-     * @param cesClient  已配置的华为云 CES SDK 客户端
-     * @param invocation 负责限流、重试以及 SDK 异常映射的调用帮助类
+     * <p>v2 客户端目前仅用于 {@code listAlarmHistories}（T19 PR-1 切换）；其余接口仍走 v1。
+     *
+     * @param cesClient    已配置的华为云 CES v1 SDK 客户端
+     * @param cesV2Client  已配置的华为云 CES v2 SDK 客户端
+     * @param invocation   负责限流、重试以及 SDK 异常映射的调用帮助类
      */
-    public CesMetricsAdapterImpl(CesClient cesClient, HuaweiCloudInvocation invocation) {
+    public CesMetricsAdapterImpl(
+            CesClient cesClient,
+            @Qualifier("cesV2Client") com.huaweicloud.sdk.ces.v2.CesClient cesV2Client,
+            HuaweiCloudInvocation invocation) {
         this.cesClient = cesClient;
+        this.cesV2Client = cesV2Client;
         this.invocation = invocation;
     }
 
@@ -140,7 +159,7 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
         ListAlarmHistoriesRequest sdkRequest = toListAlarmHistoriesSdkRequest(request);
         ListAlarmHistoriesResponse sdkResponse = invocation.execute(
                 RATE_LIMITER_NAME, RETRY_NAME, API_LIST_ALARM_HISTORIES,
-                () -> cesClient.listAlarmHistories(sdkRequest));
+                () -> cesV2Client.listAlarmHistories(sdkRequest));
 
         return toListAlarmsResponseDto(sdkResponse);
     }
@@ -331,23 +350,24 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     }
 
     private ListAlarmHistoriesRequest toListAlarmHistoriesSdkRequest(CesListAlarmsRequest request) {
+        // CES v2 接口走 HTTP GET，所有参数都在 query 上；与 v1 POST 形态不同。
+        // 注意：v2 不再支持 group_id 过滤，CesListAlarmsRequest.groupId 若被设置则 service 层校验
+        // 已经拦下；这里再次跳过该字段以双保险。
         ListAlarmHistoriesRequest sdk = new ListAlarmHistoriesRequest()
-                .withLimit(String.valueOf(request.limit()))
-                .withStart(String.valueOf(request.start()));
-        if (request.groupId() != null) {
-            sdk.setGroupId(request.groupId());
-        }
+                .withOffset(request.start())
+                .withLimit(request.limit());
         if (request.alarmId() != null) {
-            sdk.setAlarmId(request.alarmId());
+            sdk.setAlarmId(Collections.singletonList(request.alarmId()));
         }
         if (request.alarmName() != null) {
-            sdk.setAlarmName(request.alarmName());
+            sdk.setName(request.alarmName());
         }
         if (request.alarmStatus() != null) {
-            sdk.setAlarmStatus(ListAlarmHistoriesRequest.AlarmStatusEnum.fromValue(request.alarmStatus()));
+            sdk.setStatus(Collections.singletonList(
+                    ListAlarmHistoriesRequest.StatusEnum.fromValue(request.alarmStatus())));
         }
         if (request.alarmLevel() != null) {
-            sdk.setAlarmLevel(ListAlarmHistoriesRequest.AlarmLevelEnum.fromValue(request.alarmLevel()));
+            sdk.setLevel(request.alarmLevel());
         }
         if (request.namespace() != null) {
             sdk.setNamespace(request.namespace());
@@ -362,30 +382,110 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
     }
 
     private CesListAlarmsResponse toListAlarmsResponseDto(ListAlarmHistoriesResponse sdkResp) {
-        List<AlarmHistoryInfoResp> sdkAlarms =
+        List<AlarmHistoryItemV2> sdkAlarms =
                 sdkResp.getAlarmHistories() == null ? Collections.emptyList() : sdkResp.getAlarmHistories();
         List<CesAlarmHistory> alarms = sdkAlarms.stream()
                 .map(this::toAlarmHistory)
                 .toList();
-        MetaDataForAlarmHistoryResp meta = sdkResp.getMetaData();
-        Integer total = meta == null ? null : meta.getTotal();
-        return new CesListAlarmsResponse(alarms, total);
+        return new CesListAlarmsResponse(alarms, sdkResp.getCount());
     }
 
-    private CesAlarmHistory toAlarmHistory(AlarmHistoryInfoResp sdk) {
-        MetricInfoResp metric = sdk.getMetric();
-        String namespace = metric == null ? null : metric.getNamespace();
-        String metricName = metric == null ? null : metric.getMetricName();
+    private CesAlarmHistory toAlarmHistory(AlarmHistoryItemV2 sdk) {
+        CesAlarmMetric metric = toAlarmMetric(sdk.getMetric());
+        String namespace = metric == null ? null : metric.namespace();
+        String metricName = metric == null ? null : metric.metricName();
+
+        Long triggerTime = toMillis(sdk.getFirstAlarmTime());
+        Long updateTime = toMillis(sdk.getLastAlarmTime());
+
         return new CesAlarmHistory(
                 sdk.getAlarmId(),
-                sdk.getAlarmName(),
-                sdk.getAlarmDescription(),
-                sdk.getAlarmLevel(),
-                sdk.getAlarmType(),
-                sdk.getAlarmStatus(),
+                sdk.getName(),
+                null,  // v2 没有 alarm_description 字段，保留 DTO 字段位但取 null
+                sdk.getLevel() == null ? null : sdk.getLevel().getValue(),
+                sdk.getType() == null ? null : sdk.getType().getValue(),
+                sdk.getStatus() == null ? null : sdk.getStatus().getValue(),
                 namespace,
                 metricName,
-                sdk.getTriggerTime(),
-                sdk.getUpdateTime());
+                triggerTime,
+                updateTime,
+                sdk.getRecordId(),
+                sdk.getActionEnabled(),
+                sdk.getBeginTime(),
+                sdk.getEndTime(),
+                sdk.getFirstAlarmTime(),
+                sdk.getLastAlarmTime(),
+                sdk.getAlarmRecoveryTime(),
+                metric,
+                toAlarmCondition(sdk.getCondition()),
+                toAlarmAdditionalInfo(sdk.getAdditionalInfo()),
+                toAlarmActions(sdk.getAlarmActions()),
+                toAlarmActions(sdk.getOkActions()),
+                toAlarmDataPoints(sdk.getDataPoints()));
+    }
+
+    private CesAlarmMetric toAlarmMetric(AlarmHistoryItemV2Metric sdk) {
+        if (sdk == null) {
+            return null;
+        }
+        List<CesMetricDimension> dims = sdk.getDimensions() == null
+                ? null
+                : sdk.getDimensions().stream()
+                        .map(this::toAlarmMetricDimension)
+                        .toList();
+        return new CesAlarmMetric(sdk.getNamespace(), sdk.getMetricName(), dims);
+    }
+
+    private CesMetricDimension toAlarmMetricDimension(AlarmHistoryItemV2MetricDimensions sdk) {
+        return new CesMetricDimension(sdk.getName(), sdk.getValue());
+    }
+
+    private CesAlarmCondition toAlarmCondition(AlarmHistoryItemV2Condition sdk) {
+        if (sdk == null) {
+            return null;
+        }
+        Integer period = sdk.getPeriod() == null ? null : sdk.getPeriod().getValue();
+        Integer suppressDuration = sdk.getSuppressDuration() == null
+                ? null
+                : sdk.getSuppressDuration().getValue();
+        return new CesAlarmCondition(
+                period,
+                sdk.getFilter(),
+                sdk.getComparisonOperator(),
+                sdk.getValue(),
+                sdk.getUnit(),
+                sdk.getCount(),
+                suppressDuration);
+    }
+
+    private CesAlarmAdditionalInfo toAlarmAdditionalInfo(AdditionalInfo sdk) {
+        if (sdk == null) {
+            return null;
+        }
+        return new CesAlarmAdditionalInfo(sdk.getResourceId(), sdk.getResourceName(), sdk.getEventId());
+    }
+
+    private List<CesAlarmAction> toAlarmActions(List<AlarmHistoryItemV2AlarmActions> sdkActions) {
+        if (sdkActions == null) {
+            return null;
+        }
+        return sdkActions.stream()
+                .map(action -> new CesAlarmAction(
+                        action.getType() == null ? null : action.getType().getValue(),
+                        action.getNotificationList()))
+                .toList();
+    }
+
+    private List<CesAlarmDataPoint> toAlarmDataPoints(List<DataPointInfo> sdkPoints) {
+        if (sdkPoints == null) {
+            return null;
+        }
+        return sdkPoints.stream()
+                .map(point -> new CesAlarmDataPoint(point.getTime(), point.getValue()))
+                .toList();
+    }
+
+    private Long toMillis(OffsetDateTime value) {
+        return value == null ? null : value.toInstant().toEpochMilli();
     }
 }
