@@ -52,6 +52,9 @@ public class DiscoveryCacheConfig {
     /** {@code show_apm_monitor_item_view_config} 结果缓存名。 */
     public static final String CACHE_VIEW_CONFIG = "apm-monitor-item-view-config";
 
+    /** {@code list_apm_business} 结果缓存名（T28；应用目录稳定，共享 APM 默认 spec）。 */
+    public static final String CACHE_BUSINESS_LIST = "apm-business-list";
+
     /** {@code list_ces_metrics} 结果缓存名（T24）。 */
     public static final String CACHE_CES_METRICS = "ces-list-metrics";
 
@@ -98,7 +101,8 @@ public class DiscoveryCacheConfig {
      */
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager manager = new CaffeineCacheManager(CACHE_ENV_ITEMS, CACHE_VIEW_CONFIG);
+        CaffeineCacheManager manager =
+                new CaffeineCacheManager(CACHE_ENV_ITEMS, CACHE_VIEW_CONFIG, CACHE_BUSINESS_LIST);
         manager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(ttl)
                 .maximumSize(maximumSize));

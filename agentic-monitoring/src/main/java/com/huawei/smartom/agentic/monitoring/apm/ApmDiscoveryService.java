@@ -6,7 +6,10 @@ package com.huawei.smartom.agentic.monitoring.apm;
 
 import com.huawei.smartom.agentic.adapter.apm.ApmDiscoveryAdapter;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmEnvMonitorItemsResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmListBusinessResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmMonitorItemViewConfigResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmSearchApplicationRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmSearchApplicationResponse;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 import com.huawei.smartom.agentic.monitoring.cache.DiscoveryCacheConfig;
 
@@ -38,6 +41,43 @@ public class ApmDiscoveryService {
      */
     public ApmDiscoveryService(ApmDiscoveryAdapter adapter) {
         this.adapter = adapter;
+    }
+
+    /**
+     * 查询当前租户的全部 APM 应用（business）列表；TTL 内复用缓存（应用目录稳定）。
+     *
+     * <p>空列表与 {@code null} 不写缓存，避免把临时性问题固化一整天。
+     *
+     * @return 应用列表，{@code id} 即后续工具的 {@code business_id}
+     */
+    @Cacheable(
+            cacheNames = DiscoveryCacheConfig.CACHE_BUSINESS_LIST,
+            unless = "#result == null or #result.businessNodes() == null"
+                    + " or #result.businessNodes().isEmpty()")
+    public ApmListBusinessResponse listBusiness() {
+        return adapter.listBusiness();
+    }
+
+    /**
+     * 搜索指定应用（business）下的组件与环境及其探针情况。
+     *
+     * <p><strong>不缓存</strong>：探针在线/离线计数是运行态信号，缓存会掩盖探针掉线。
+     *
+     * @param request 请求 DTO，不能为 null
+     * @return 组件/环境列表与探针计数
+     * @throws InvalidParamException {@code page} 或 {@code pageSize} 小于 1 时
+     */
+    public ApmSearchApplicationResponse searchApplication(ApmSearchApplicationRequest request) {
+        if (request == null) {
+            throw new InvalidParamException("request must not be null");
+        }
+        if (request.page() < 1) {
+            throw new InvalidParamException("page must be >= 1, got: " + request.page());
+        }
+        if (request.pageSize() != null && request.pageSize() < 1) {
+            throw new InvalidParamException("page_size must be >= 1, got: " + request.pageSize());
+        }
+        return adapter.searchApplication(request);
     }
 
     /**

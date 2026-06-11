@@ -4,10 +4,15 @@
 
 package com.huawei.smartom.agentic.adapter.apm;
 
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmAppInfo;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmBusinessNode;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmCollectorCategoryInfo;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmEnvMonitorItemsResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmListBusinessResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmMonitorItemEntity;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmMonitorItemViewConfigResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmSearchApplicationRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmSearchApplicationResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendFieldItem;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmViewBase;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmViewRow;
@@ -15,9 +20,16 @@ import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.resilience.HuaweiCloudInvocation;
 
 import com.huaweicloud.sdk.apm.v1.ApmClient;
+import com.huaweicloud.sdk.apm.v1.model.AppInfo;
+import com.huaweicloud.sdk.apm.v1.model.AppSearchParam;
+import com.huaweicloud.sdk.apm.v1.model.BusinessNodeModel;
 import com.huaweicloud.sdk.apm.v1.model.CollectorCategoryInfo;
 import com.huaweicloud.sdk.apm.v1.model.FieldItem;
+import com.huaweicloud.sdk.apm.v1.model.ListBusinessRequest;
+import com.huaweicloud.sdk.apm.v1.model.ListBusinessResponse;
 import com.huaweicloud.sdk.apm.v1.model.MonitorItemEntity;
+import com.huaweicloud.sdk.apm.v1.model.SearchApplicationRequest;
+import com.huaweicloud.sdk.apm.v1.model.SearchApplicationResponse;
 import com.huaweicloud.sdk.apm.v1.model.ShowEnvMonitorItemsRequest;
 import com.huaweicloud.sdk.apm.v1.model.ShowEnvMonitorItemsResponse;
 import com.huaweicloud.sdk.apm.v1.model.ShowMonitorItemViewConfigRequest;
@@ -30,7 +42,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 基于华为云 Java SDK v3.1.177 的 {@link ApmDiscoveryAdapter} 实现。
@@ -47,6 +62,8 @@ public class ApmDiscoveryAdapterImpl implements ApmDiscoveryAdapter {
     private static final String RETRY_NAME = "huaweicloud-retryable";
     private static final String API_SHOW_ENV_MONITOR_ITEMS = "apm.showEnvMonitorItems";
     private static final String API_SHOW_MONITOR_ITEM_VIEW_CONFIG = "apm.showMonitorItemViewConfig";
+    private static final String API_LIST_BUSINESS = "apm.listBusiness";
+    private static final String API_SEARCH_APPLICATION = "apm.searchApplication";
 
     private final ApmClient apmClient;
     private final HuaweiCloudInvocation invocation;
@@ -66,6 +83,96 @@ public class ApmDiscoveryAdapterImpl implements ApmDiscoveryAdapter {
         this.apmClient = apmClient;
         this.invocation = invocation;
         this.properties = properties;
+    }
+
+    @Override
+    public ApmListBusinessResponse listBusiness() {
+        LOG.info("apm.listBusiness start");
+
+        ListBusinessResponse sdkResp = invocation.execute(
+                RATE_LIMITER_NAME, RETRY_NAME, API_LIST_BUSINESS,
+                () -> apmClient.listBusiness(new ListBusinessRequest()));
+
+        List<BusinessNodeModel> sdkNodes = sdkResp.getBusinessNodes() == null
+                ? Collections.emptyList()
+                : sdkResp.getBusinessNodes();
+        return new ApmListBusinessResponse(sdkNodes.stream()
+                .map(this::toBusinessNode)
+                .toList());
+    }
+
+    @Override
+    public ApmSearchApplicationResponse searchApplication(ApmSearchApplicationRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+        Long effectiveBusinessId = request.businessId() == null
+                ? properties.getApmBusinessId()
+                : request.businessId();
+        String effectiveRegion = request.region() == null
+                ? properties.getApmRegion()
+                : request.region();
+        LOG.info("apm.searchApplication start, businessId={}, region={}, page={}, keyword={}",
+                effectiveBusinessId, effectiveRegion, request.page(), request.keyword());
+
+        SearchApplicationRequest sdkReq = new SearchApplicationRequest()
+                .withBody(new AppSearchParam()
+                        .withBusinessId(effectiveBusinessId)
+                        .withRegion(effectiveRegion)
+                        .withPage(request.page())
+                        .withPageSize(request.pageSize())
+                        .withKeyword(request.keyword()));
+        if (effectiveBusinessId != null) {
+            sdkReq.setXBusinessId(effectiveBusinessId);
+        }
+
+        SearchApplicationResponse sdkResp = invocation.execute(
+                RATE_LIMITER_NAME, RETRY_NAME, API_SEARCH_APPLICATION,
+                () -> apmClient.searchApplication(sdkReq));
+
+        return toSearchApplicationDto(sdkResp);
+    }
+
+    private ApmBusinessNode toBusinessNode(BusinessNodeModel sdk) {
+        return new ApmBusinessNode(
+                sdk.getDefault(),
+                sdk.getDisplayName(),
+                sdk.getEpsId(),
+                sdk.getGmtCreate(),
+                sdk.getGmtModify(),
+                sdk.getId(),
+                sdk.getInnerDomainId(),
+                sdk.getIsDefault(),
+                sdk.getName());
+    }
+
+    private ApmSearchApplicationResponse toSearchApplicationDto(SearchApplicationResponse sdkResp) {
+        List<AppInfo> sdkApps = sdkResp.getAppInfoList() == null
+                ? Collections.emptyList()
+                : sdkResp.getAppInfoList();
+        List<ApmAppInfo> apps = sdkApps.stream()
+                .map(this::toAppInfo)
+                .toList();
+        Map<String, ApmAppInfo> appMap = null;
+        if (sdkResp.getAppInfoMap() != null) {
+            appMap = new LinkedHashMap<>();
+            for (Map.Entry<String, AppInfo> entry : sdkResp.getAppInfoMap().entrySet()) {
+                appMap.put(entry.getKey(), toAppInfo(entry.getValue()));
+            }
+        }
+        return new ApmSearchApplicationResponse(apps, sdkResp.getAppTotalCount(), appMap);
+    }
+
+    private ApmAppInfo toAppInfo(AppInfo sdk) {
+        if (sdk == null) {
+            return null;
+        }
+        return new ApmAppInfo(
+                sdk.getEnvName(),
+                sdk.getEnvId(),
+                sdk.getAppName(),
+                sdk.getAppId(),
+                sdk.getOnlineCount(),
+                sdk.getDisableCount(),
+                sdk.getOfflineCount());
     }
 
     @Override

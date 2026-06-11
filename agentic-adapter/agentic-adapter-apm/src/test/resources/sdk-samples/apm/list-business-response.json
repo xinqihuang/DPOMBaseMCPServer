@@ -1,0 +1,19 @@
+{
+  "business_nodes": [
+    {
+      "default": false,
+      "display_name": "订单中心",
+      "eps_id": "0",
+      "gmt_create": "2025-11-03",
+      "gmt_modify": "2026-05-20",
+      "id": 7000,
+      "inner_domain_id": 12345,
+      "is_default": false,
+      "name": "order-center"
+    },
+    {
+      "id": 7001,
+      "name": "default-business"
+    }
+  ]
+}

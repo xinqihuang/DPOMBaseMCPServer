@@ -5,16 +5,22 @@
 package com.huawei.smartom.agentic.adapter.apm;
 
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmEnvMonitorItemsResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmListBusinessResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmMonitorItemViewConfigResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmSearchApplicationRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmSearchApplicationResponse;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
 
 /**
- * 华为云 APM「监控项 / 视图配置发现」适配器。
+ * 华为云 APM「CMDB / 监控项 / 视图配置发现」适配器。
  *
- * <p>承担 T23 三步链路前两步：
+ * <p>承担发现链全部只读步骤：
  * <ol>
- *   <li>{@link #showEnvMonitorItems(Long, Long)} —— 拉取 env 下全部监控项及 {@code collector_id};</li>
- *   <li>{@link #showMonitorItemViewConfig(Long, Long, Long)} —— 拉取某采集器的真实视图清单。</li>
+ *   <li>{@link #listBusiness()} —— 拉取租户全部 APM 应用（business），输出 {@code business_id}（T28）;</li>
+ *   <li>{@link #searchApplication(ApmSearchApplicationRequest)} —— 拉取应用下组件/环境与探针计数，
+ *       输出 {@code env_id}（T28）;</li>
+ *   <li>{@link #showEnvMonitorItems(Long, Long)} —— 拉取 env 下全部监控项及 {@code collector_id}（T23）;</li>
+ *   <li>{@link #showMonitorItemViewConfig(Long, Long, Long)} —— 拉取某采集器的真实视图清单（T23）。</li>
  * </ol>
  *
  * <p>与 {@link ApmAlarmAdapter} / {@link ApmTrendAdapter} 并列，共享 {@code ApmClient} Bean。
@@ -23,6 +29,29 @@ import com.huawei.smartom.agentic.common.exception.SmartomException;
  * @since 2026-06-10
  */
 public interface ApmDiscoveryAdapter {
+
+    /**
+     * 拉取当前租户在 APM 注册的全部应用（business）列表。
+     *
+     * <p>对应 SDK {@code ApmClient.listBusiness(ListBusinessRequest)}，无入参。
+     *
+     * @return 应用列表（无损覆盖 SDK 全部字段）
+     * @throws SmartomException 携带对应的 {@link com.huawei.smartom.agentic.common.error.ErrorCode}
+     */
+    ApmListBusinessResponse listBusiness();
+
+    /**
+     * 搜索指定应用（business）下的组件与环境及其探针情况。
+     *
+     * <p>对应 SDK {@code ApmClient.searchApplication(SearchApplicationRequest)}。
+     * {@code businessId} / {@code region} 为 {@code null} 时回落到配置默认值；
+     * header {@code x-business-id} 与 body {@code business_id} 取同一生效值。
+     *
+     * @param request 请求 DTO，不可为 {@code null}
+     * @return 组件/环境列表与探针计数（无损覆盖 SDK 全部字段）
+     * @throws SmartomException 携带对应的 {@link com.huawei.smartom.agentic.common.error.ErrorCode}
+     */
+    ApmSearchApplicationResponse searchApplication(ApmSearchApplicationRequest request);
 
     /**
      * 拉取指定 env 下全部监控项与采集器类别。
