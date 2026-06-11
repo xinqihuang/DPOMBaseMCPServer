@@ -9,6 +9,7 @@ import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDatapoint;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDimension;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricInfo;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricStatistic;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomPagination;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsResponse;
@@ -214,15 +215,17 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
         }
         QuerySampleParam body = new QuerySampleParam()
                 .withSamples(List.of(sample))
-                .withPeriod(request.period())
+                .withPeriod(request.period() == null ? null : request.period().getSeconds())
                 .withTimeRange(request.timeRange());
         if (request.statistics() != null && !request.statistics().isEmpty()) {
-            body.setStatistics(request.statistics());
+            body.setStatistics(request.statistics().stream()
+                    .map(AomMetricStatistic::getValue)
+                    .toList());
         }
 
         ListSampleRequest sdk = new ListSampleRequest().withBody(body);
         if (request.fillValue() != null) {
-            sdk.setFillValue(request.fillValue());
+            sdk.setFillValue(request.fillValue().getValue());
         }
         return sdk;
     }
@@ -268,7 +271,7 @@ public class AomMetricsAdapterImpl implements AomMetricsAdapter {
 
     private ListLogItemsRequest toListLogItemsSdkRequest(AomQueryLogsRequest request) {
         QueryBodyParam body = new QueryBodyParam()
-                .withCategory(request.category())
+                .withCategory(request.category() == null ? null : request.category().getValue())
                 .withStartTime(request.startTime())
                 .withEndTime(request.endTime())
                 .withPageSizeSize(String.valueOf(request.pageSize()))

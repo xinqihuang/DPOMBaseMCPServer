@@ -7,7 +7,9 @@ package com.huawei.smartom.agentic.adapter.aom.dto;
 /**
  * {@code query_logs} 工具的请求 DTO，对应华为云 AOM {@code ListLogItems} 接口的入参（{@code type=querylogs}）。
  *
- * @param category    日志类型：{@code app_log} / {@code node_log} / {@code custom_log}
+ * <p>{@code category} 为受控枚举（T26，封闭集走 ADR-004 严格档）。
+ *
+ * @param category    日志类型
  * @param startTime   起始时间，毫秒 UTC 时间戳
  * @param endTime     结束时间，毫秒 UTC 时间戳
  * @param keyWord     关键字搜索，可选
@@ -17,7 +19,7 @@ package com.huawei.smartom.agentic.adapter.aom.dto;
  * @since 2026-05-28
  */
 public record AomQueryLogsRequest(
-        String category,
+        AomLogCategory category,
         Long startTime,
         Long endTime,
         String keyWord,

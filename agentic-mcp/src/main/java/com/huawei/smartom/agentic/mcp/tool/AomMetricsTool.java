@@ -57,14 +57,16 @@ public class AomMetricsTool {
     @Tool(
             name = "list_aom_metrics",
             description = """
-                    List available AOM (Application Operations Management) metric definitions \
-                    for an application, component, container, process, or other monitored object \
-                    in Huawei Cloud. Use this BEFORE query_aom_metric_data to discover which \
-                    metric names exist for a given namespace (PAAS.CONTAINER / PAAS.NODE / \
-                    PAAS.SLA / PAAS.AGGR / CUSTOMMETRICS) or a specific inventoryId. AOM covers \
+                    Step 1 of the AOM query chain: list available AOM (Application Operations \
+                    Management) metric definitions for an application, component, container, \
+                    process, or other monitored object in Huawei Cloud. ALWAYS call this BEFORE \
+                    query_aom_metric_data to discover the REAL metric names and dimension names \
+                    for a given namespace (PAAS.CONTAINER / PAAS.NODE / PAAS.SLA / PAAS.AGGR / \
+                    CUSTOMMETRICS) or a specific inventoryId — do not invent them. AOM covers \
                     application-layer metrics; for cloud infrastructure metrics (ECS / RDS / EVS \
                     etc.) use list_ces_metrics instead. Returns metric metadata (namespace, \
-                    metric_name, dimensions, unit) — NOT actual data points.""")
+                    metric_name, dimensions, unit) — NOT actual data points; results are cached \
+                    server-side for about 1 hour.""")
     public Object listAomMetrics(
             @ToolParam(
                     description = "AOM namespace. Predefined values: PAAS.CONTAINER / PAAS.NODE "

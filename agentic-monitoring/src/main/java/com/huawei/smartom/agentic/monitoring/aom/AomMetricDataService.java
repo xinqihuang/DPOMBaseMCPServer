@@ -15,7 +15,6 @@ import com.huawei.smartom.agentic.common.validation.Validations;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * AOM 时序数据查询的业务编排。
@@ -27,14 +26,6 @@ import java.util.Set;
  */
 @Service
 public class AomMetricDataService {
-
-    private static final Set<Integer> ALLOWED_PERIODS = Set.of(60, 300, 900, 3600);
-
-    private static final Set<String> ALLOWED_STATISTICS =
-            Set.of("maximum", "minimum", "sum", "average", "sampleCount");
-
-    private static final Set<String> ALLOWED_FILL_VALUES =
-            Set.of("-1", "0", "null", "average");
 
     private static final int MAX_DIMENSIONS = 20;
 
@@ -72,28 +63,16 @@ public class AomMetricDataService {
                             + request.namespace());
         }
         Validations.requireNonBlank(request.metricName(), "metric_name");
-        if (request.period() == null || !ALLOWED_PERIODS.contains(request.period())) {
-            throw new InvalidParamException(
-                    "period must be 60/300/900/3600 (seconds), got: " + request.period());
-        }
+        // statistics / period / fill_value 已通过受控枚举强类型（T26），仅保留必填与元素非空校验
+        Validations.requireNonNull(request.period(), "period");
         if (Validations.isBlank(request.timeRange())
                 || !AomPatterns.TIME_RANGE.matcher(request.timeRange()).matches()) {
             throw new InvalidParamException(
                     "time_range must follow 'startMs.endMs.durationMin' (use -1 as placeholder), got: "
                             + request.timeRange());
         }
-        if (request.statistics() != null) {
-            for (String stat : request.statistics()) {
-                if (!ALLOWED_STATISTICS.contains(stat)) {
-                    throw new InvalidParamException(
-                            "statistics entry invalid: '" + stat
-                                    + "'; allowed: maximum/minimum/sum/average/sampleCount");
-                }
-            }
-        }
-        if (request.fillValue() != null && !ALLOWED_FILL_VALUES.contains(request.fillValue())) {
-            throw new InvalidParamException(
-                    "fill_value must be one of -1/0/null/average, got: " + request.fillValue());
+        if (request.statistics() != null && request.statistics().contains(null)) {
+            throw new InvalidParamException("statistics entries must not be null");
         }
         List<AomMetricDimension> dims = request.dimensions();
         if (dims != null) {

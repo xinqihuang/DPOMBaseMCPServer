@@ -4,6 +4,7 @@
 
 package com.huawei.smartom.agentic.mcp.tool;
 
+import com.huawei.smartom.agentic.adapter.aom.dto.AomLogCategory;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsResponse;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.when;
  */
 class AomLogToolTest {
 
-    private static final String CATEGORY = "app_log";
+    private static final AomLogCategory CATEGORY = AomLogCategory.APP_LOG;
     private static final long START = 1700000000000L;
     private static final long END = 1700003600000L;
     private static final String KEY_WORD = "*ERROR*";

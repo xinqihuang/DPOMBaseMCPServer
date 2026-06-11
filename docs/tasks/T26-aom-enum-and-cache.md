@@ -1,6 +1,6 @@
 # T26 — AOM 封闭集参数枚举化 + list_aom_metrics 缓存 + 描述收紧
 
-> 状态: **Ready** · 估时: 0.5d · 依赖: T24（模式与基建：受控枚举进 Schema、DiscoveryCacheConfig）、ADR-004 · 关联: 无需改 §4.3（本卡是其 (a)+(b) 的 AOM 实例）
+> 状态: **Done** · 估时: 0.5d · 依赖: T24（模式与基建：受控枚举进 Schema、DiscoveryCacheConfig）、ADR-004 · 关联: 无需改 §4.3（本卡是其 (a)+(b) 的 AOM 实例）
 
 ## 背景
 
@@ -60,14 +60,14 @@ AomLogCategory      APP_LOG("app_log") / NODE_LOG("node_log") / CUSTOM_LOG("cust
 
 ## 验收标准
 
-- [ ] 四个枚举各含且仅含上表取值；`fromValue` 接受字面量与常量名、未知值抛错
-- [ ] 两工具入参为枚举；JSON Schema 中可见全部合法取值（含批量 statistics 列表元素）
-- [ ] 传非法 statistics/period/fill_value/category → 框架拒绝或 `INVALID_PARAM`
-- [ ] service 层 `ALLOWED_PERIODS/ALLOWED_STATISTICS/ALLOWED_FILL_VALUES/ALLOWED_CATEGORIES` 已删除
-- [ ] `list_aom_metrics` 命中 Caffeine 缓存（同参二次调用 `verify(adapter, times(1))`）；空结果不缓存；TTL 配置默认 1h 且与 CES 缓存相互独立
-- [ ] `query_aom_metric_data` 描述含「取自 list_aom_metrics、禁止编造、调用顺序」
-- [ ] namespace 仍为 String，自定义 namespace 查询不受影响（既有 UT 保持绿）
-- [ ] 迭代 `mvn -o -q -pl agentic-mcp -am test`；收尾全量 `mvn verify` 一次通过；Checkstyle 0
+- [x] 四个枚举各含且仅含上表取值；`fromValue` 接受字面量与常量名、未知值抛错
+- [x] 两工具入参为枚举；JSON Schema 中可见全部合法取值（含批量 statistics 列表元素）
+- [x] 传非法 statistics/period/fill_value/category → 框架拒绝或 `INVALID_PARAM`
+- [x] service 层 `ALLOWED_PERIODS/ALLOWED_STATISTICS/ALLOWED_FILL_VALUES/ALLOWED_CATEGORIES` 已删除
+- [x] `list_aom_metrics` 命中 Caffeine 缓存（同参二次调用 `verify(adapter, times(1))`）；空结果不缓存；TTL 配置默认 1h 且与 CES 缓存相互独立
+- [x] `query_aom_metric_data` 描述含「取自 list_aom_metrics、禁止编造、调用顺序」
+- [x] namespace 仍为 String，自定义 namespace 查询不受影响（既有 UT 保持绿）
+- [x] 迭代 `mvn -o -q -pl agentic-mcp -am test`；收尾全量 `mvn verify` 一次通过；Checkstyle 0
 
 ## AI 易错点提醒
 

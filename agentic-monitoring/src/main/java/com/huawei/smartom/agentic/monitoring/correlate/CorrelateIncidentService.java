@@ -10,6 +10,7 @@ import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsRequest;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.aom.AomLogService;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomLogCategory;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsRequest;
 import com.huawei.smartom.agentic.monitoring.apm.ApmTraceService;
 import com.huawei.smartom.agentic.monitoring.ces.CesAlarmService;
@@ -132,7 +133,7 @@ public class CorrelateIncidentService {
         }
         return runBranch("aom_logs", () -> {
             AomQueryLogsRequest req = new AomQueryLogsRequest(
-                    request.logCategory(),
+                    toLogCategory(request.logCategory()),
                     request.startTimeMillis(),
                     request.endTimeMillis(),
                     request.logKeyword(),
@@ -140,6 +141,23 @@ public class CorrelateIncidentService {
                     Boolean.TRUE);
             return aomLogService.queryLogs(req);
         });
+    }
+
+    /**
+     * 将 correlate 工具的 String 入参解析为受控枚举（T26），未知取值映射为
+     * {@code INVALID_PARAM} 以保持分支错误语义不变。
+     *
+     * @param category 日志类型字面量
+     * @return 对应枚举
+     * @throws InvalidParamException 取值不在枚举集合内时抛出
+     */
+    private static AomLogCategory toLogCategory(String category) {
+        try {
+            return AomLogCategory.fromValue(category);
+        }
+        catch (IllegalArgumentException e) {
+            throw new InvalidParamException(e.getMessage());
+        }
     }
 
     private CorrelateBranchResult runApmTraces(CorrelateIncidentRequest request) {

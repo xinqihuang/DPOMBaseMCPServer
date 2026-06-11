@@ -5,6 +5,7 @@
 package com.huawei.smartom.agentic.adapter.aom.contract;
 
 import com.huawei.smartom.agentic.adapter.aom.AomMetricsAdapterImpl;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomLogCategory;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsResponse;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
@@ -79,7 +80,8 @@ class AomListLogItemsContractTest {
         when(aomClient.listLogItems(any(ListLogItemsRequest.class))).thenReturn(sdkResp);
 
         AomQueryLogsResponse out = adapter.queryLogs(new AomQueryLogsRequest(
-                "app_log", 1718000000000L, 1718000060000L, "ERROR", 100, Boolean.TRUE));
+                AomLogCategory.APP_LOG, 1718000000000L, 1718000060000L,
+                "ERROR", 100, Boolean.TRUE));
 
         assertThat(out.errorCode()).isEqualTo("SVCSTG_AMS_2000000");
         assertThat(out.errorMessage()).isEqualTo("success");

@@ -6,6 +6,8 @@ package com.huawei.smartom.agentic.adapter.aom.contract;
 
 import com.huawei.smartom.agentic.adapter.aom.AomMetricsAdapterImpl;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDatapoint;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricPeriod;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricStatistic;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataResponse;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomSampleSeries;
@@ -88,7 +90,9 @@ class AomListSampleContractTest {
 
         AomQueryMetricDataResponse out = adapter.queryMetricData(new AomQueryMetricDataRequest(
                 "PAAS.CONTAINER", "aom_process_cpu_usage", null,
-                List.of("maximum", "average", "minimum"), 60, "-1.-1.60", null));
+                List.of(AomMetricStatistic.MAXIMUM, AomMetricStatistic.AVERAGE,
+                        AomMetricStatistic.MINIMUM),
+                AomMetricPeriod.SEC_60, "-1.-1.60", null));
 
         assertThat(out.series()).hasSize(1);
 

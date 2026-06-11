@@ -4,6 +4,7 @@
 
 package com.huawei.smartom.agentic.mcp.tool;
 
+import com.huawei.smartom.agentic.adapter.aom.dto.AomLogCategory;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsRequest;
 import com.huawei.smartom.agentic.monitoring.aom.AomLogService;
 
@@ -34,7 +35,7 @@ public class AomLogTool {
     /**
      * MCP 入口方法：根据时间区间、关键字、日志类型查询日志。
      *
-     * @param category   日志类型：{@code app_log/node_log/custom_log}
+     * @param category   日志类型（受控枚举）
      * @param startTime  起始时间（UTC 毫秒）
      * @param endTime    结束时间（UTC 毫秒）
      * @param keyWord    关键字搜索，可选
@@ -54,8 +55,9 @@ public class AomLogTool {
                     search, and '&&'/'||' boolean combinators. Returns the raw upstream 'result' \
                     JSON string for downstream parsing.""")
     public Object queryLogs(
-            @ToolParam(description = "Log category: app_log / node_log / custom_log.")
-            String category,
+            @ToolParam(description = "Log category (closed enum): app_log / node_log / "
+                    + "custom_log.")
+            AomLogCategory category,
             @ToolParam(description = "Start timestamp (UTC millis).")
             Long startTime,
             @ToolParam(description = "End timestamp (UTC millis), must be > start_time.")

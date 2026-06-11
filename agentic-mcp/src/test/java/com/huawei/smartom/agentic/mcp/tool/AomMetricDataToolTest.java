@@ -4,7 +4,10 @@
 
 package com.huawei.smartom.agentic.mcp.tool;
 
+import com.huawei.smartom.agentic.adapter.aom.dto.AomFillValue;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDimension;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricPeriod;
+import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricStatistic;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataResponse;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -41,10 +44,11 @@ class AomMetricDataToolTest {
     private static final String METRIC = "cpuUsage";
     private static final List<AomMetricDimension> DIMS =
             List.of(new AomMetricDimension("appId", "app-1"));
-    private static final List<String> STATS = List.of("average", "maximum");
-    private static final Integer PERIOD = 60;
+    private static final List<AomMetricStatistic> STATS =
+            List.of(AomMetricStatistic.AVERAGE, AomMetricStatistic.MAXIMUM);
+    private static final AomMetricPeriod PERIOD = AomMetricPeriod.SEC_60;
     private static final String TIME_RANGE = "-1.-1.60";
-    private static final String FILL = "average";
+    private static final AomFillValue FILL = AomFillValue.AVERAGE;
 
     private AomMetricDataService service;
     private AomMetricDataTool tool;
@@ -87,7 +91,7 @@ class AomMetricDataToolTest {
                         "period must be 60/300/900/3600 (seconds), got: 42"));
 
         Object result = tool.queryAomMetricData(
-                NAMESPACE, METRIC, DIMS, STATS, 42, TIME_RANGE, FILL);
+                NAMESPACE, METRIC, DIMS, STATS, PERIOD, TIME_RANGE, FILL);
 
         assertThat(result).isInstanceOf(ErrorResponse.class);
         ErrorResponse err = (ErrorResponse) result;

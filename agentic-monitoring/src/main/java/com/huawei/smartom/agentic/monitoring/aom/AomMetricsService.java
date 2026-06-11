@@ -11,7 +11,10 @@ import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDimension;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomPatterns;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 import com.huawei.smartom.agentic.common.validation.Validations;
+import com.huawei.smartom.agentic.monitoring.cache.DiscoveryCacheConfig;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +28,8 @@ import java.util.regex.Pattern;
  *   <li>按 {@code list_aom_metrics} 规约 §3.2 的 7 条规则校验入参，若违反则抛出
  *       {@link InvalidParamException}，校验通过后再调用 adapter。</li>
  *   <li>将实际的 SDK 调用委托给 adapter。</li>
+ *   <li>对查询结果做 Caffeine TTL 缓存（T26）：指标定义目录读频高、变化相对低；
+ *       但 AOM 清单含容器/进程级对象，churn 快于 CES 云服务目录，TTL 默认 1h 而非 1d。</li>
  * </ul>
  *
  * <p>校验采用短路求值：规则按顺序逐条检查，首个违反立即抛出，避免在后续规则中触发空指针。
@@ -59,16 +64,33 @@ public class AomMetricsService {
     /**
      * 校验入参，随后委托给 adapter 执行。
      *
+     * <p>结果按整个请求 record 作 key 缓存（record 值语义 equals 覆盖全部参数，
+     * 紧凑构造器已归一化 limit/start 默认值）；失败（异常）与空结果不写缓存。
+     *
      * @param request 查询参数，不能为 null
      * @return 列表查询结果
      * @throws InvalidParamException 入参约束违反时抛出
      */
+    @Cacheable(
+            cacheNames = DiscoveryCacheConfig.CACHE_AOM_METRICS,
+            key = "#request",
+            condition = "#request != null",
+            unless = "#result == null or #result.metrics() == null or #result.metrics().isEmpty()")
     public AomListMetricsResponse listMetrics(AomListMetricsRequest request) {
         if (request == null) {
             throw new InvalidParamException("request must not be null");
         }
         validate(request);
         return adapter.listMetrics(request);
+    }
+
+    /**
+     * 清空 {@code list_aom_metrics} 结果缓存。运维入口：当 AOM 侧新增指标定义
+     * 而 TTL 尚未到期时，可经由本方法强制失效。
+     */
+    @CacheEvict(cacheNames = DiscoveryCacheConfig.CACHE_AOM_METRICS, allEntries = true)
+    public void evictListMetricsCache() {
+        // 注解驱动的整体失效，无方法体逻辑
     }
 
     private void validate(AomListMetricsRequest request) {

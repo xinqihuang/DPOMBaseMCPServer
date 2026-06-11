@@ -11,14 +11,12 @@ import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
-
 /**
  * AOM 日志查询的业务编排。
  *
  * <p>对 {@code query_logs} 工具入参进行规约校验：
  * <ul>
- *   <li>{@code category} 必填，取值 {@code app_log/node_log/custom_log}</li>
+ *   <li>{@code category} 必填（取值集合已由受控枚举强类型，T26）</li>
  *   <li>{@code startTime} / {@code endTime} 必填，毫秒级 UTC 时间戳</li>
  *   <li>{@code endTime > startTime}</li>
  *   <li>{@code pageSize} 范围 [1, 1000]</li>
@@ -29,9 +27,6 @@ import java.util.Set;
  */
 @Service
 public class AomLogService {
-
-    private static final Set<String> ALLOWED_CATEGORIES =
-            Set.of("app_log", "node_log", "custom_log");
 
     private static final int PAGE_SIZE_MIN = 1;
     private static final int PAGE_SIZE_MAX = 1000;
@@ -63,9 +58,9 @@ public class AomLogService {
     }
 
     private void validate(AomQueryLogsRequest request) {
-        if (request.category() == null || !ALLOWED_CATEGORIES.contains(request.category())) {
+        if (request.category() == null) {
             throw new InvalidParamException(
-                    "category must be one of app_log/node_log/custom_log, got: " + request.category());
+                    "category is required, one of app_log/node_log/custom_log");
         }
         if (request.startTime() == null || request.endTime() == null) {
             throw new InvalidParamException("start_time and end_time are required (millis)");

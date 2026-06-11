@@ -26,6 +26,11 @@ ces:
     ttl: 1d
     maximum-size: 2000
 
+aom:
+  discovery-cache:
+    ttl: 1h
+    maximum-size: 2000
+
 server:
   port: 8080
 
