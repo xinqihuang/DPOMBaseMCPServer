@@ -6,12 +6,8 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDimension;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.aom.AomMetricDataService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -26,8 +22,6 @@ import java.util.List;
  */
 @Component
 public class AomMetricDataTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AomMetricDataTool.class);
 
     private final AomMetricDataService service;
 
@@ -51,7 +45,7 @@ public class AomMetricDataTool {
      * @param timeRange  时间区间字符串，例如 {@code -1.-1.60}（最近 60 分钟）
      * @param fillValue  断点插值策略，可选
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.aom.dto.AomQueryMetricDataResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "query_aom_metric_data",
@@ -88,13 +82,6 @@ public class AomMetricDataTool {
 
         AomQueryMetricDataRequest req = new AomQueryMetricDataRequest(
                 namespace, metricName, dimensions, statistics, period, timeRange, fillValue);
-        try {
-            return service.queryMetricData(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("query_aom_metric_data failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("query_aom_metric_data", () -> service.queryMetricData(req));
     }
 }

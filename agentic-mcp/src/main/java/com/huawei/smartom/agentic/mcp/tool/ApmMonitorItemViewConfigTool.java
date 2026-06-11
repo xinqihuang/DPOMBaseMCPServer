@@ -4,12 +4,8 @@
 
 package com.huawei.smartom.agentic.mcp.tool;
 
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.apm.ApmDiscoveryService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -26,8 +22,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ApmMonitorItemViewConfigTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ApmMonitorItemViewConfigTool.class);
 
     private final ApmDiscoveryService service;
 
@@ -48,7 +42,7 @@ public class ApmMonitorItemViewConfigTool {
      * @param businessId  APM 业务 id；为 {@code null} 时回落到配置默认值
      * @return 成功时返回
      *         {@link com.huawei.smartom.agentic.adapter.apm.dto.ApmMonitorItemViewConfigResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "show_apm_monitor_item_view_config",
@@ -74,13 +68,7 @@ public class ApmMonitorItemViewConfigTool {
             @ToolParam(description = "APM business id (HTTP x-business-id header). Falls back to "
                     + "huaweicloud.apm-business-id config when null.", required = false)
             Long businessId) {
-        try {
-            return service.getMonitorItemViewConfig(collectorId, envId, businessId);
-        }
-        catch (SmartomException e) {
-            LOG.warn("show_apm_monitor_item_view_config failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("show_apm_monitor_item_view_config",
+                () -> service.getMonitorItemViewConfig(collectorId, envId, businessId));
     }
 }

@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.apm.ApmAlarmService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -28,8 +24,6 @@ import java.util.List;
  */
 @Component
 public class ApmAlarmDataTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ApmAlarmDataTool.class);
 
     private final ApmAlarmService service;
 
@@ -61,7 +55,7 @@ public class ApmAlarmDataTool {
      * @param ipAddress         实例 IP 过滤
      * @param envList           环境 id 列表过滤
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "list_apm_alarm_data",
@@ -117,13 +111,6 @@ public class ApmAlarmDataTool {
                 businessId, page, pageSize, region, appName, businessIdFilter,
                 monitorItemId, status, alarmLevel, keyword, alarmStartTime, alarmEndTime,
                 collectorId, ipAddress, envList);
-        try {
-            return service.listAlarmData(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("list_apm_alarm_data failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("list_apm_alarm_data", () -> service.listAlarmData(req));
     }
 }

@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmQueryTracesRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.apm.ApmTraceService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -23,8 +19,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ApmTraceTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ApmTraceTool.class);
 
     private final ApmTraceService service;
 
@@ -50,7 +44,7 @@ public class ApmTraceTool {
      * @param page            页码，默认 1
      * @param pageSize        单页大小，默认 50
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.apm.dto.ApmQueryTracesResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "query_traces",
@@ -89,13 +83,6 @@ public class ApmTraceTool {
         ApmQueryTracesRequest req = new ApmQueryTracesRequest(
                 businessId, startTimeString, endTimeString, traceId,
                 source, hasError, timeUsedMin, page, pageSize);
-        try {
-            return service.queryTraces(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("query_traces failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("query_traces", () -> service.queryTraces(req));
     }
 }

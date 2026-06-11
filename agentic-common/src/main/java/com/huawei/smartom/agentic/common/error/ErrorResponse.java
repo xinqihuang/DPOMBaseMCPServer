@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param errorMessage     可读的错误描述
  * @param upstreamTraceId  华为云 X-Request-Id（错误源自本地时可为 null）
  * @param retryable        调用方是否可重试
+ * @param hint             面向 Agent 的行动建议，派生自 {@link ErrorCode#getHint()}
  *
  * @author h00884391
  * @since 2026-05-21
@@ -23,10 +24,11 @@ public record ErrorResponse(
         @JsonProperty("error_code") String errorCode,
         @JsonProperty("error_message") String errorMessage,
         @JsonProperty("upstream_trace_id") String upstreamTraceId,
-        @JsonProperty("retryable") boolean retryable) {
+        @JsonProperty("retryable") boolean retryable,
+        @JsonProperty("hint") String hint) {
 
     /**
-     * 便捷工厂方法，从枚举派生 {@code errorCode} 字符串和 {@code retryable} 字段。
+     * 便捷工厂方法，从枚举派生 {@code errorCode} 字符串、{@code retryable} 与 {@code hint} 字段。
      *
      * @param code             错误码
      * @param message          可读的错误消息
@@ -34,6 +36,6 @@ public record ErrorResponse(
      * @return 已填充字段的 ErrorResponse
      */
     public static ErrorResponse of(ErrorCode code, String message, String upstreamTraceId) {
-        return new ErrorResponse(code.name(), message, upstreamTraceId, code.isRetryable());
+        return new ErrorResponse(code.name(), message, upstreamTraceId, code.isRetryable(), code.getHint());
     }
 }

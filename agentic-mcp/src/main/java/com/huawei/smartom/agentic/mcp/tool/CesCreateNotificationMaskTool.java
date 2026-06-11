@@ -7,12 +7,8 @@ package com.huawei.smartom.agentic.mcp.tool;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesCreateNotificationMaskRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.NotificationMaskProductMetric;
 import com.huawei.smartom.agentic.adapter.ces.dto.NotificationMaskResource;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.ces.CesNotificationMaskService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -29,8 +25,6 @@ import java.util.List;
  */
 @Component
 public class CesCreateNotificationMaskTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CesCreateNotificationMaskTool.class);
 
     private final CesNotificationMaskService service;
 
@@ -61,7 +55,7 @@ public class CesCreateNotificationMaskTool {
      * @param endTime           截止时间 {@code HH:mm:ss}，可选
      * @param effectiveTimezone 时区字符串，可选
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.ces.dto.CesCreateNotificationMaskResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "create_notification_mask",
@@ -120,13 +114,6 @@ public class CesCreateNotificationMaskTool {
                 maskName, relationType, relationIds, resources, metricNames, productMetrics,
                 resourceLevel, productName, maskType,
                 startDate, startTime, endDate, endTime, effectiveTimezone);
-        try {
-            return service.createNotificationMask(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("create_notification_mask failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("create_notification_mask", () -> service.createNotificationMask(req));
     }
 }

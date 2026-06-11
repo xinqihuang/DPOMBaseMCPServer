@@ -52,4 +52,24 @@ class ErrorCodeTest {
     void internalNotRetryable() {
         assertThat(ErrorCode.INTERNAL.isRetryable()).isFalse();
     }
+
+    @Test
+    @DisplayName("every error code carries a non-blank agent-facing hint")
+    void everyCodeHasHint() {
+        for (ErrorCode code : ErrorCode.values()) {
+            assertThat(code.getHint())
+                    .as("hint of %s", code)
+                    .isNotBlank();
+        }
+    }
+
+    @Test
+    @DisplayName("ErrorResponse.of populates hint from the error code")
+    void errorResponsePopulatesHint() {
+        ErrorResponse resp = ErrorResponse.of(ErrorCode.UPSTREAM_THROTTLED, "throttled", "trace-1");
+
+        assertThat(resp.hint()).isEqualTo(ErrorCode.UPSTREAM_THROTTLED.getHint());
+        assertThat(resp.retryable()).isTrue();
+        assertThat(resp.upstreamTraceId()).isEqualTo("trace-1");
+    }
 }

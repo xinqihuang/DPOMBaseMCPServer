@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.ces.CesMetricsService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -26,8 +22,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CesMetricsTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CesMetricsTool.class);
 
     private final CesMetricsService service;
 
@@ -54,7 +48,8 @@ public class CesMetricsTool {
      * @param start      上一次响应返回的分页标记，可选
      * @param order      排序方式，{@code "asc"} 或 {@code "desc"}（默认 {@code "desc"}）
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse}，
-     *         捕获 {@link SmartomException} 时返回 {@link ErrorResponse}
+     *         捕获 {@link com.huawei.smartom.agentic.common.exception.SmartomException}
+     *         时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "list_ces_metrics",
@@ -83,13 +78,6 @@ public class CesMetricsTool {
 
         CesListMetricsRequest req = new CesListMetricsRequest(
                 namespace, metricName, dimName, dimValue, limit, start, order);
-        try {
-            return service.listMetrics(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("list_ces_metrics failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("list_ces_metrics", () -> service.listMetrics(req));
     }
 }

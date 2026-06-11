@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmGetTopologyRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.apm.ApmTraceService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -23,8 +19,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ApmTopologyTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ApmTopologyTool.class);
 
     private final ApmTraceService service;
 
@@ -42,7 +36,7 @@ public class ApmTopologyTool {
      *
      * @param traceId 调用链 traceId
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.apm.dto.ApmGetTopologyResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "get_service_topology",
@@ -57,13 +51,6 @@ public class ApmTopologyTool {
             String traceId) {
 
         ApmGetTopologyRequest req = new ApmGetTopologyRequest(traceId);
-        try {
-            return service.getTopology(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("get_service_topology failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("get_service_topology", () -> service.getTopology(req));
     }
 }

@@ -6,12 +6,8 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendViewConfig;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.apm.ApmTrendService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -29,8 +25,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ApmTrendTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ApmTrendTool.class);
 
     private final ApmTrendService service;
 
@@ -54,7 +48,7 @@ public class ApmTrendTool {
      * @param endTime       结束时间字符串，必填
      * @param viewConfig    视图配置（嵌套对象，含 view_type/metric_set/...），必填
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "show_apm_trend",
@@ -102,13 +96,6 @@ public class ApmTrendTool {
 
         ApmTrendRequest req = new ApmTrendRequest(
                 businessId, viewConfig, instanceId, monitorItemId, envId, startTime, endTime);
-        try {
-            return service.showTrend(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("show_apm_trend failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("show_apm_trend", () -> service.showTrend(req));
     }
 }

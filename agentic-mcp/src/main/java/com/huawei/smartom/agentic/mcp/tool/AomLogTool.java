@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.aom.AomLogService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -23,8 +19,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AomLogTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AomLogTool.class);
 
     private final AomLogService service;
 
@@ -47,7 +41,7 @@ public class AomLogTool {
      * @param pageSize   单页大小，可选（默认 100）
      * @param isDesc     是否倒序，可选（默认 true）
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.aom.dto.AomQueryLogsResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "query_logs",
@@ -77,13 +71,6 @@ public class AomLogTool {
 
         AomQueryLogsRequest req = new AomQueryLogsRequest(
                 category, startTime, endTime, keyWord, pageSize, isDesc);
-        try {
-            return service.queryLogs(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("query_logs failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("query_logs", () -> service.queryLogs(req));
     }
 }

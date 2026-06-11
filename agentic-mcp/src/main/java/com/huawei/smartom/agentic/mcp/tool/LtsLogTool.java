@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogsRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.lts.LtsLogService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -28,8 +24,6 @@ import java.util.Map;
  */
 @Component
 public class LtsLogTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LtsLogTool.class);
 
     private final LtsLogService service;
 
@@ -63,7 +57,7 @@ public class LtsLogTool {
      * @param cursorTime       游标分页：与 {@code lineNum} 配对的 {@code __time__} 字符串，可选
      * @param scrollId         scroll API 分页 id，可选
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogsResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "query_lts_logs",
@@ -125,13 +119,6 @@ public class LtsLogTool {
                 labels, keywords, query, isAnalysisQuery, isCount, limit,
                 isDesc, highlight, isIterative, searchType,
                 lineNum, cursorTime, scrollId);
-        try {
-            return service.queryLogs(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("query_lts_logs failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("query_lts_logs", () -> service.queryLogs(req));
     }
 }

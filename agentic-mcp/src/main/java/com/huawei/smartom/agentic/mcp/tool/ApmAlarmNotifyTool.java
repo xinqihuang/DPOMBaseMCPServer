@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.apm.ApmAlarmService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -26,8 +22,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ApmAlarmNotifyTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ApmAlarmNotifyTool.class);
 
     private final ApmAlarmService service;
 
@@ -49,7 +43,7 @@ public class ApmAlarmNotifyTool {
      * @param pageSize    单页大小 [1, 100]；可选
      * @param region      资源 region 过滤
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "list_alarm_notify",
@@ -78,13 +72,6 @@ public class ApmAlarmNotifyTool {
 
         ApmAlarmNotifyRequest req = new ApmAlarmNotifyRequest(
                 businessId, alarmDataId, page, pageSize, region);
-        try {
-            return service.listAlarmNotify(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("list_alarm_notify failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("list_alarm_notify", () -> service.listAlarmNotify(req));
     }
 }

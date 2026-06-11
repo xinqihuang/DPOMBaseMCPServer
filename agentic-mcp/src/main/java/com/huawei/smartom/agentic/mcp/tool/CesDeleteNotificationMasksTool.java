@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesDeleteNotificationMasksRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.ces.CesNotificationMaskService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -25,8 +21,6 @@ import java.util.List;
  */
 @Component
 public class CesDeleteNotificationMasksTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CesDeleteNotificationMasksTool.class);
 
     private final CesNotificationMaskService service;
 
@@ -44,7 +38,7 @@ public class CesDeleteNotificationMasksTool {
      *
      * @param notificationMaskIds 屏蔽规则 ID 列表，长度 [1, 100]
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.ces.dto.CesDeleteNotificationMasksResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "delete_notification_masks",
@@ -60,13 +54,6 @@ public class CesDeleteNotificationMasksTool {
 
         CesDeleteNotificationMasksRequest req =
                 new CesDeleteNotificationMasksRequest(notificationMaskIds);
-        try {
-            return service.deleteNotificationMasks(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("delete_notification_masks failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("delete_notification_masks", () -> service.deleteNotificationMasks(req));
     }
 }

@@ -5,12 +5,8 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.ces.CesAlarmService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -23,8 +19,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CesAlarmTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CesAlarmTool.class);
 
     private final CesAlarmService service;
 
@@ -51,7 +45,7 @@ public class CesAlarmTool {
      * @param start       分页偏移，可选（默认 0）
      * @param limit       分页大小 [1, 100]，可选（默认 100）
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.ces.dto.CesListAlarmsResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "list_alarms",
@@ -97,13 +91,6 @@ public class CesAlarmTool {
         CesListAlarmsRequest req = new CesListAlarmsRequest(
                 groupId, alarmId, alarmName, alarmStatus, alarmLevel,
                 namespace, from, to, start, limit);
-        try {
-            return service.listAlarms(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("list_alarms failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("list_alarms", () -> service.listAlarms(req));
     }
 }

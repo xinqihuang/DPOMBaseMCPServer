@@ -4,13 +4,9 @@
 
 package com.huawei.smartom.agentic.mcp.tool;
 
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.correlate.CorrelateIncidentRequest;
 import com.huawei.smartom.agentic.monitoring.correlate.CorrelateIncidentService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -26,8 +22,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CorrelateIncidentTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CorrelateIncidentTool.class);
 
     private final CorrelateIncidentService service;
 
@@ -50,7 +44,8 @@ public class CorrelateIncidentTool {
      * @param logKeyword      AOM 日志关键字，可选
      * @param apmTraceId      APM trace id，可选（为空则跳过拓扑分支）
      * @param apmSource       APM 入口资源，可选
-     * @return 各分支结果聚合（含 success / failure / skipped 状态）；输入校验失败时返回 {@link ErrorResponse}
+     * @return 各分支结果聚合（含 success / failure / skipped 状态）；
+     *         输入校验失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "correlate_incident",
@@ -83,13 +78,6 @@ public class CorrelateIncidentTool {
         CorrelateIncidentRequest req = new CorrelateIncidentRequest(
                 startTimeMillis, endTimeMillis, cesNamespace,
                 logCategory, logKeyword, apmTraceId, apmSource);
-        try {
-            return service.correlate(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("correlate_incident failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("correlate_incident", () -> service.correlate(req));
     }
 }

@@ -6,12 +6,8 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricQuery;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataRequest;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.ces.CesBatchMetricDataService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -29,8 +25,6 @@ import java.util.List;
  */
 @Component
 public class CesBatchMetricDataTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CesBatchMetricDataTool.class);
 
     private final CesBatchMetricDataService service;
 
@@ -53,7 +47,7 @@ public class CesBatchMetricDataTool {
      * @param to      结束时间（毫秒）
      * @return 成功时返回
      *         {@link com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "batch_query_ces_metric_data",
@@ -83,18 +77,13 @@ public class CesBatchMetricDataTool {
             @ToolParam(description = "End time in UNIX millis (exclusive), must be > from.")
             Long to) {
 
-        try {
+        return ToolCallSupport.execute("batch_query_ces_metric_data", () -> {
             CesBatchQueryMetricDataRequest req = new CesBatchQueryMetricDataRequest(
                     metrics,
                     ToolValidations.requireCesFilter(filter),
                     ToolValidations.requireCesPeriod(period),
                     from, to);
             return service.batchQueryMetricData(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("batch_query_ces_metric_data failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        });
     }
 }

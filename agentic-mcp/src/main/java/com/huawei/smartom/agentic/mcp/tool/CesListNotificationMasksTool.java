@@ -6,12 +6,8 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListNotificationMasksRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.NotificationMaskDimension;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.ces.CesNotificationMaskService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -26,8 +22,6 @@ import java.util.List;
  */
 @Component
 public class CesListNotificationMasksTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CesListNotificationMasksTool.class);
 
     private final CesNotificationMaskService service;
 
@@ -58,7 +52,7 @@ public class CesListNotificationMasksTool {
      * @param namespace     命名空间，可选
      * @param dimensions    资源维度列表，可选
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.ces.dto.CesListNotificationMasksResponse}，
-     *         失败时返回 {@link ErrorResponse}
+     *         失败时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "list_notification_masks",
@@ -109,13 +103,6 @@ public class CesListNotificationMasksTool {
         CesListNotificationMasksRequest req = new CesListNotificationMasksRequest(
                 offset, limit, sortKey, sortDir, relationType, relationIds, metricName,
                 resourceLevel, maskId, maskName, maskStatus, resourceId, namespace, dimensions);
-        try {
-            return service.listNotificationMasks(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("list_notification_masks failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("list_notification_masks", () -> service.listNotificationMasks(req));
     }
 }

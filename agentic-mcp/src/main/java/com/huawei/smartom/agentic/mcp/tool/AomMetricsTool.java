@@ -6,12 +6,8 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsRequest;
 import com.huawei.smartom.agentic.adapter.aom.dto.AomMetricDimension;
-import com.huawei.smartom.agentic.common.error.ErrorResponse;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
 import com.huawei.smartom.agentic.monitoring.aom.AomMetricsService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -29,8 +25,6 @@ import java.util.List;
  */
 @Component
 public class AomMetricsTool {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AomMetricsTool.class);
 
     private final AomMetricsService service;
 
@@ -57,7 +51,8 @@ public class AomMetricsTool {
      * @param limit       分页大小，取值范围 [1, 1000]，为 {@code null} 时由下游使用默认值
      * @param start       分页偏移（从 0 开始），为 {@code null} 时由下游使用默认值
      * @return 成功时返回 {@link com.huawei.smartom.agentic.adapter.aom.dto.AomListMetricsResponse}，
-     *         捕获 {@link SmartomException} 时返回 {@link ErrorResponse}
+     *         捕获 {@link com.huawei.smartom.agentic.common.exception.SmartomException}
+     *         时返回 {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
      */
     @Tool(
             name = "list_aom_metrics",
@@ -101,13 +96,6 @@ public class AomMetricsTool {
 
         AomListMetricsRequest req = new AomListMetricsRequest(
                 namespace, metricName, dimensions, inventoryId, limit, start);
-        try {
-            return service.listMetrics(req);
-        }
-        catch (SmartomException e) {
-            LOG.warn("list_aom_metrics failed, errorCode={}, upstreamTraceId={}",
-                    e.getErrorCode(), e.getUpstreamTraceId());
-            return ErrorResponse.of(e.getErrorCode(), e.getMessage(), e.getUpstreamTraceId());
-        }
+        return ToolCallSupport.execute("list_aom_metrics", () -> service.listMetrics(req));
     }
 }
