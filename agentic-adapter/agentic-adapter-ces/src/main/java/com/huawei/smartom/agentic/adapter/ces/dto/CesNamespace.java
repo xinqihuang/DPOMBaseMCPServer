@@ -17,9 +17,10 @@ import java.util.Arrays;
  * 不再凭先验拼 namespace 字符串。响应侧 DTO（如 {@link CesMetricInfo}）仍以
  * {@code String} 承载（§4.1 无损投影），两侧职责不同，请勿混用。
  *
- * <p>已知边界：RDS for MySQL 集群版的 {@code SYS.RDS_MYSQL_CLUSTER} <strong>不进本枚举</strong>——
- * Agent 无法判定实例部署形态，统一传 {@link #SYS_RDS}，由 service 层探测后透明路由
- * （见 monitoring 模块的 RDS fallback 实现与 {@code docs/tasks/T24-ces-namespace-enum.md}）。
+ * <p>已知边界：RDS for MySQL 按部署形态分裂为两个命名空间——主备/单机是 {@link #SYS_RDS}，
+ * 集群版是 {@link #SYS_RDS_MYSQL_CLUSTER}。Agent 不确定实例形态时，应先用带缓存的
+ * {@code list_ces_metrics} 探测哪个命名空间下存在该实例的指标定义，再发起数据查询
+ * （Agent 自编排，服务端不做隐式路由，见 {@code docs/tasks/T24-ces-namespace-enum.md}）。
  *
  * <p>取值见 <a href="https://support.huaweicloud.com/intl/en-us/usermanual-ces/ces_01_0059.html">
  * Services Interconnected with Cloud Eye</a>。
@@ -59,8 +60,11 @@ public enum CesNamespace {
     /** API 网关（共享版）。 */
     SYS_APIG("SYS.APIG", "API网关(共享版)"),
 
-    /** 关系型数据库（含 MySQL 集群版，由 service 层 fallback 透明路由）。 */
+    /** 关系型数据库（主备/单机形态）。 */
     SYS_RDS("SYS.RDS", "关系型数据库"),
+
+    /** 关系型数据库 MySQL 集群版（与 {@link #SYS_RDS} 按部署形态分裂，先经 list_ces_metrics 探测）。 */
+    SYS_RDS_MYSQL_CLUSTER("SYS.RDS_MYSQL_CLUSTER", "关系型数据库(MySQL集群版)"),
 
     /** 弹性负载均衡。 */
     SYS_ELB("SYS.ELB", "弹性负载均衡"),

@@ -23,7 +23,8 @@ import org.springframework.stereotype.Service;
  *   <li>按 {@code list_ces_metrics} 规约校验入参，若违反则抛出 {@link InvalidParamException}</li>
  *   <li>将实际的 SDK 调用委托给 adapter 层</li>
  *   <li>对查询结果做 Caffeine TTL 缓存（T24）：指标定义目录读频高、变化低，
- *       同时作为 SYS_RDS 形态 fallback 的探测原语被两个数据查询 service 复用</li>
+ *       Agent 还会用它探测 RDS 实例归属的命名空间（SYS.RDS vs SYS.RDS_MYSQL_CLUSTER），
+ *       缓存使重复探测几乎零成本</li>
  * </ul>
  *
  * @author h00884391
@@ -51,7 +52,7 @@ public class CesMetricsService {
      *
      * <p>结果按整个请求 record 作 key 缓存（record 值语义 equals 覆盖全部参数，
      * 紧凑构造器已归一化 limit/order 默认值）；失败（异常）与空结果不写缓存——
-     * 空结果对 RDS fallback 探测是触发信号，缓存它会把暂时性问题固化一整天。
+     * 空结果是 Agent 探测 RDS 命名空间归属的判定信号，缓存它会把暂时性问题固化一整天。
      *
      * @param request 请求 DTO，不能为 null
      * @return 列表查询结果

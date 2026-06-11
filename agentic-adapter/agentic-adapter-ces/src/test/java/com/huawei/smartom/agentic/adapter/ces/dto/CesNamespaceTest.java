@@ -22,15 +22,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CesNamespaceTest {
 
     @Test
-    @DisplayName("enum contains exactly the 14 supported namespaces")
-    void containsExactly14SupportedValues() {
-        assertThat(CesNamespace.values()).hasSize(14);
+    @DisplayName("enum contains exactly the 15 supported namespaces")
+    void containsExactly15SupportedValues() {
+        assertThat(CesNamespace.values()).hasSize(15);
         assertThat(CesNamespace.values())
                 .extracting(CesNamespace::getValue)
                 .containsExactlyInAnyOrder(
                         "SYS.ECS", "SYS.OBS", "SYS.EVS", "SYS.VPC", "SYS.GEIP",
                         "SYS.DMS", "SYS.DCS", "SYS.WAF", "SYS.CFW", "SYS.APIG",
-                        "SYS.RDS", "SYS.ELB", "SYS.DNS", "SYS.NAT");
+                        "SYS.RDS", "SYS.RDS_MYSQL_CLUSTER", "SYS.ELB", "SYS.DNS", "SYS.NAT");
     }
 
     @Test
@@ -61,9 +61,10 @@ class CesNamespaceTest {
     }
 
     @Test
-    @DisplayName("SYS.RDS_MYSQL_CLUSTER stays out of the enum (service-internal fallback only)")
-    void rdsMysqlClusterNotInEnum() {
-        assertThatThrownBy(() -> CesNamespace.fromValue("SYS.RDS_MYSQL_CLUSTER"))
-                .isInstanceOf(IllegalArgumentException.class);
+    @DisplayName("both RDS deployment-form namespaces are explicitly selectable")
+    void bothRdsNamespacesSelectable() {
+        assertThat(CesNamespace.fromValue("SYS.RDS")).isEqualTo(CesNamespace.SYS_RDS);
+        assertThat(CesNamespace.fromValue("SYS.RDS_MYSQL_CLUSTER"))
+                .isEqualTo(CesNamespace.SYS_RDS_MYSQL_CLUSTER);
     }
 }

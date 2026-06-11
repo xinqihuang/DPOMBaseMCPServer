@@ -59,8 +59,7 @@ class CesMetricDataToolTest {
     @Test
     @DisplayName("Success: filter/period strings parsed to enums and request passed through")
     void successPassthrough() {
-        CesQueryMetricDataResponse expected =
-                new CesQueryMetricDataResponse(METRIC, List.of(), NS.getValue());
+        CesQueryMetricDataResponse expected = new CesQueryMetricDataResponse(METRIC, List.of());
         when(service.queryMetricData(any(CesQueryMetricDataRequest.class))).thenReturn(expected);
 
         Object result = tool.queryCesMetricData(

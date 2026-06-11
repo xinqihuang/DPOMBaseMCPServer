@@ -101,7 +101,6 @@ class CesBatchListMetricDataContractTest {
 
         CesBatchMetricResult m0 = out.metrics().get(0);
         assertThat(m0.namespace()).isEqualTo("SYS.ECS");
-        assertThat(m0.resolvedNamespace()).isEqualTo("SYS.ECS");
         assertThat(m0.metricName()).isEqualTo("cpu_util");
         assertThat(m0.unit()).isEqualTo("%");
         assertThat(m0.dimensions()).hasSize(1);

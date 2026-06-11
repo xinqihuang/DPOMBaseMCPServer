@@ -94,7 +94,6 @@ class CesShowMetricDataContractTest {
                 1718000000000L, 1718000300000L));
 
         assertThat(out.metricName()).isEqualTo("cpu_util");
-        assertThat(out.resolvedNamespace()).isEqualTo("SYS.ECS");
         assertThat(out.datapoints()).hasSize(2);
 
         CesDatapoint p0 = out.datapoints().get(0);

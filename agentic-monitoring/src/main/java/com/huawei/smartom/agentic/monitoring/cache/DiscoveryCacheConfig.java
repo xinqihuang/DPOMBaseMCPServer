@@ -22,7 +22,7 @@ import java.time.Duration;
  * <ul>
  *   <li>APM：{@link #CACHE_ENV_ITEMS} / {@link #CACHE_VIEW_CONFIG}（T23）；</li>
  *   <li>CES：{@link #CACHE_CES_METRICS}，即 {@code list_ces_metrics} 的指标定义目录（T24）。
- *       它同时也是 SYS_RDS 形态 fallback 的探测原语，缓存使探测几乎零成本。</li>
+ *       Agent 也会用它探测 RDS 实例的命名空间归属，缓存使重复探测几乎零成本。</li>
  * </ul>
  * 实时数据端点（{@code show_apm_trend}、CES 指标数据查询）不在此处加缓存。
  *

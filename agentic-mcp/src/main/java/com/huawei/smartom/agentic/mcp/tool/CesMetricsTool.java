@@ -61,15 +61,16 @@ public class CesMetricsTool {
                     query_ces_metric_data / batch_query_ces_metric_data to discover the REAL \
                     metric_name and dimension NAMES under a namespace or for a specific resource \
                     — do NOT invent them from prior knowledge. The namespace parameter is a \
-                    closed enum of 14 supported services. Returns metric metadata (name, \
+                    closed enum of 15 supported values. Returns metric metadata (name, \
                     namespace, dimensions, unit), not actual data points; results are cached \
                     server-side for about 1 day.""")
     public Object listCesMetrics(
             @ToolParam(description = "CES namespace (closed enum). One of: SYS.ECS (ECS), "
                     + "SYS.OBS (OBS), SYS.EVS (EVS disk), SYS.VPC (VPC/EIP), SYS.GEIP "
                     + "(Global EIP), SYS.DMS (DMS), SYS.DCS (DCS Redis), SYS.WAF (WAF), "
-                    + "SYS.CFW (CFW), SYS.APIG (APIG shared), SYS.RDS (RDS), SYS.ELB (ELB), "
-                    + "SYS.DNS (DNS), SYS.NAT (NAT). Optional.", required = false)
+                    + "SYS.CFW (CFW), SYS.APIG (APIG shared), SYS.RDS (RDS primary/standby), "
+                    + "SYS.RDS_MYSQL_CLUSTER (RDS MySQL cluster), SYS.ELB (ELB), SYS.DNS (DNS), "
+                    + "SYS.NAT (NAT). Optional.", required = false)
             CesNamespace namespace,
             @ToolParam(description = "Exact metric name, e.g. cpu_util, optional", required = false)
             String metricName,

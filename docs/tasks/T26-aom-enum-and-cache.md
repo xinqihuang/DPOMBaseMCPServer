@@ -9,7 +9,7 @@ T24 已对 CES 完成请求侧收口；AOM 三个工具（`list_aom_metrics` / `
 - **statistics / period / fill_value / category**：CES API 同款「封闭集且多年不变」→ **§4.3 (a) 严格枚举**（ADR-004 严格档）。现状是自由 String/Integer + service 层 `ALLOWED_*` Set 校验（`AomMetricDataService.java:35-41`、`AomLogService` 的 `ALLOWED_CATEGORIES`），取值对 Agent 不可见，只能靠描述文本。
 - **namespace**：与 CES 的本质差异——AOM 除 5 个预定义值（`PAAS.CONTAINER/PAAS.NODE/PAAS.SLA/PAAS.AGGR/CUSTOMMETRICS`）外**合法接受用户自定义命名空间**（`AomPatterns.NAMESPACE` 与现有报错文案均明确容忍）。锁死枚举会废掉自定义指标查询 → **维持 String + 模式校验**（ADR-004 宽容目录档），本卡不动。
 - **metric_name / 维度名**：按 namespace 变化、海量 → **§4.3 (b) 运行时发现**，`list_aom_metrics` 已存在，复用 + 加缓存。
-- **无 RDS 式 fallback 需求**：AOM 不存在同一资源因部署形态分裂到两个 namespace 的问题，T24 的探测路由 / `resolved_namespace` 不适用本卡。
+- **无 RDS 式双命名空间问题**：AOM 不存在同一资源因部署形态分裂到两个 namespace 的问题，无需 T24 那样的探测指引。
 
 ## 设计
 
@@ -52,7 +52,7 @@ AomLogCategory      APP_LOG("app_log") / NODE_LOG("node_log") / CUSTOM_LOG("cust
 
 **不做**：
 - ❌ **namespace 不枚举**（自定义命名空间合法，维持 String + `AomPatterns` 校验——这是与 T24 的关键差异，别照搬）
-- ❌ 不做 RDS 式 fallback / `resolved_namespace`（AOM 无 namespace 分裂问题）
+- ❌ 不做 RDS 式双 namespace 处理（AOM 无 namespace 分裂问题）
 - ❌ `inventory_id` 不枚举（`resType_resId` 复合字符串，枚举化收益低）
 - ❌ 响应 DTO 一律不动（§4.1 无损）
 - ❌ `time_range` 格式、`query_logs` 的 keyword 语法不动（格式约束非词表，现有 Pattern 校验已覆盖）

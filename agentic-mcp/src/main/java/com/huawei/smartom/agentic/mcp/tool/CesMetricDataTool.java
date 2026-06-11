@@ -61,17 +61,19 @@ public class CesMetricDataTool {
                     list_ces_metrics -> this tool. metric_name and dimension NAMES MUST come \
                     from a prior list_ces_metrics response — do NOT invent them; dimension \
                     VALUES (e.g. the concrete instance_id) come from the alarm payload or \
-                    resource info. For RDS always pass namespace SYS.RDS — the server detects \
-                    cluster deployments automatically and reports the actually-queried namespace \
-                    in the resolved_namespace response field. 'from'/'to' are UNIX timestamps in \
-                    milliseconds; 'period' is the aggregation granularity in seconds \
-                    (1 / 60 / 300 / 1200 / 3600 / 14400 / 86400).""")
+                    resource info. RDS splits namespaces by deployment form: SYS.RDS for \
+                    primary/standby or single instances, SYS.RDS_MYSQL_CLUSTER for the MySQL \
+                    cluster edition — when unsure, probe with list_ces_metrics (cached) and use \
+                    the namespace that returns metric definitions for the instance. 'from'/'to' \
+                    are UNIX timestamps in milliseconds; 'period' is the aggregation granularity \
+                    in seconds (1 / 60 / 300 / 1200 / 3600 / 14400 / 86400).""")
     public Object queryCesMetricData(
             @ToolParam(description = "CES namespace (closed enum). One of: SYS.ECS (ECS), "
                     + "SYS.OBS (OBS), SYS.EVS (EVS disk), SYS.VPC (VPC/EIP), SYS.GEIP "
                     + "(Global EIP), SYS.DMS (DMS), SYS.DCS (DCS Redis), SYS.WAF (WAF), "
-                    + "SYS.CFW (CFW), SYS.APIG (APIG shared), SYS.RDS (RDS), SYS.ELB (ELB), "
-                    + "SYS.DNS (DNS), SYS.NAT (NAT).")
+                    + "SYS.CFW (CFW), SYS.APIG (APIG shared), SYS.RDS (RDS primary/standby), "
+                    + "SYS.RDS_MYSQL_CLUSTER (RDS MySQL cluster), SYS.ELB (ELB), SYS.DNS (DNS), "
+                    + "SYS.NAT (NAT).")
             CesNamespace namespace,
             @ToolParam(description = "Exact metric name from a prior list_ces_metrics response, "
                     + "e.g. cpu_util. Do not invent.")

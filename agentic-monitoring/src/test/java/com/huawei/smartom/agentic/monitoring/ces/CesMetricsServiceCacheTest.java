@@ -122,7 +122,7 @@ class CesMetricsServiceCacheTest {
     }
 
     /**
-     * 测试装配：注册被测 service 与 RDS 解析器所需的最小 Bean 集。
+     * 测试装配：注册被测 service 的最小 Bean 集。
      */
     @Configuration
     static class TestConfig {

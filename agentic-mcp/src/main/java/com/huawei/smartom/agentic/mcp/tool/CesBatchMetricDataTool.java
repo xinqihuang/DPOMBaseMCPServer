@@ -56,18 +56,19 @@ public class CesBatchMetricDataTool {
             description = """
                     Batch query monitoring data points for multiple CES (Cloud Eye Service) metrics \
                     in a single call. Up to 500 metric queries can be combined; each query specifies \
-                    namespace (closed enum of 14 supported services), metric_name and dimensions, \
+                    namespace (closed enum of 15 supported values), metric_name and dimensions, \
                     and they all share the same filter / period / from / to. Returns aggregated \
                     values (max / min / average / sum / variance) per period bucket for every \
                     metric, in the same order as requested. Prefer this over repeated \
                     query_ces_metric_data calls when fetching many metrics. Call order: \
                     list_ces_metrics -> this tool. metric_name and dimension NAMES MUST come from \
                     a prior list_ces_metrics response — do NOT invent them; dimension VALUES come \
-                    from the alarm payload or resource info. For RDS always pass namespace SYS.RDS \
-                    — the server detects cluster deployments automatically and reports the \
-                    actually-queried namespace in each result's resolved_namespace field. \
-                    'from'/'to' are UNIX timestamps in milliseconds; 'period' is the aggregation \
-                    granularity in seconds (1 / 60 / 300 / 1200 / 3600 / 14400 / 86400).""")
+                    from the alarm payload or resource info. RDS splits namespaces by deployment \
+                    form: SYS.RDS for primary/standby or single instances, SYS.RDS_MYSQL_CLUSTER \
+                    for the MySQL cluster edition — when unsure, probe with list_ces_metrics \
+                    (cached) and use the namespace that returns metric definitions. 'from'/'to' \
+                    are UNIX timestamps in milliseconds; 'period' is the aggregation granularity \
+                    in seconds (1 / 60 / 300 / 1200 / 3600 / 14400 / 86400).""")
     public Object batchQueryCesMetricData(
             @ToolParam(description = "Metric query items, 1-500. Each item: "
                     + "{\"namespace\":\"SYS.ECS\",\"metricName\":\"cpu_util\","
