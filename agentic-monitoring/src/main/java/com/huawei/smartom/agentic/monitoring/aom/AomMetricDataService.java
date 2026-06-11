@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * AOM 时序数据查询的业务编排。
@@ -28,9 +27,6 @@ import java.util.regex.Pattern;
  */
 @Service
 public class AomMetricDataService {
-
-    private static final Pattern TIME_RANGE_PATTERN =
-            Pattern.compile("^(-1|\\d{1,16})\\.(-1|\\d{1,16})\\.\\d{1,7}$");
 
     private static final Set<Integer> ALLOWED_PERIODS = Set.of(60, 300, 900, 3600);
 
@@ -81,7 +77,7 @@ public class AomMetricDataService {
                     "period must be 60/300/900/3600 (seconds), got: " + request.period());
         }
         if (Validations.isBlank(request.timeRange())
-                || !TIME_RANGE_PATTERN.matcher(request.timeRange()).matches()) {
+                || !AomPatterns.TIME_RANGE.matcher(request.timeRange()).matches()) {
             throw new InvalidParamException(
                     "time_range must follow 'startMs.endMs.durationMin' (use -1 as placeholder), got: "
                             + request.timeRange());

@@ -25,6 +25,14 @@ public final class AomPatterns {
     public static final Pattern NAMESPACE = Pattern.compile(
             "^(PAAS\\.(CONTAINER|NODE|SLA|AGGR)|CUSTOMMETRICS|[A-Za-z][A-Za-z0-9_]{2,63})$");
 
+    /**
+     * AOM 时间范围参数格式：{@code startTimeInMillis.endTimeInMillis.durationInMinutes}，
+     * 起止时间可为 {@code -1} 表示由服务端推算。{@code query_aom_metric_data} 与
+     * {@code list_aom_events} 共用。
+     */
+    public static final Pattern TIME_RANGE = Pattern.compile(
+            "^(-1|\\d{1,16})\\.(-1|\\d{1,16})\\.\\d{1,7}$");
+
     private AomPatterns() {
         // 工具类，禁止实例化
     }

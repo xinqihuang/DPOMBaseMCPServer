@@ -4,6 +4,7 @@
 
 package com.huawei.smartom.agentic.mcp.config;
 
+import com.huawei.smartom.agentic.mcp.tool.AomEventTool;
 import com.huawei.smartom.agentic.mcp.tool.AomLogTool;
 import com.huawei.smartom.agentic.mcp.tool.AomMetricDataTool;
 import com.huawei.smartom.agentic.mcp.tool.AomMetricsTool;
@@ -54,6 +55,7 @@ public class McpServerConfig {
      * @param aomMetricsTool                  AOM 指标定义查询工具
      * @param aomMetricDataTool               AOM 时序数据查询工具（T08）
      * @param aomLogTool                      AOM 日志查询工具（T13）
+     * @param aomEventTool                    AOM 事件/告警查询工具（T27）
      * @param apmTraceTool                    APM trace 搜索工具（T10）
      * @param apmTopologyTool                 APM 拓扑查询工具（T11）
      * @param correlateIncidentTool           跨组件事故关联工具（T12）
@@ -79,6 +81,7 @@ public class McpServerConfig {
             AomMetricsTool aomMetricsTool,
             AomMetricDataTool aomMetricDataTool,
             AomLogTool aomLogTool,
+            AomEventTool aomEventTool,
             ApmTraceTool apmTraceTool,
             ApmTopologyTool apmTopologyTool,
             CorrelateIncidentTool correlateIncidentTool,
@@ -102,6 +105,7 @@ public class McpServerConfig {
                         aomMetricsTool,
                         aomMetricDataTool,
                         aomLogTool,
+                        aomEventTool,
                         apmTraceTool,
                         apmTopologyTool,
                         correlateIncidentTool,

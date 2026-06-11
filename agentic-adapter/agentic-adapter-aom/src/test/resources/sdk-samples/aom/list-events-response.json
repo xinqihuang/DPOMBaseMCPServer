@@ -1,0 +1,40 @@
+{
+  "events": [
+    {
+      "id": "evt-7f3a9c10",
+      "event_sn": "sn-20260611-0001",
+      "starts_at": 1718000000000,
+      "ends_at": 1718000600000,
+      "arrives_at": 1718000001000,
+      "timeout": 60000,
+      "enterprise_project_id": "0",
+      "metadata": {
+        "event_severity": "Critical",
+        "event_type": "alarm",
+        "resource_id": "pod-order-svc-0",
+        "resource_provider": "CCE",
+        "namespace": "default"
+      },
+      "annotations": {
+        "message": "container cpu usage exceeds 90% for 5 minutes",
+        "alarm_probableCause_zh_cn": "容器 CPU 使用率过高"
+      },
+      "attach_rule": {
+        "name": "cpu-high-rule",
+        "id": 42
+      },
+      "policy": {
+        "name": "default-policy",
+        "level": 1
+      }
+    },
+    {
+      "id": "evt-minimal"
+    }
+  ],
+  "page_info": {
+    "current_count": 2,
+    "previous_marker": "0",
+    "next_marker": "2"
+  }
+}
