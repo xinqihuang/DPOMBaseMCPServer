@@ -95,3 +95,20 @@ CES 的 `ShowMetricData` 与 `BatchListMetricData` 接口的入参（`namespace`
 - 数据来源：https://support.huaweicloud.com/intl/en-us/usermanual-ecs/ecs_03_1002.html（ECS 基础监控指标）
 - 关联 spec：`docs/specs/tools/batch_query_ces_metric_data.md` §4
 - 提交：`ce6fd6c feat(ces): add batch_query_ces_metric_data tool and CES enum catalog`
+
+## 2026-06-11 更新（T24）：namespace 从"宽容目录"升级为请求侧受控枚举
+
+T24（`docs/tasks/T24-ces-namespace-enum.md`）将 `CesNamespace` 的定位从"宽容目录"
+（DTO 持 String、`fromValue` 未知值返回 `null`）调整为 **请求侧受控枚举**（CLAUDE.md §4.3 (a)）：
+
+- **请求侧**：三个 CES 查询工具的 namespace 入参直接以 `CesNamespace` 承载（14 个受支持取值），
+  枚举常量经 Spring AI 反射进工具 JSON Schema；`fromValue` 对未知值**抛
+  `IllegalArgumentException`**（严格拒绝），并同时接受 API 字面量（`SYS.ECS`）与常量名（`SYS_ECS`）
+  两种写法以兼容 Schema 渲染差异。
+- **响应侧与 adapter 边界不变**：响应 DTO 与 adapter 请求 DTO 的 namespace 仍为 String
+  （§4.1 无损投影；adapter 边界还需承载不进枚举的 `SYS.RDS_MYSQL_CLUSTER`，
+  由 service 层 SYS_RDS 形态 fallback 透明路由）。
+- 原"宽容目录"理由（华为云持续新增服务）对**诊断 Agent 的请求侧**不再成立：
+  Agent 凭先验拼 namespace 猜错时上游返回空数据而非报错，会无声带偏诊断（T23/T24 同源结论），
+  封闭集 + 显式扩容（改枚举发版）是更安全的运营模式。`metric_name` / 维度名仍走
+  `list_ces_metrics` 运行时发现（§4.3 (b)），不受本次调整影响。

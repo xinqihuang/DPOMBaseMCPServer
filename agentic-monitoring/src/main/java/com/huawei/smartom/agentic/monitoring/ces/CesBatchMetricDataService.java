@@ -15,6 +15,7 @@ import com.huawei.smartom.agentic.common.validation.Validations;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +31,10 @@ import java.util.List;
  *
  * <p>{@code filter} 与 {@code period} 已通过枚举强类型，不再在此校验取值集合。
  *
+ * <p>T24：查询项中 {@code namespace=SYS.RDS} 的条目先经 {@link CesRdsNamespaceResolver}
+ * 探测实例部署形态，集群版实例透明路由到 {@code SYS.RDS_MYSQL_CLUSTER}；实际取数的命名空间
+ * 通过每条结果的 {@code resolved_namespace} 字段回显，不做静默替换。
+ *
  * @author h00884391
  * @since 2026-06-02
  */
@@ -40,29 +45,58 @@ public class CesBatchMetricDataService {
     private static final int MAX_DIMENSIONS = 4;
 
     private final CesMetricsAdapter adapter;
+    private final CesRdsNamespaceResolver rdsResolver;
 
     /**
      * 构造一个由指定 adapter 支撑的 {@code CesBatchMetricDataService}。
      *
-     * @param adapter 执行实际 SDK 调用的 CES adapter
+     * @param adapter     执行实际 SDK 调用的 CES adapter
+     * @param rdsResolver SYS_RDS 形态 fallback 解析器
      */
-    public CesBatchMetricDataService(CesMetricsAdapter adapter) {
+    public CesBatchMetricDataService(CesMetricsAdapter adapter, CesRdsNamespaceResolver rdsResolver) {
         this.adapter = adapter;
+        this.rdsResolver = rdsResolver;
     }
 
     /**
-     * 校验入参后委托 adapter 执行批量查询。
+     * 校验入参、逐项解析 SYS_RDS 形态后委托 adapter 执行批量查询。
      *
      * @param request 查询请求，不能为 null
-     * @return 包含每条指标查询结果的响应 DTO
-     * @throws InvalidParamException 入参不符合规约时抛出
+     * @return 包含每条指标查询结果的响应 DTO，每条结果的 {@code resolved_namespace}
+     *         标明实际取数的命名空间
+     * @throws InvalidParamException 入参不符合规约，或某 SYS.RDS 查询项的实例在两个 RDS
+     *         namespace 下均无指标定义时抛出
      */
     public CesBatchQueryMetricDataResponse batchQueryMetricData(CesBatchQueryMetricDataRequest request) {
         if (request == null) {
             throw new InvalidParamException("request must not be null");
         }
         validate(request);
-        return adapter.batchQueryMetricData(request);
+        return adapter.batchQueryMetricData(resolveRdsNamespaces(request));
+    }
+
+    private CesBatchQueryMetricDataRequest resolveRdsNamespaces(CesBatchQueryMetricDataRequest request) {
+        boolean changed = false;
+        List<CesBatchMetricQuery> resolved = new ArrayList<>(request.metrics().size());
+        for (CesBatchMetricQuery query : request.metrics()) {
+            if (!CesRdsNamespaceResolver.appliesTo(query.namespace())) {
+                resolved.add(query);
+                continue;
+            }
+            String namespace = rdsResolver.resolve(query.dimensions().get(0));
+            if (namespace.equals(query.namespace())) {
+                resolved.add(query);
+            }
+            else {
+                resolved.add(new CesBatchMetricQuery(namespace, query.metricName(), query.dimensions()));
+                changed = true;
+            }
+        }
+        if (!changed) {
+            return request;
+        }
+        return new CesBatchQueryMetricDataRequest(
+                resolved, request.filter(), request.period(), request.from(), request.to());
     }
 
     private void validate(CesBatchQueryMetricDataRequest request) {

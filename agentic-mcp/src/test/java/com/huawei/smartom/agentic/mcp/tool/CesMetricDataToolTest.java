@@ -7,6 +7,7 @@ package com.huawei.smartom.agentic.mcp.tool;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricDimension;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricFilter;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricPeriod;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataResponse;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
  */
 class CesMetricDataToolTest {
 
-    private static final String NS = "SYS.ECS";
+    private static final CesNamespace NS = CesNamespace.SYS_ECS;
     private static final String METRIC = "cpu_util";
     private static final List<CesMetricDimension> DIMS =
             List.of(new CesMetricDimension("instance_id", "i-1"));
@@ -58,7 +59,8 @@ class CesMetricDataToolTest {
     @Test
     @DisplayName("Success: filter/period strings parsed to enums and request passed through")
     void successPassthrough() {
-        CesQueryMetricDataResponse expected = new CesQueryMetricDataResponse(METRIC, List.of());
+        CesQueryMetricDataResponse expected =
+                new CesQueryMetricDataResponse(METRIC, List.of(), NS.getValue());
         when(service.queryMetricData(any(CesQueryMetricDataRequest.class))).thenReturn(expected);
 
         Object result = tool.queryCesMetricData(
@@ -71,7 +73,7 @@ class CesMetricDataToolTest {
         CesQueryMetricDataRequest req = captor.getValue();
         assertThat(req.filter()).isEqualTo(CesMetricFilter.AVERAGE);
         assertThat(req.period()).isEqualTo(CesMetricPeriod.MIN_5);
-        assertThat(req.namespace()).isEqualTo(NS);
+        assertThat(req.namespace()).isEqualTo(NS.getValue());
         assertThat(req.metricName()).isEqualTo(METRIC);
     }
 

@@ -29,6 +29,10 @@ import java.util.List;
  *
  * <p>{@code filter} 与 {@code period} 已通过枚举强类型，不再在此校验取值集合。
  *
+ * <p>T24：{@code namespace=SYS.RDS} 时先经 {@link CesRdsNamespaceResolver} 探测实例部署形态，
+ * 集群版实例透明路由到 {@code SYS.RDS_MYSQL_CLUSTER}；实际取数的命名空间通过响应的
+ * {@code resolved_namespace} 字段回显，不做静默替换。
+ *
  * @author h00884391
  * @since 2026-05-28
  */
@@ -38,29 +42,46 @@ public class CesMetricDataService {
     private static final int MAX_DIMENSIONS = 4;
 
     private final CesMetricsAdapter adapter;
+    private final CesRdsNamespaceResolver rdsResolver;
 
     /**
      * 构造一个由指定 adapter 支撑的 {@code CesMetricDataService}。
      *
-     * @param adapter 执行实际 SDK 调用的 CES adapter
+     * @param adapter     执行实际 SDK 调用的 CES adapter
+     * @param rdsResolver SYS_RDS 形态 fallback 解析器
      */
-    public CesMetricDataService(CesMetricsAdapter adapter) {
+    public CesMetricDataService(CesMetricsAdapter adapter, CesRdsNamespaceResolver rdsResolver) {
         this.adapter = adapter;
+        this.rdsResolver = rdsResolver;
     }
 
     /**
-     * 校验入参后委托 adapter 执行查询。
+     * 校验入参、解析 SYS_RDS 形态后委托 adapter 执行查询。
      *
      * @param request 查询请求，不能为 null
-     * @return 包含数据点的响应 DTO
-     * @throws InvalidParamException 入参不符合规约时抛出
+     * @return 包含数据点的响应 DTO，{@code resolved_namespace} 标明实际取数的命名空间
+     * @throws InvalidParamException 入参不符合规约，或 SYS.RDS 实例在两个 RDS
+     *         namespace 下均无指标定义时抛出
      */
     public CesQueryMetricDataResponse queryMetricData(CesQueryMetricDataRequest request) {
         if (request == null) {
             throw new InvalidParamException("request must not be null");
         }
         validate(request);
-        return adapter.queryMetricData(request);
+        return adapter.queryMetricData(resolveRdsNamespace(request));
+    }
+
+    private CesQueryMetricDataRequest resolveRdsNamespace(CesQueryMetricDataRequest request) {
+        if (!CesRdsNamespaceResolver.appliesTo(request.namespace())) {
+            return request;
+        }
+        String resolved = rdsResolver.resolve(request.dimensions().get(0));
+        if (resolved.equals(request.namespace())) {
+            return request;
+        }
+        return new CesQueryMetricDataRequest(
+                resolved, request.metricName(), request.dimensions(),
+                request.filter(), request.period(), request.from(), request.to());
     }
 
     private void validate(CesQueryMetricDataRequest request) {

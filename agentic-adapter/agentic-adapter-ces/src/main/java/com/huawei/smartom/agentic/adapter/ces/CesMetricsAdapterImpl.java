@@ -131,7 +131,7 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
                 RATE_LIMITER_NAME, RETRY_NAME, API_SHOW_METRIC_DATA,
                 () -> cesClient.showMetricData(sdkRequest));
 
-        return toQueryMetricDataResponseDto(sdkResponse);
+        return toQueryMetricDataResponseDto(sdkResponse, request.namespace());
     }
 
     @Override
@@ -259,13 +259,14 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
         return sdk;
     }
 
-    private CesQueryMetricDataResponse toQueryMetricDataResponseDto(ShowMetricDataResponse sdkResp) {
+    private CesQueryMetricDataResponse toQueryMetricDataResponseDto(
+            ShowMetricDataResponse sdkResp, String resolvedNamespace) {
         List<Datapoint> sdkDatapoints =
                 sdkResp.getDatapoints() == null ? Collections.emptyList() : sdkResp.getDatapoints();
         List<CesDatapoint> datapoints = sdkDatapoints.stream()
                 .map(this::toDatapoint)
                 .toList();
-        return new CesQueryMetricDataResponse(sdkResp.getMetricName(), datapoints);
+        return new CesQueryMetricDataResponse(sdkResp.getMetricName(), datapoints, resolvedNamespace);
     }
 
     private CesDatapoint toDatapoint(Datapoint sdk) {
@@ -330,12 +331,15 @@ public class CesMetricsAdapterImpl implements CesMetricsAdapter {
         List<CesDatapoint> points = sdkPoints.stream()
                 .map(this::toBatchDatapoint)
                 .toList();
+        // resolved_namespace 取上游回显的 namespace——批量请求经 service 层 RDS fallback 后,
+        // 回显值即实际取数的命名空间，非 RDS 场景天然等于入参值。
         return new CesBatchMetricResult(
                 sdk.getNamespace(),
                 sdk.getMetricName(),
                 dims,
                 sdk.getUnit(),
-                points);
+                points,
+                sdk.getNamespace());
     }
 
     private CesDatapoint toBatchDatapoint(DatapointForBatchMetric sdk) {

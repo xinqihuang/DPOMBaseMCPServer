@@ -9,7 +9,10 @@ import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesPatterns;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
+import com.huawei.smartom.agentic.monitoring.cache.DiscoveryCacheConfig;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,6 +22,8 @@ import org.springframework.stereotype.Service;
  * <ul>
  *   <li>按 {@code list_ces_metrics} 规约校验入参，若违反则抛出 {@link InvalidParamException}</li>
  *   <li>将实际的 SDK 调用委托给 adapter 层</li>
+ *   <li>对查询结果做 Caffeine TTL 缓存（T24）：指标定义目录读频高、变化低，
+ *       同时作为 SYS_RDS 形态 fallback 的探测原语被两个数据查询 service 复用</li>
  * </ul>
  *
  * @author h00884391
@@ -44,16 +49,34 @@ public class CesMetricsService {
     /**
      * 校验入参，随后委托给 adapter 执行。
      *
+     * <p>结果按整个请求 record 作 key 缓存（record 值语义 equals 覆盖全部参数，
+     * 紧凑构造器已归一化 limit/order 默认值）；失败（异常）与空结果不写缓存——
+     * 空结果对 RDS fallback 探测是触发信号，缓存它会把暂时性问题固化一整天。
+     *
      * @param request 请求 DTO，不能为 null
      * @return 列表查询结果
      * @throws InvalidParamException 入参违反约束时抛出
      */
+    @Cacheable(
+            cacheNames = DiscoveryCacheConfig.CACHE_CES_METRICS,
+            key = "#request",
+            condition = "#request != null",
+            unless = "#result == null or #result.metrics() == null or #result.metrics().isEmpty()")
     public CesListMetricsResponse listMetrics(CesListMetricsRequest request) {
         if (request == null) {
             throw new InvalidParamException("request must not be null");
         }
         validate(request);
         return adapter.listMetrics(request);
+    }
+
+    /**
+     * 清空 {@code list_ces_metrics} 结果缓存。运维入口：当华为云侧新增指标定义
+     * 而 TTL 尚未到期时，可经由本方法强制失效。
+     */
+    @CacheEvict(cacheNames = DiscoveryCacheConfig.CACHE_CES_METRICS, allEntries = true)
+    public void evictListMetricsCache() {
+        // 注解驱动的整体失效，无方法体逻辑
     }
 
     private void validate(CesListMetricsRequest request) {

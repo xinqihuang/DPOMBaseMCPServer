@@ -4,12 +4,12 @@
 
 package com.huawei.smartom.agentic.mcp.tool;
 
-import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchMetricQuery;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesBatchQueryMetricDataResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricDimension;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricFilter;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricPeriod;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
 import com.huawei.smartom.agentic.common.error.ErrorResponse;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
@@ -40,10 +40,10 @@ import static org.mockito.Mockito.when;
  */
 class CesBatchMetricDataToolTest {
 
-    private static final List<CesBatchMetricQuery> METRICS = List.of(
-            new CesBatchMetricQuery("SYS.ECS", "cpu_util",
+    private static final List<CesBatchMetricQueryInput> METRICS = List.of(
+            new CesBatchMetricQueryInput(CesNamespace.SYS_ECS, "cpu_util",
                     List.of(new CesMetricDimension("instance_id", "i-1"))),
-            new CesBatchMetricQuery("SYS.ECS", "mem_util",
+            new CesBatchMetricQueryInput(CesNamespace.SYS_ECS, "mem_util",
                     List.of(new CesMetricDimension("instance_id", "i-2"))));
 
     private static final long FROM = 1700000000000L;
@@ -75,6 +75,7 @@ class CesBatchMetricDataToolTest {
         assertThat(req.filter()).isEqualTo(CesMetricFilter.MAX);
         assertThat(req.period()).isEqualTo(CesMetricPeriod.HOUR_1);
         assertThat(req.metrics()).hasSize(2);
+        assertThat(req.metrics().get(0).namespace()).isEqualTo(CesNamespace.SYS_ECS.getValue());
     }
 
     @Test

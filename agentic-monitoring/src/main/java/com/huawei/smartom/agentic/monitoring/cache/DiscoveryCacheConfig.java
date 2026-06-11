@@ -16,18 +16,24 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
 
 /**
- * T23 「发现工具」缓存配置。
+ * 「发现工具」缓存配置（T23 APM + T24 CES）。
  *
- * <p>仅为 APM 发现工具的两个端点做堆内本地缓存（{@link #CACHE_ENV_ITEMS} /
- * {@link #CACHE_VIEW_CONFIG}），目的是缓存掉 MCP→华为云的 HTTP 往返；{@code show_apm_trend}
- * 需要实时数据，不在此处加缓存。
+ * <p>为发现类只读端点做堆内本地缓存，目的是缓存掉 MCP→华为云的 HTTP 往返：
+ * <ul>
+ *   <li>APM：{@link #CACHE_ENV_ITEMS} / {@link #CACHE_VIEW_CONFIG}（T23）；</li>
+ *   <li>CES：{@link #CACHE_CES_METRICS}，即 {@code list_ces_metrics} 的指标定义目录（T24）。
+ *       它同时也是 SYS_RDS 形态 fallback 的探测原语，缓存使探测几乎零成本。</li>
+ * </ul>
+ * 实时数据端点（{@code show_apm_trend}、CES 指标数据查询）不在此处加缓存。
  *
  * <p>实现采用 Caffeine：
  * <ul>
- *   <li>{@code expireAfterWrite}：可由 {@code apm.discovery-cache.ttl} 调节，默认 1 天；</li>
- *   <li>{@code maximumSize}：防无界增长，默认 1000；</li>
- *   <li>缓存 key 由 service 层 SpEL 显式构造，始终带 {@code env_id} 前缀——避免将来多 env
- *       部署时跨 env 串号（{@code collector_id} 是 env 局部的）。</li>
+ *   <li>{@code expireAfterWrite}：APM 由 {@code apm.discovery-cache.ttl} 调节，
+ *       CES 由 {@code ces.discovery-cache.ttl} 调节，默认均为 1 天；</li>
+ *   <li>{@code maximumSize}：防无界增长，APM 默认 1000，CES 默认 2000
+ *       （CES 缓存 key 含全部查询参数，组合空间更大）；</li>
+ *   <li>缓存 key 由 service 层显式构造：APM 始终带 {@code env_id} 前缀防跨 env 串号；
+ *       CES 直接以请求 record 为 key（值语义 equals 覆盖全部参数）。</li>
  * </ul>
  *
  * @author h00884391
@@ -43,24 +49,36 @@ public class DiscoveryCacheConfig {
     /** {@code show_apm_monitor_item_view_config} 结果缓存名。 */
     public static final String CACHE_VIEW_CONFIG = "apm-monitor-item-view-config";
 
+    /** {@code list_ces_metrics} 结果缓存名（T24）。 */
+    public static final String CACHE_CES_METRICS = "ces-list-metrics";
+
     private final Duration ttl;
     private final long maximumSize;
+    private final Duration cesTtl;
+    private final long cesMaximumSize;
 
     /**
      * 构造缓存配置。
      *
-     * @param ttl         缓存写入后过期时间，默认 {@code 1d}
-     * @param maximumSize 单缓存最大条目数，默认 {@code 1000}
+     * @param ttl            APM 缓存写入后过期时间，默认 {@code 1d}
+     * @param maximumSize    APM 单缓存最大条目数，默认 {@code 1000}
+     * @param cesTtl         CES 缓存写入后过期时间，默认 {@code 1d}
+     * @param cesMaximumSize CES 缓存最大条目数，默认 {@code 2000}
      */
     public DiscoveryCacheConfig(
             @Value("${apm.discovery-cache.ttl:1d}") Duration ttl,
-            @Value("${apm.discovery-cache.maximum-size:1000}") long maximumSize) {
+            @Value("${apm.discovery-cache.maximum-size:1000}") long maximumSize,
+            @Value("${ces.discovery-cache.ttl:1d}") Duration cesTtl,
+            @Value("${ces.discovery-cache.maximum-size:2000}") long cesMaximumSize) {
         this.ttl = ttl;
         this.maximumSize = maximumSize;
+        this.cesTtl = cesTtl;
+        this.cesMaximumSize = cesMaximumSize;
     }
 
     /**
-     * 注册 Caffeine 缓存管理器。
+     * 注册 Caffeine 缓存管理器。APM 两个缓存共享默认 spec，CES 缓存以独立 spec 注册，
+     * 便于按服务单独调节 TTL 与容量。
      *
      * @return 已配置 TTL 与容量上限的 {@link CaffeineCacheManager}
      */
@@ -70,6 +88,10 @@ public class DiscoveryCacheConfig {
         manager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(ttl)
                 .maximumSize(maximumSize));
+        manager.registerCustomCache(CACHE_CES_METRICS, Caffeine.newBuilder()
+                .expireAfterWrite(cesTtl)
+                .maximumSize(cesMaximumSize)
+                .build());
         return manager;
     }
 }

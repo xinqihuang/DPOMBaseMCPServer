@@ -6,6 +6,7 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricFilter;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricPeriod;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
 /**
@@ -41,6 +42,19 @@ final class ToolValidations {
         catch (IllegalArgumentException e) {
             throw new InvalidParamException(e.getMessage());
         }
+    }
+
+    /**
+     * 将受控枚举 namespace 转为 CES API 字面量（T24，.getValue() 映射集中于 Tool 层此一处）。
+     *
+     * <p>{@code null} 透传为 {@code null}——必填校验由 service 层完成，
+     * 以保证缺失时返回 {@code INVALID_PARAM} 而非 NPE。
+     *
+     * @param namespace 受控枚举命名空间，可为 {@code null}
+     * @return CES API 字面量（如 {@code SYS.ECS}），入参为 {@code null} 时返回 {@code null}
+     */
+    static String cesNamespaceValue(CesNamespace namespace) {
+        return namespace == null ? null : namespace.getValue();
     }
 
     /**

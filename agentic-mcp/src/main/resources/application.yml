@@ -21,6 +21,11 @@ apm:
     ttl: 1d
     maximum-size: 1000
 
+ces:
+  discovery-cache:
+    ttl: 1d
+    maximum-size: 2000
+
 server:
   port: 8080
 

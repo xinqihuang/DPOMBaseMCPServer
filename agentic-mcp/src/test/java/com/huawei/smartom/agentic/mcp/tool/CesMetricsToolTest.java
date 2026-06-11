@@ -6,6 +6,7 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse;
+import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesPagination;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
 import com.huawei.smartom.agentic.common.error.ErrorResponse;
@@ -49,7 +50,7 @@ class CesMetricsToolTest {
         when(service.listMetrics(any(CesListMetricsRequest.class))).thenReturn(expected);
 
         Object result = tool.listCesMetrics(
-                "SYS.ECS", null, null, null, 10, null, "desc");
+                CesNamespace.SYS_ECS, null, null, null, 10, null, "desc");
         assertThat(result).isSameAs(expected);
     }
 
