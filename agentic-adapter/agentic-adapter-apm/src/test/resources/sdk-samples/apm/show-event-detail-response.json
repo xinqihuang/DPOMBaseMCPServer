@@ -1,0 +1,21 @@
+{
+  "event_info": {
+    "env_name": "prod",
+    "app_name": "order-svc",
+    "event_id": "evt-100",
+    "trace_id": "trace-abc",
+    "span_id": "span-1",
+    "env_id": 1306682,
+    "method": "querySql",
+    "class_name": "com.example.OrderDao",
+    "time_used": 2456,
+    "has_error": true,
+    "error_reasons": "SQLTimeoutException",
+    "tags": {
+      "sql_clob_id": "clob-778",
+      "exceptionType": "java.sql.SQLTimeoutException",
+      "exceptionMessage": "Statement timed out after 2s"
+    },
+    "type": "SQL"
+  }
+}

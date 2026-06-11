@@ -1,0 +1,3 @@
+{
+  "clob_string": "java.sql.SQLTimeoutException: Statement timed out after 2s\n\tat com.example.OrderDao.querySql(OrderDao.java:88)\n\tat com.example.OrderService.list(OrderService.java:42)"
+}

@@ -4,10 +4,15 @@
 
 package com.huawei.smartom.agentic.adapter.apm;
 
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmClobDetailRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmClobDetailResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmEventDetailRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmEventDetailResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmGetTopologyRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmGetTopologyResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmQueryTracesRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmQueryTracesResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmTraceEventsResponse;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
 
 /**
@@ -38,4 +43,33 @@ public interface ApmTraceAdapter {
      * @throws SmartomException 当 SDK 或上游发生错误时抛出
      */
     ApmGetTopologyResponse getTopology(ApmGetTopologyRequest request);
+
+    /**
+     * 获取一个 trace 的全部调用链事件序列（{@code ShowTraceEvents}，T29）。
+     *
+     * @param traceId trace id，不能为空白
+     * @return 事件序列（无损覆盖 SDK 全部字段）
+     * @throws SmartomException 当 SDK 或上游发生错误时抛出
+     */
+    ApmTraceEventsResponse showTraceEvents(String traceId);
+
+    /**
+     * 获取单个调用链事件的详情（{@code ShowEventDetail}，T29）。
+     *
+     * @param request 四元组请求（trace/span/event/env），不能为 null
+     * @return 事件详情（无损覆盖 SDK 全部字段）
+     * @throws SmartomException 当 SDK 或上游发生错误时抛出
+     */
+    ApmEventDetailResponse showEventDetail(ApmEventDetailRequest request);
+
+    /**
+     * 按 clob 引用取回超长字段全文（{@code ShowClobDetail}，T29）。
+     *
+     * <p>{@code businessId} 为 {@code null} 时回落到配置默认值。
+     *
+     * @param request clob 请求，不能为 null
+     * @return clob 全文
+     * @throws SmartomException 当 SDK 或上游发生错误时抛出
+     */
+    ApmClobDetailResponse showClobDetail(ApmClobDetailRequest request);
 }

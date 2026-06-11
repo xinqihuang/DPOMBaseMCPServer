@@ -5,19 +5,26 @@
 package com.huawei.smartom.agentic.monitoring.apm;
 
 import com.huawei.smartom.agentic.adapter.apm.ApmTraceAdapter;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmClobDetailRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmClobDetailResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmEventDetailRequest;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmEventDetailResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmGetTopologyRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmGetTopologyResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmQueryTracesRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmQueryTracesResponse;
+import com.huawei.smartom.agentic.adapter.apm.dto.ApmTraceEventsResponse;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
+import com.huawei.smartom.agentic.common.validation.Validations;
 
 import org.springframework.stereotype.Service;
 
 /**
  * APM 调用链与拓扑查询的业务编排。
  *
- * <p>对 {@code query_traces} / {@code get_service_topology} 工具入参进行规约校验，
- * 校验通过后委托 adapter 调用 SDK。
+ * <p>对 {@code query_traces} / {@code get_service_topology} 以及 T29 根因诊断链三工具
+ * （{@code show_trace_events} / {@code show_event_detail} / {@code show_clob_detail}）
+ * 的入参进行规约校验，校验通过后委托 adapter 调用 SDK。诊断链全部为实时数据，不缓存。
  *
  * @author h00884391
  * @since 2026-05-28
@@ -70,6 +77,52 @@ public class ApmTraceService {
             throw new InvalidParamException("trace_id is required");
         }
         return adapter.getTopology(request);
+    }
+
+    /**
+     * 校验入参后委托 adapter 获取一个 trace 的全部调用链事件（T29）。
+     *
+     * @param traceId trace id，不能为空白
+     * @return 事件序列
+     * @throws InvalidParamException {@code traceId} 缺失或空白时抛出
+     */
+    public ApmTraceEventsResponse showTraceEvents(String traceId) {
+        Validations.requireNonBlank(traceId, "trace_id");
+        return adapter.showTraceEvents(traceId);
+    }
+
+    /**
+     * 校验入参后委托 adapter 获取单个调用链事件详情（T29）。
+     *
+     * @param request 四元组请求，不能为 null，四个参数全部必填
+     * @return 事件详情
+     * @throws InvalidParamException 任一入参缺失/空白时抛出
+     */
+    public ApmEventDetailResponse showEventDetail(ApmEventDetailRequest request) {
+        if (request == null) {
+            throw new InvalidParamException("request must not be null");
+        }
+        Validations.requireNonBlank(request.traceId(), "trace_id");
+        Validations.requireNonBlank(request.spanId(), "span_id");
+        Validations.requireNonBlank(request.eventId(), "event_id");
+        Validations.requireNonNull(request.envId(), "env_id");
+        return adapter.showEventDetail(request);
+    }
+
+    /**
+     * 校验入参后委托 adapter 取回 clob 全文（T29）。
+     *
+     * @param request clob 请求，不能为 null；{@code businessId} 可为 null（adapter 回落配置）
+     * @return clob 全文
+     * @throws InvalidParamException {@code envId} 或 {@code clobId} 缺失时抛出
+     */
+    public ApmClobDetailResponse showClobDetail(ApmClobDetailRequest request) {
+        if (request == null) {
+            throw new InvalidParamException("request must not be null");
+        }
+        Validations.requireNonNull(request.envId(), "env_id");
+        Validations.requireNonBlank(request.clobId(), "clob_id");
+        return adapter.showClobDetail(request);
     }
 
     private void validateTraces(ApmQueryTracesRequest request) {

@@ -1,0 +1,55 @@
+{
+  "span_event_list": [
+    {
+      "env_name": "prod",
+      "app_name": "order-svc",
+      "indent": 2,
+      "region": "cn-north-4",
+      "host_name": "node-1",
+      "ip_address": "192.168.1.10",
+      "instance_name": "order-svc-0",
+      "event_id": "evt-100",
+      "next_spanId": "span-2",
+      "source_event_id": "evt-099",
+      "method": "querySql",
+      "children_event_count": 0,
+      "discard": [
+        { "type": "sql", "count": 3, "totalTime": 1200 }
+      ],
+      "argument": "SELECT * FROM t_order WHERE ...",
+      "attachment": { "db_instance": "rds-1" },
+      "global_trace_id": "gtid-1",
+      "global_path": "0.1.2",
+      "trace_id": "trace-abc",
+      "span_id": "span-1",
+      "env_id": 1306682,
+      "instance_id": 88001,
+      "app_id": 555001,
+      "biz_id": 7000,
+      "domain_id": 12345,
+      "source": "MYSQL",
+      "real_source": "MYSQL_JDBC",
+      "start_time": 1718000000123,
+      "time_used": 2456,
+      "code": 500,
+      "class_name": "com.example.OrderDao",
+      "is_async": false,
+      "tags": {
+        "sql": "SELECT * FROM t_order WHERE ...",
+        "exceptionType": "java.sql.SQLTimeoutException",
+        "stacktrace_clob_id": "clob-777"
+      },
+      "has_error": true,
+      "error_reasons": "SQLTimeoutException",
+      "type": "SQL",
+      "http_method": "POST",
+      "biz_code": "ORDER_QUERY",
+      "id": "evt-100"
+    },
+    {
+      "event_id": "evt-101",
+      "trace_id": "trace-abc",
+      "span_id": "span-2"
+    }
+  ]
+}

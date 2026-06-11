@@ -12,9 +12,12 @@ import com.huawei.smartom.agentic.mcp.tool.ApmAlarmDataTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmAlarmNotifyTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmApplicationTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmBusinessTool;
+import com.huawei.smartom.agentic.mcp.tool.ApmClobDetailTool;
+import com.huawei.smartom.agentic.mcp.tool.ApmEventDetailTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmEnvMonitorItemsTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmMonitorItemViewConfigTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTopologyTool;
+import com.huawei.smartom.agentic.mcp.tool.ApmTraceEventsTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTraceTool;
 import com.huawei.smartom.agentic.mcp.tool.ApmTrendTool;
 import com.huawei.smartom.agentic.mcp.tool.CesAlarmTool;
@@ -73,6 +76,9 @@ public class McpServerConfig {
      * @param apmApplicationTool              APM 组件/环境搜索工具（T28 链路第 1 步）
      * @param apmEnvMonitorItemsTool          APM env 监控项发现工具（T23 链路第 1 步）
      * @param apmMonitorItemViewConfigTool    APM 视图配置发现工具（T23 链路第 2 步）
+     * @param apmTraceEventsTool              APM 调用链事件序列工具（T29 链路第 3 步）
+     * @param apmEventDetailTool              APM 事件详情工具（T29 链路第 4 步）
+     * @param apmClobDetailTool               APM clob 全文工具（T29 链路第 5 步）
      * @return 暴露所有已注册工具对象的 {@link MethodToolCallbackProvider}
      */
     @Bean
@@ -100,7 +106,10 @@ public class McpServerConfig {
             ApmBusinessTool apmBusinessTool,
             ApmApplicationTool apmApplicationTool,
             ApmEnvMonitorItemsTool apmEnvMonitorItemsTool,
-            ApmMonitorItemViewConfigTool apmMonitorItemViewConfigTool) {
+            ApmMonitorItemViewConfigTool apmMonitorItemViewConfigTool,
+            ApmTraceEventsTool apmTraceEventsTool,
+            ApmEventDetailTool apmEventDetailTool,
+            ApmClobDetailTool apmClobDetailTool) {
         return MethodToolCallbackProvider.builder()
                 .toolObjects(
                         helloWorldTool,
@@ -126,7 +135,10 @@ public class McpServerConfig {
                         apmBusinessTool,
                         apmApplicationTool,
                         apmEnvMonitorItemsTool,
-                        apmMonitorItemViewConfigTool)
+                        apmMonitorItemViewConfigTool,
+                        apmTraceEventsTool,
+                        apmEventDetailTool,
+                        apmClobDetailTool)
                 .build();
     }
 }
