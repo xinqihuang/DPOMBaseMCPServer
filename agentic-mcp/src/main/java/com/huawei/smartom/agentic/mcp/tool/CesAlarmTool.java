@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-05-28
  */
 @Component
-public class CesAlarmTool {
+public class CesAlarmTool implements McpTool {
 
     private final CesAlarmService service;
 

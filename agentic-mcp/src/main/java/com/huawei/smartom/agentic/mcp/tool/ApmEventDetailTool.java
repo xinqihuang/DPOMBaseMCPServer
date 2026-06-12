@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-06-11
  */
 @Component
-public class ApmEventDetailTool {
+public class ApmEventDetailTool implements McpTool {
 
     private final ApmTraceService service;
 

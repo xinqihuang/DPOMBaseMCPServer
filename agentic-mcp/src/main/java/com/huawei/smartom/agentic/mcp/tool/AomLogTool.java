@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-05-28
  */
 @Component
-public class AomLogTool {
+public class AomLogTool implements McpTool {
 
     private final AomLogService service;
 

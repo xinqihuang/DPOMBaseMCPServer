@@ -20,7 +20,7 @@ import java.util.List;
  * @since 2026-05-28
  */
 @Component
-public class CesDeleteNotificationMasksTool {
+public class CesDeleteNotificationMasksTool implements McpTool {
 
     private final CesNotificationMaskService service;
 

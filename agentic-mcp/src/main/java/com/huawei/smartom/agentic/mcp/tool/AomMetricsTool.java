@@ -24,7 +24,7 @@ import java.util.List;
  * @since 2026-05-21
  */
 @Component
-public class AomMetricsTool {
+public class AomMetricsTool implements McpTool {
 
     private final AomMetricsService service;
 

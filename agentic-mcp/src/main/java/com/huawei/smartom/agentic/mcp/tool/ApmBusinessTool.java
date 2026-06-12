@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-06-11
  */
 @Component
-public class ApmBusinessTool {
+public class ApmBusinessTool implements McpTool {
 
     private final ApmDiscoveryService service;
 

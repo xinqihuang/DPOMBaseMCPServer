@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-06-10
  */
 @Component
-public class ApmEnvMonitorItemsTool {
+public class ApmEnvMonitorItemsTool implements McpTool {
 
     private final ApmDiscoveryService service;
 

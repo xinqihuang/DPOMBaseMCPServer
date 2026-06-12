@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-06-03
  */
 @Component
-public class LtsLogContextTool {
+public class LtsLogContextTool implements McpTool {
 
     private final LtsLogContextService service;
 

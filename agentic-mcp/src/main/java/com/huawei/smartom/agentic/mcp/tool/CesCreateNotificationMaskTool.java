@@ -24,7 +24,7 @@ import java.util.List;
  * @since 2026-05-28
  */
 @Component
-public class CesCreateNotificationMaskTool {
+public class CesCreateNotificationMaskTool implements McpTool {
 
     private final CesNotificationMaskService service;
 

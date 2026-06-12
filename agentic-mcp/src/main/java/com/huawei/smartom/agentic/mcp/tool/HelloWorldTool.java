@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-05-21
  */
 @Component
-public class HelloWorldTool {
+public class HelloWorldTool implements McpTool {
 
     /**
      * 返回问候字符串，用于验证 MCP 服务器可达且工具分发链路正确。

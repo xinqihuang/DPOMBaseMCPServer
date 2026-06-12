@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-05-28
  */
 @Component
-public class CorrelateIncidentTool {
+public class CorrelateIncidentTool implements McpTool {
 
     private final CorrelateIncidentService service;
 

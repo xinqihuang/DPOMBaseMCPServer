@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-05-21
  */
 @Component
-public class CesMetricsTool {
+public class CesMetricsTool implements McpTool {
 
     private final CesMetricsService service;
 

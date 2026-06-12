@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-06-10
  */
 @Component
-public class ApmAlarmNotifyTool {
+public class ApmAlarmNotifyTool implements McpTool {
 
     private final ApmAlarmService service;
 

@@ -23,7 +23,7 @@ import java.util.List;
  * @since 2026-06-10
  */
 @Component
-public class ApmAlarmDataTool {
+public class ApmAlarmDataTool implements McpTool {
 
     private final ApmAlarmService service;
 

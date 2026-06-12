@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-06-10
  */
 @Component
-public class ApmTrendTool {
+public class ApmTrendTool implements McpTool {
 
     private final ApmTrendService service;
 

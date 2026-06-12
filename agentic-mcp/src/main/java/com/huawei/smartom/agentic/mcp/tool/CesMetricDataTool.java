@@ -26,7 +26,7 @@ import java.util.List;
  * @since 2026-05-28
  */
 @Component
-public class CesMetricDataTool {
+public class CesMetricDataTool implements McpTool {
 
     private final CesMetricDataService service;
 

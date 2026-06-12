@@ -25,7 +25,7 @@ import java.util.List;
  * @since 2026-06-11
  */
 @Component
-public class AomEventTool {
+public class AomEventTool implements McpTool {
 
     private final AomEventService service;
 

@@ -23,7 +23,7 @@ import java.util.Map;
  * @since 2026-06-03
  */
 @Component
-public class LtsLogTool {
+public class LtsLogTool implements McpTool {
 
     private final LtsLogService service;
 
