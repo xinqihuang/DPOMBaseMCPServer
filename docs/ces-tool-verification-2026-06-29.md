@@ -230,7 +230,76 @@ mvn -pl agentic-mcp -am checkstyle:check → BUILD SUCCESS                ✅
 - 提交：`0aa095d` — `T31: CES namespace 工具入参由枚举改为 String`（7 文件 +152/−43，未推送）
 - 项目记忆：`spring-ai-enum-param-valueof.md`（记录此 Spring AI 框架坑，后续任何 enum 入参新 tool 都会踩）
 
-## 8. 遗留与建议
+---
+
+## 9. 本机部署 + 对接 OpenClaw（2026-06-29 续）
+
+将修复后的 MCP Server 部署为本机常驻服务，并对接 OpenClaw（`/Users/huangxinqi/.local/bin/openclaw`，v2026.6.10），跑通端到端 agent turn。
+
+### 9.1 部署：launchd 常驻服务
+
+- **plist**：`~/Library/LaunchAgents/com.huawei.smartom.dpom-mcp.plist`（chmod 600）
+- **进程**：`/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home/bin/java -jar <repo>/agentic-mcp/target/agentic-mcp-0.0.1-SNAPSHOT.jar --spring.profiles.active=local`
+- **环境变量**：`HUAWEICLOUD_AK` / `HUAWEICLOUD_SK` / `HUAWEICLOUD_REGION=cn-north-9` / `HUAWEICLOUD_PROJECT_ID`（从 `.env.local` 映射；`huaweicloud.region` 在 yml 硬编码 `cn-southwest-2`，靠 `HUAWEICLOUD_REGION` 覆盖）
+- **保活**：`RunAtLoad` + `KeepAlive` + `ThrottleInterval=10`，日志 `<repo>/logs/dpom-mcp.{out,err}.log`
+- **端口**：8080(SSE) / 8081(actuator)，readiness `UP`
+- **管理**：`launchctl unload/load ~/Library/LaunchAgents/com.huawei.smartom.dpom-mcp.plist`
+
+### 9.2 对接 OpenClaw
+
+```
+openclaw mcp add dpom-mcp --transport sse --url http://127.0.0.1:8080/sse --no-probe
+openclaw mcp probe dpom-mcp   →  28 tools, resources, prompts ✅
+openclaw mcp reload
+```
+
+**坑 1：SSRF 拦截 localhost**。OpenClaw 的 mcp-http SSRF 守卫对 `localhost` 解析成 `127.0.0.1` 后与 `allowedOrigins` 里的 `http://localhost:8080` 不同源，私网检查不跳过，报 `Blocked: resolves to private/internal/special-use IP address`。改用 `http://127.0.0.1:8080/sse` 注册即通过（origin 精确匹配，`resolveSsrFPolicyForUrl` 自动把 hostname 加进 allowedHostnames 跳过私网检查）。`browser.ssrfPolicy.*` 对 mcp-http 无效。
+
+**坑 2：模型 provider**。OpenClaw `mcp.servers` 只给内嵌 agent 运行时用；`claude-cli` 后端是 passthrough 到 Claude Code，不接 OpenClaw 的 MCP。本机能跑的模型经 modelarts 的 anthropic 兼容代理（env `ANTHROPIC_BASE_URL=https://api.modelarts-maas.com/anthropic` + `ANTHROPIC_AUTH_TOKEN`，实际模型 `glm-5.2`）。在 `~/.openclaw/openclaw.json` 注册自定义 provider：
+
+```jsonc
+{
+  "models": {
+    "providers": {
+      "modelarts": {
+        "baseUrl": "https://api.modelarts-maas.com/anthropic",
+        "api": "anthropic-messages",
+        "apiKey": "<ANTHROPIC_AUTH_TOKEN>",
+        "models": [{ "id": "glm-5.2", "name": "GLM 5.2 (modelarts)", "api": "anthropic-messages", "input": ["text"] }]
+      }
+    }
+  }
+}
+```
+
+### 9.3 端到端 agent turn
+
+```
+openclaw agent --local --agent main --model modelarts/glm-5.2 \
+  --session-key main:ces-verify2 \
+  --message "调用 list_ces_metrics，namespace=SYS.ECS, limit=5，列出 metric_name"
+```
+
+Agent 实际调用 `dpom-mcp__list_ces_metrics`（`namespace=SYS.ECS, limit=5`），返回真实指标：
+
+| metric_name | 单位 |
+|---|---|
+| network_vm_pps_out | Packet/s |
+| network_vm_pps_in | Packet/s |
+| network_vm_newconnections | connect/s |
+| network_vm_connections | Count |
+| network_vm_bandwidth_out | Byte/s |
+
+`total=13239, has_more=true`。**Agent 传 `SYS.ECS` 点分形式且成功**——T31 修复在生效。
+
+完整链路：`OpenClaw agent → OpenClaw MCP 运行时 → SSE → DPOMBaseMCPServer(launchd) → 华为云 CES(cn-north-9) → 真实数据` ✅
+
+### 9.4 凭证与安全提示
+
+- launchd plist 与 `~/.openclaw/openclaw.json` 均含明文 AK/SK 与 modelarts token（均 chmod 600 / 本机 dev 可接受）。**切勿把 `~/.openclaw/openclaw.json` 提交进 git**。
+- 项目记忆 `local-deploy-openclaw.md` 记录了部署方式与两个坑，换机/换凭证时参考。
+
+## 10. 遗留与建议
 
 1. **smoke 脚本需更新**：`scripts/smoke/smoke-list_ces_metrics.sh` 直接 POST `/mcp/messages` 不带 sessionId，Spring AI SSE 传输要求先 `GET /sse` 握流，脚本当前会 400（`Session ID missing`）。建议改成先建立 SSE 会话再 POST，或单独写一个 Python 客户端（本次验证用的 `/tmp/mcp_call.py` 可作蓝本）。
 2. **`docs/specs/tools/list_ces_metrics.md` / `query_ces_metric_data.md` 的 namespace 描述**仍写「string + 正则 `^[A-Z]...`」，与 T24 之后的「封闭 15 值」事实有漂移。本次未改 spec（避免扩大改动面），建议后续小卡对齐。
