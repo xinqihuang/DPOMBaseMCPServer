@@ -5,7 +5,6 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.monitoring.ces.CesMetricsService;
 
 import org.springframework.ai.tool.annotation.Tool;
@@ -16,8 +15,10 @@ import org.springframework.stereotype.Component;
  * 封装 {@code list_ces_metrics} 能力的 MCP 工具。
  *
  * <p>工具命名、描述及参数语义遵循
- * {@code docs/specs/tools/list_ces_metrics.md}；T24 起 {@code namespace}
- * 以 {@link CesNamespace} 受控枚举承载（CLAUDE.md §4.3 (a)）。
+ * {@code docs/specs/tools/list_ces_metrics.md}；T31 起 {@code namespace}
+ * 以 {@code String} 承载并在 Tool 层用 {@code CesNamespace.fromValue} 做受控翻译
+ * （CLAUDE.md §4.3 (a)）——Spring AI 1.0.4 对 enum 入参走 {@code Enum.valueOf} 绕过
+ * {@code @JsonCreator}，故改 String 以接受 {@code SYS.ECS} 字面量。
  *
  * @author h00884391
  * @since 2026-05-21
@@ -42,7 +43,7 @@ public class CesMetricsTool implements McpTool {
      * <p>{@link Tool} 注解中的描述文本与 spec 保持一致，请勿随意改写——
      * Agent 的工具选择依赖该描述的精确度。
      *
-     * @param namespace  CES 命名空间（受控枚举），可选
+     * @param namespace  CES 命名空间字面量（受控集合，如 {@code SYS.ECS}），可选
      * @param metricName 指标名称精确匹配，如 {@code cpu_util}，可选
      * @param dimName    维度名称（如 {@code instance_id}），必须与 {@code dimValue} 成对出现
      * @param dimValue   维度取值，必须与 {@code dimName} 成对出现
@@ -65,13 +66,13 @@ public class CesMetricsTool implements McpTool {
                     namespace, dimensions, unit), not actual data points; results are cached \
                     server-side for about 1 day.""")
     public Object listCesMetrics(
-            @ToolParam(description = "CES namespace (closed enum). One of: SYS.ECS (ECS), "
-                    + "SYS.OBS (OBS), SYS.EVS (EVS disk), SYS.VPC (VPC/EIP), SYS.GEIP "
-                    + "(Global EIP), SYS.DMS (DMS), SYS.DCS (DCS Redis), SYS.WAF (WAF), "
-                    + "SYS.CFW (CFW), SYS.APIG (APIG shared), SYS.RDS (RDS primary/standby), "
-                    + "SYS.RDS_MYSQL_CLUSTER (RDS MySQL cluster), SYS.ELB (ELB), SYS.DNS (DNS), "
-                    + "SYS.NAT (NAT). Optional.", required = false)
-            CesNamespace namespace,
+            @ToolParam(description = "CES namespace (closed set of 15 values). One of: "
+                    + "SYS.ECS (ECS), SYS.OBS (OBS), SYS.EVS (EVS disk), SYS.VPC (VPC/EIP), "
+                    + "SYS.GEIP (Global EIP), SYS.DMS (DMS), SYS.DCS (DCS Redis), "
+                    + "SYS.WAF (WAF), SYS.CFW (CFW), SYS.APIG (APIG shared), "
+                    + "SYS.RDS (RDS primary/standby), SYS.RDS_MYSQL_CLUSTER (RDS MySQL cluster), "
+                    + "SYS.ELB (ELB), SYS.DNS (DNS), SYS.NAT (NAT). Optional.", required = false)
+            String namespace,
             @ToolParam(description = "Exact metric name, e.g. cpu_util, optional", required = false)
             String metricName,
             @ToolParam(description = "Dimension name like instance_id; must accompany dim_value",
@@ -86,9 +87,11 @@ public class CesMetricsTool implements McpTool {
             @ToolParam(description = "Sort order: 'asc' or 'desc', default 'desc'", required = false)
             String order) {
 
-        CesListMetricsRequest req = new CesListMetricsRequest(
-                ToolValidations.cesNamespaceValue(namespace),
-                metricName, dimName, dimValue, limit, start, order);
-        return ToolCallSupport.execute("list_ces_metrics", () -> service.listMetrics(req));
+        return ToolCallSupport.execute("list_ces_metrics", () -> {
+            CesListMetricsRequest req = new CesListMetricsRequest(
+                    ToolValidations.resolveCesNamespace(namespace),
+                    metricName, dimName, dimValue, limit, start, order);
+            return service.listMetrics(req);
+        });
     }
 }

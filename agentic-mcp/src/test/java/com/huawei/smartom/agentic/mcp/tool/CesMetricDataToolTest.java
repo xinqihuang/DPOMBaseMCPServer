@@ -7,7 +7,6 @@ package com.huawei.smartom.agentic.mcp.tool;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricDimension;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricFilter;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricPeriod;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataResponse;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
@@ -40,7 +39,7 @@ import static org.mockito.Mockito.when;
  */
 class CesMetricDataToolTest {
 
-    private static final CesNamespace NS = CesNamespace.SYS_ECS;
+    private static final String NS = "SYS.ECS";
     private static final String METRIC = "cpu_util";
     private static final List<CesMetricDimension> DIMS =
             List.of(new CesMetricDimension("instance_id", "i-1"));
@@ -72,7 +71,7 @@ class CesMetricDataToolTest {
         CesQueryMetricDataRequest req = captor.getValue();
         assertThat(req.filter()).isEqualTo(CesMetricFilter.AVERAGE);
         assertThat(req.period()).isEqualTo(CesMetricPeriod.MIN_5);
-        assertThat(req.namespace()).isEqualTo(NS.getValue());
+        assertThat(req.namespace()).isEqualTo(NS);
         assertThat(req.metricName()).isEqualTo(METRIC);
     }
 
@@ -121,6 +120,18 @@ class CesMetricDataToolTest {
         ErrorResponse err = (ErrorResponse) result;
         assertThat(err.errorCode()).isEqualTo(ErrorCode.INVALID_PARAM.name());
         assertThat(err.errorMessage()).contains("42");
+        verify(service, never()).queryMetricData(any());
+    }
+
+    @Test
+    @DisplayName("Unknown namespace string -> INVALID_PARAM without invoking service")
+    void unknownNamespaceRejected() {
+        Object result = tool.queryCesMetricData("SYS.NOPE", METRIC, DIMS, "average", 300, FROM, TO);
+
+        assertThat(result).isInstanceOf(ErrorResponse.class);
+        ErrorResponse err = (ErrorResponse) result;
+        assertThat(err.errorCode()).isEqualTo(ErrorCode.INVALID_PARAM.name());
+        assertThat(err.errorMessage()).contains("SYS.NOPE");
         verify(service, never()).queryMetricData(any());
     }
 

@@ -58,6 +58,34 @@ final class ToolValidations {
     }
 
     /**
+     * 把 MCP 入参的 namespace 字符串解析为 CES API 字面量（T31，服务端目录翻译）。
+     *
+     * <p>Spring AI 1.0.4 对 enum 类型的工具参数直接调 {@code Enum.valueOf}，绕过 Jackson
+     * 的 {@code @JsonCreator}，导致 Agent 传 {@code SYS.ECS}（{@code @JsonValue} 字面量）时
+     * 报 {@code No enum constant}。故 list/query 工具的 namespace 改以 {@code String} 承载，
+     * 在此用 {@link CesNamespace#fromValue} 做受控翻译——兼容 {@code SYS.ECS} 与 {@code SYS_ECS}
+     * 两种写法，非法值映射为 {@link InvalidParamException}（→ {@code INVALID_PARAM}）。
+     *
+     * <p>{@code null} 透传为 {@code null}，必填校验由 service 层完成，与
+     * {@link #cesNamespaceValue(CesNamespace)} 语义一致。
+     *
+     * @param namespace MCP 入参字面量或常量名，可为 {@code null}
+     * @return CES API 字面量（如 {@code SYS.ECS}），入参为 {@code null} 时返回 {@code null}
+     * @throws InvalidParamException 入参非 {@code null} 但不在受支持集合时抛出
+     */
+    static String resolveCesNamespace(String namespace) {
+        if (namespace == null) {
+            return null;
+        }
+        try {
+            return CesNamespace.fromValue(namespace).getValue();
+        }
+        catch (IllegalArgumentException e) {
+            throw new InvalidParamException(e.getMessage());
+        }
+    }
+
+    /**
      * 将 MCP 入参秒数解析为 {@link CesMetricPeriod}。
      *
      * @param value MCP 入参秒数，如 {@code 300}

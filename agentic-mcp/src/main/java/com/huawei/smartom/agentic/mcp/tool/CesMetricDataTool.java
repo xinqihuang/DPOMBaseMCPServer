@@ -5,7 +5,6 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesMetricDimension;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesQueryMetricDataRequest;
 import com.huawei.smartom.agentic.monitoring.ces.CesMetricDataService;
 
@@ -20,7 +19,9 @@ import java.util.List;
  *
  * <p>用于查询华为云 CES 单条指标在指定时间区间、聚合粒度下的数据点序列；
  * 调用前必须先调用 {@code list_ces_metrics} 发现指标定义与维度（T24，CLAUDE.md §4.3 (b)）。
- * {@code namespace} 以 {@link CesNamespace} 受控枚举承载。
+ * T31 起 {@code namespace} 以 {@code String} 承载并在 Tool 层用
+ * {@code CesNamespace.fromValue} 做受控翻译——Spring AI 1.0.4 对 enum 入参走
+ * {@code Enum.valueOf} 绕过 {@code @JsonCreator}，故改 String 以接受 {@code SYS.ECS} 字面量。
  *
  * @author h00884391
  * @since 2026-05-28
@@ -42,7 +43,7 @@ public class CesMetricDataTool implements McpTool {
     /**
      * MCP 入口方法：按时间区间与聚合粒度查询单条 CES 指标的数据点。
      *
-     * @param namespace  CES 命名空间（受控枚举）
+     * @param namespace  CES 命名空间字面量（受控集合，如 {@code SYS.ECS}）
      * @param metricName 指标名，取自 {@code list_ces_metrics} 返回
      * @param dimensions 维度列表，长度 [1, 4]
      * @param filter     聚合方式
@@ -68,13 +69,13 @@ public class CesMetricDataTool implements McpTool {
                     are UNIX timestamps in milliseconds; 'period' is the aggregation granularity \
                     in seconds (1 / 60 / 300 / 1200 / 3600 / 14400 / 86400).""")
     public Object queryCesMetricData(
-            @ToolParam(description = "CES namespace (closed enum). One of: SYS.ECS (ECS), "
-                    + "SYS.OBS (OBS), SYS.EVS (EVS disk), SYS.VPC (VPC/EIP), SYS.GEIP "
-                    + "(Global EIP), SYS.DMS (DMS), SYS.DCS (DCS Redis), SYS.WAF (WAF), "
-                    + "SYS.CFW (CFW), SYS.APIG (APIG shared), SYS.RDS (RDS primary/standby), "
-                    + "SYS.RDS_MYSQL_CLUSTER (RDS MySQL cluster), SYS.ELB (ELB), SYS.DNS (DNS), "
-                    + "SYS.NAT (NAT).")
-            CesNamespace namespace,
+            @ToolParam(description = "CES namespace (closed set of 15 values). One of: "
+                    + "SYS.ECS (ECS), SYS.OBS (OBS), SYS.EVS (EVS disk), SYS.VPC (VPC/EIP), "
+                    + "SYS.GEIP (Global EIP), SYS.DMS (DMS), SYS.DCS (DCS Redis), "
+                    + "SYS.WAF (WAF), SYS.CFW (CFW), SYS.APIG (APIG shared), "
+                    + "SYS.RDS (RDS primary/standby), SYS.RDS_MYSQL_CLUSTER (RDS MySQL cluster), "
+                    + "SYS.ELB (ELB), SYS.DNS (DNS), SYS.NAT (NAT).")
+            String namespace,
             @ToolParam(description = "Exact metric name from a prior list_ces_metrics response, "
                     + "e.g. cpu_util. Do not invent.")
             String metricName,
@@ -94,7 +95,7 @@ public class CesMetricDataTool implements McpTool {
 
         return ToolCallSupport.execute("query_ces_metric_data", () -> {
             CesQueryMetricDataRequest req = new CesQueryMetricDataRequest(
-                    ToolValidations.cesNamespaceValue(namespace), metricName, dimensions,
+                    ToolValidations.resolveCesNamespace(namespace), metricName, dimensions,
                     ToolValidations.requireCesFilter(filter),
                     ToolValidations.requireCesPeriod(period),
                     from, to);

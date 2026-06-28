@@ -6,7 +6,6 @@ package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListMetricsResponse;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesNamespace;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesPagination;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
 import com.huawei.smartom.agentic.common.error.ErrorResponse;
@@ -17,12 +16,15 @@ import com.huawei.smartom.agentic.monitoring.ces.CesMetricsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -50,8 +52,25 @@ class CesMetricsToolTest {
         when(service.listMetrics(any(CesListMetricsRequest.class))).thenReturn(expected);
 
         Object result = tool.listCesMetrics(
-                CesNamespace.SYS_ECS, null, null, null, 10, null, "desc");
+                "SYS.ECS", null, null, null, 10, null, "desc");
         assertThat(result).isSameAs(expected);
+
+        ArgumentCaptor<CesListMetricsRequest> captor =
+                ArgumentCaptor.forClass(CesListMetricsRequest.class);
+        verify(service).listMetrics(captor.capture());
+        assertThat(captor.getValue().namespace()).isEqualTo("SYS.ECS");
+    }
+
+    @Test
+    @DisplayName("Unknown namespace string -> INVALID_PARAM without invoking service")
+    void unknownNamespaceRejected() {
+        Object result = tool.listCesMetrics("SYS.NOPE", null, null, null, 10, null, "desc");
+
+        assertThat(result).isInstanceOf(ErrorResponse.class);
+        ErrorResponse err = (ErrorResponse) result;
+        assertThat(err.errorCode()).isEqualTo(ErrorCode.INVALID_PARAM.name());
+        assertThat(err.errorMessage()).contains("SYS.NOPE");
+        verify(service, never()).listMetrics(any());
     }
 
     @Test
