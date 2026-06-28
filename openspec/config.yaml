@@ -1,0 +1,42 @@
+schema: spec-driven
+
+context: |
+  服务: DPOMBaseMCPServer —— 基于华为云 SDK 封装 AOM/APM/CES/LTS 监控能力的 MCP Server，
+  供智能运维 Agent 调用。本期范围: 只读监控查询 (read-only)；故障恢复(写)不在范围。
+  部署: 华为云 CCE 无状态服务, Helm Chart。
+
+  技术栈基线(不可偏离): JDK 21(虚拟线程) · Spring Boot 3.4.x · Spring AI MCP Server(WebMvc+SSE) 1.0.4 ·
+  huaweicloud-sdk-java-v3 3.1.x(ces/aom/apm) · Resilience4j 2.x · JUnit5+Mockito+AssertJ ·
+  SLF4J+Logback(JSON)。禁用: Lombok / WebFlux / 第三方 HTTP 客户端 / Guava / commons-lang3。
+
+  模块依赖方向(CI 校验): mcp → monitoring → adapter.{ces,aom,apm,lts} → common。
+  adapter 之间不互相依赖; mcp 不直接 import 华为云 SDK; SDK 类型不得泄漏到 adapter 之外。
+
+  核心架构约束:
+  - 自定义 DTO 无损包裹 SDK 类型: SDK 响应字段 DTO 必须全覆盖, 砍字段须在 spec 显式列理由。
+  - 面向 Agent 的入参禁止凭先验捏造上游结构(collector_id/metric_set/function 等):
+    合法来源仅二选一 —— (a)受控枚举/带 allowed-values 的 key, 或 (b)先调只读发现工具拿真实结构再转发。
+    collector_id 是 env 局部标识, 运行时发现, 禁止硬编码或跨 env 复用。
+  - 统一错误码: INVALID_PARAM / UPSTREAM_THROTTLED / UPSTREAM_AUTH_FAILED / UPSTREAM_ERROR / TIMEOUT / INTERNAL,
+    每个错误携带 retryable(bool) 与 upstreamTraceId(华为云 X-Request-Id, 可空)。SDK 异常不得透传到 MCP 层。
+
+  约定:
+  - Javadoc 类级/方法级一律中文(标识符/`{@code}`/`{@link}`/HTML 标记保留英文)。
+  - Logger 字段固定大写 LOG; 日志用 SLF4J 占位符不拼接; 不打印 AK/SK/token。
+  - 行宽 120 · 4 空格缩进 · 所有 if/for/while 带 {} · `} else {` 须换行 · 单方法体 ≤ 50 行。
+  - 测试: 每个有响应 DTO 的工具须有 *ContractTest(真实 SDK 样本反序列化, 全字段断言, 漂移即 fail)。
+
+  能力(capability)粒度: 1 个 MCP tool = 1 个 capability(与原 docs/specs/tools/ 一一对应)。
+
+rules:
+  specs:
+    - "用 ## Purpose + ## Requirements + ### Requirement: + #### Scenario: 结构; 行为用 GIVEN/WHEN/THEN。"
+    - "每个工具的入参校验、成功输出契约、失败输出(错误码→retryable)都要落成可测试的 Requirement/Scenario。"
+    - "发现链工具(如 show_env_monitor_items→view_config→trend)须在 Requirement 中写明调用顺序与禁止编造入参。"
+  design:
+    - "把 SDK 映射(类/方法/版本/字段映射表)、非功能(限流 key/重试/超时/可观测)这些标准 spec 放不下的重契约写在这里。"
+    - "时间参数格式各工具不一致, 必须显式标注(上游字符串 / ISO8601 / UTC毫秒 / startMillis.endMillis.durationMinutes)。"
+  proposal:
+    - "存量工具的 proposal 用于回填: ## Why 写该工具解决的运维场景, ## What Changes 写交付的 adapter/service/tool/DTO, ## Impact 写涉及模块与配置。"
+  tasks:
+    - "回填存量任务时保留原任务卡的依赖关系与'不做(本期未交付)'遗留项; 已交付项勾选 [x] 并标注实现 commit hash。"

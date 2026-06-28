@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/build_highlights_xlsx.py)",
+      "Bash(pip3 install *)"
+    ]
+  }
+}
