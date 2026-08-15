@@ -6,15 +6,24 @@ package com.huawei.smartom.agentic.adapter.lts;
 
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogContextRequest;
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogContextResponse;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogGroupsResponse;
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogsRequest;
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogsResponse;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogStreamsRequest;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogStreamsResponse;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsLogGroup;
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsLogEntry;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsLogStream;
 import com.huawei.smartom.agentic.common.resilience.HuaweiCloudInvocation;
 
 import com.huaweicloud.sdk.lts.v2.LtsClient;
 import com.huaweicloud.sdk.lts.v2.model.ListLogContextRequest;
 import com.huaweicloud.sdk.lts.v2.model.ListLogContextRequestBody;
 import com.huaweicloud.sdk.lts.v2.model.ListLogContextResponse;
+import com.huaweicloud.sdk.lts.v2.model.ListLogGroupsRequest;
+import com.huaweicloud.sdk.lts.v2.model.ListLogGroupsResponse;
+import com.huaweicloud.sdk.lts.v2.model.ListLogStreamsRequest;
+import com.huaweicloud.sdk.lts.v2.model.ListLogStreamsResponse;
 import com.huaweicloud.sdk.lts.v2.model.ListLogsRequest;
 import com.huaweicloud.sdk.lts.v2.model.ListLogsResponse;
 import com.huaweicloud.sdk.lts.v2.model.LogContents;
@@ -46,6 +55,8 @@ public class LtsLogAdapterImpl implements LtsLogAdapter {
     private static final String RETRY_NAME = "huaweicloud-retryable";
     private static final String API_LIST_LOGS = "lts.listLogs";
     private static final String API_LIST_LOG_CONTEXT = "lts.listLogContext";
+    private static final String API_LIST_LOG_GROUPS = "lts.listLogGroups";
+    private static final String API_LIST_LOG_STREAMS = "lts.listLogStreams";
 
     private final LtsClient ltsClient;
     private final HuaweiCloudInvocation invocation;
@@ -59,6 +70,39 @@ public class LtsLogAdapterImpl implements LtsLogAdapter {
     public LtsLogAdapterImpl(LtsClient ltsClient, HuaweiCloudInvocation invocation) {
         this.ltsClient = ltsClient;
         this.invocation = invocation;
+    }
+
+    @Override
+    public LtsListLogGroupsResponse listLogGroups() {
+        LOG.info("lts.listLogGroups start");
+        ListLogGroupsResponse response = invocation.execute(
+                RATE_LIMITER_NAME, RETRY_NAME, API_LIST_LOG_GROUPS,
+                () -> ltsClient.listLogGroups(new ListLogGroupsRequest()));
+        List<LtsLogGroup> groups = response.getLogGroups() == null ? List.of()
+                : response.getLogGroups().stream().map(group -> new LtsLogGroup(
+                        group.getCreationTime(), group.getLogGroupName(), group.getLogGroupId(),
+                        group.getTtlInDays(), group.getTag(), group.getLogGroupNameAlias())).toList();
+        return new LtsListLogGroupsResponse(groups);
+    }
+
+    @Override
+    public LtsListLogStreamsResponse listLogStreams(LtsListLogStreamsRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+        LOG.info("lts.listLogStreams start, logGroupName={}, logStreamName={}",
+                request.logGroupName(), request.logStreamName());
+        ListLogStreamsRequest sdkRequest = new ListLogStreamsRequest()
+                .withLogGroupName(request.logGroupName()).withLogStreamName(request.logStreamName());
+        ListLogStreamsResponse response = invocation.execute(
+                RATE_LIMITER_NAME, RETRY_NAME, API_LIST_LOG_STREAMS,
+                () -> ltsClient.listLogStreams(sdkRequest));
+        List<LtsLogStream> streams = response.getLogStreams() == null ? List.of()
+                : response.getLogStreams().stream().map(stream -> new LtsLogStream(
+                        stream.getCreationTime(), stream.getLogStreamId(), stream.getLogStreamName(),
+                        stream.getLogStreamNameAlias(), stream.getTag(), stream.getFilterCount(),
+                        stream.getWhetherLogStorage(), stream.getHotColdSeparation(), stream.getAuthWebTracking(),
+                        stream.getTtlInDays(), stream.getHotStorageDays(), stream.getLogGroupId(),
+                        stream.getIsFavorite())).toList();
+        return new LtsListLogStreamsResponse(streams);
     }
 
     @Override

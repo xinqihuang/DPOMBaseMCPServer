@@ -6,6 +6,9 @@ package com.huawei.smartom.agentic.adapter.lts;
 
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogContextRequest;
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogContextResponse;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogGroupsResponse;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogStreamsRequest;
+import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogStreamsResponse;
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogsRequest;
 import com.huawei.smartom.agentic.adapter.lts.dto.LtsListLogsResponse;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
@@ -19,6 +22,23 @@ import com.huawei.smartom.agentic.common.exception.SmartomException;
  * @since 2026-06-03
  */
 public interface LtsLogAdapter {
+
+    /**
+     * 列出当前项目可访问的 LTS 日志组。
+     *
+     * @return 日志组列表
+     * @throws SmartomException 上游调用失败
+     */
+    LtsListLogGroupsResponse listLogGroups();
+
+    /**
+     * 按可选名称条件列出 LTS 日志流。
+     *
+     * @param request 名称过滤条件，不能为 {@code null}
+     * @return 日志流列表
+     * @throws SmartomException 上游调用失败
+     */
+    LtsListLogStreamsResponse listLogStreams(LtsListLogStreamsRequest request);
 
     /**
      * 按时间区间 / 关键字 / 标签 / SQL 查询日志内容。
