@@ -41,7 +41,7 @@ public class DiagnoseTraceTool implements McpTool {
      *
      * @param traceId          APM trace id，必填，来自告警载荷或 {@code query_traces}
      * @param businessId       APM 业务 id，可选；为空回落到服务端配置默认值（仅 clob 下钻用）
-     * @param maxSuspectEvents 最多深挖的可疑 event 数，可选，默认 5
+     * @param maxSuspectEvents 最多深挖的可疑 event 数，可选，范围 1–20，默认 5
      * @param includeSlowest   无出错 event 时是否仍纳入最慢的若干 span，可选，默认 true
      * @return 聚合诊断包；输入校验失败时返回
      *         {@link com.huawei.smartom.agentic.common.error.ErrorResponse}
@@ -68,7 +68,7 @@ public class DiagnoseTraceTool implements McpTool {
             @ToolParam(description = "APM business id; falls back to the server-configured "
                     + "default when null. Only used for clob drill-down.", required = false)
             Long businessId,
-            @ToolParam(description = "Max number of suspect events to drill into. Default 5.",
+            @ToolParam(description = "Max number of suspect events to drill into [1, 20]. Default 5.",
                     required = false)
             Integer maxSuspectEvents,
             @ToolParam(description = "Whether to also include the slowest spans when no errored "

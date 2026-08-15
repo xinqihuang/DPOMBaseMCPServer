@@ -157,6 +157,23 @@ class DiagnoseTraceServiceTest {
                 .isInstanceOf(InvalidParamException.class);
     }
 
+    @Test
+    @DisplayName("拒绝超过单次证据预算的 max_suspect_events")
+    void excessiveSuspectBudgetRejected() {
+        assertThatThrownBy(() -> service.diagnose(new DiagnoseTraceRequest(TRACE_ID, null, 21, null)))
+                .isInstanceOf(InvalidParamException.class)
+                .hasMessageContaining("[1, 20]");
+        verify(apmTraceService, never()).showTraceEvents(anyString());
+    }
+
+    @Test
+    @DisplayName("拒绝非正数 max_suspect_events")
+    void nonPositiveSuspectBudgetRejected() {
+        assertThatThrownBy(() -> service.diagnose(new DiagnoseTraceRequest(TRACE_ID, null, 0, null)))
+                .isInstanceOf(InvalidParamException.class)
+                .hasMessageContaining("[1, 20]");
+    }
+
     private static ApmSpanEvent detailWithClob(String spanId, String clobId) {
         return event("{\"span_id\":\"" + spanId + "\",\"env_id\":1306682,"
                 + "\"tags\":{\"sql_clob_id\":\"" + clobId + "\"}}");

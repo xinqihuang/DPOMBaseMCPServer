@@ -92,7 +92,7 @@ resilience4j:
       apm-readonly:
         limit-for-period: 10
         limit-refresh-period: 1s
-        timeout-duration: 0
+        timeout-duration: 1500ms
       lts-readonly:
         limit-for-period: 10
         limit-refresh-period: 1s

@@ -49,6 +49,8 @@ public class DiagnoseTraceService {
 
     private static final int DEFAULT_MAX_SUSPECTS = 5;
 
+    private static final int MAX_SUSPECTS = 20;
+
     private static final String CLOB_ID_SUFFIX = "_clob_id";
 
     private final ApmTraceService apmTraceService;
@@ -81,14 +83,14 @@ public class DiagnoseTraceService {
                     CompletableFuture.supplyAsync(() -> events(request.traceId(), errors), executor);
             ApmGetTopologyResponse topology = topoFuture.join();
             ApmTraceEventsResponse events = eventsFuture.join();
-            return assemble(request, topology, events, executor, errors);
+            return assemble(request, topology, events, errors);
         }
     }
 
     private DiagnoseTraceResponse assemble(DiagnoseTraceRequest request, ApmGetTopologyResponse topology,
-            ApmTraceEventsResponse events, ExecutorService executor, List<DiagnoseStageError> errors) {
+            ApmTraceEventsResponse events, List<DiagnoseStageError> errors) {
         List<ApmSpanEvent> all = (events == null) ? List.of() : nullSafe(events.spanEventList());
-        List<SuspectEvent> suspects = deepDive(selectSuspects(all, request), request, executor, errors);
+        List<SuspectEvent> suspects = deepDive(selectSuspects(all, request), request, errors);
         Integer total = (events == null) ? null : all.size();
         Integer errorCount = (events == null) ? null : (int) all.stream().filter(this::isError).count();
         LOG.info("diagnose_trace done, traceId={}, totalEvents={}, errorEvents={}, suspects={}, stageErrors={}",
@@ -143,12 +145,10 @@ public class DiagnoseTraceService {
     }
 
     private List<SuspectEvent> deepDive(List<ApmSpanEvent> selected, DiagnoseTraceRequest request,
-            ExecutorService executor, List<DiagnoseStageError> errors) {
-        List<CompletableFuture<SuspectEvent>> futures = selected.stream()
-                .map(event -> CompletableFuture.supplyAsync(
-                        () -> buildSuspect(event, request, errors), executor))
+            List<DiagnoseStageError> errors) {
+        return selected.stream()
+                .map(event -> buildSuspect(event, request, errors))
                 .toList();
-        return futures.stream().map(CompletableFuture::join).toList();
     }
 
     private SuspectEvent buildSuspect(ApmSpanEvent base, DiagnoseTraceRequest request,
@@ -232,6 +232,10 @@ public class DiagnoseTraceService {
         }
         if (request.traceId() == null || request.traceId().isBlank()) {
             throw new InvalidParamException("trace_id is required");
+        }
+        if (request.maxSuspectEvents() != null
+                && (request.maxSuspectEvents() < 1 || request.maxSuspectEvents() > MAX_SUSPECTS)) {
+            throw new InvalidParamException("max_suspect_events must be in [1, " + MAX_SUSPECTS + "]");
         }
     }
 }
