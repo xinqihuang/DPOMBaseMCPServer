@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 class ApmTraceToolTest {
 
     private static final Long BUSINESS_ID = 12345L;
+    private static final String REGION = "cn-north-9";
     private static final String START = "2026-05-28 10:00:00";
     private static final String END = "2026-05-28 11:00:00";
     private static final String TRACE_ID = "trace-abc";
@@ -62,7 +63,7 @@ class ApmTraceToolTest {
         when(service.queryTraces(any(ApmQueryTracesRequest.class))).thenReturn(expected);
 
         Object result = tool.queryTraces(
-                BUSINESS_ID, START, END, TRACE_ID, SOURCE, HAS_ERROR,
+                BUSINESS_ID, REGION, START, END, TRACE_ID, SOURCE, HAS_ERROR,
                 TIME_USED_MIN, PAGE, PAGE_SIZE);
 
         assertThat(result).isSameAs(expected);
@@ -72,6 +73,7 @@ class ApmTraceToolTest {
         verify(service).queryTraces(captor.capture());
         ApmQueryTracesRequest req = captor.getValue();
         assertThat(req.businessId()).isEqualTo(BUSINESS_ID);
+        assertThat(req.region()).isEqualTo(REGION);
         assertThat(req.startTimeString()).isEqualTo(START);
         assertThat(req.endTimeString()).isEqualTo(END);
         assertThat(req.traceId()).isEqualTo(TRACE_ID);
@@ -89,7 +91,7 @@ class ApmTraceToolTest {
         when(service.queryTraces(any(ApmQueryTracesRequest.class))).thenReturn(expected);
 
         Object result = tool.queryTraces(
-                null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null, null);
 
         assertThat(result).isSameAs(expected);
 
@@ -110,7 +112,7 @@ class ApmTraceToolTest {
                 .thenThrow(new InvalidParamException("page_size must be in [1, 500]"));
 
         Object result = tool.queryTraces(
-                BUSINESS_ID, null, null, null, null, null, null, 1, 9999);
+                BUSINESS_ID, REGION, null, null, null, null, null, null, 1, 9999);
 
         assertThat(result).isInstanceOf(ErrorResponse.class);
         ErrorResponse err = (ErrorResponse) result;
@@ -128,7 +130,7 @@ class ApmTraceToolTest {
                         ErrorCode.UPSTREAM_THROTTLED, "throttled", "req-trace-1", null));
 
         Object result = tool.queryTraces(
-                BUSINESS_ID, null, null, null, null, null, null, 1, 50);
+                BUSINESS_ID, REGION, null, null, null, null, null, null, 1, 50);
 
         assertThat(result).isInstanceOf(ErrorResponse.class);
         ErrorResponse err = (ErrorResponse) result;
@@ -145,7 +147,7 @@ class ApmTraceToolTest {
                         ErrorCode.UPSTREAM_ERROR, "boom", "req-trace-5xx", null));
 
         Object result = tool.queryTraces(
-                BUSINESS_ID, null, null, null, null, null, null, 1, 50);
+                BUSINESS_ID, REGION, null, null, null, null, null, null, 1, 50);
 
         assertThat(result).isInstanceOf(ErrorResponse.class);
         ErrorResponse err = (ErrorResponse) result;

@@ -95,11 +95,15 @@ public class ApmTraceAdapterImpl implements ApmTraceAdapter {
         Long businessId = request.businessId() == null
                 ? properties.getApmBusinessId()
                 : request.businessId();
-        LOG.info("apm.showSpanSearch start, businessId={}, traceId={}, source={}, page={}, pageSize={}",
-                businessId, request.traceId(), request.source(), request.page(), request.pageSize());
+        String resourceRegion = request.region() == null
+                ? properties.getRegion()
+                : request.region();
+        LOG.info("apm.showSpanSearch start, businessId={}, region={}, traceId={}, source={}, page={}, pageSize={}",
+                businessId, resourceRegion, request.traceId(), request.source(), request.page(), request.pageSize());
 
         TraceSearchParam body = new TraceSearchParam()
-                .withRegion(properties.getApmRegion())
+                .withRegion(resourceRegion)
+                .withBizId(businessId)
                 .withPage(request.page())
                 .withPageSize(request.pageSize());
         if (request.startTimeString() != null) {

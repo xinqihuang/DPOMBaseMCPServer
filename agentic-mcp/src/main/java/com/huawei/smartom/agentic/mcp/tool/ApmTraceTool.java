@@ -35,6 +35,7 @@ public class ApmTraceTool implements McpTool {
      * MCP 入口方法：搜索 APM span。
      *
      * @param businessId     APM 应用 id，可选；为空时使用配置项默认值
+     * @param region         被查询应用所在资源区域，可选；优先使用告警载荷中的 region
      * @param startTimeString 起始时间字符串，可选
      * @param endTimeString   结束时间字符串，可选
      * @param traceId         按 traceId 精确过滤，可选
@@ -59,6 +60,9 @@ public class ApmTraceTool implements McpTool {
             @ToolParam(description = "APM application id (x-business-id). Optional if a "
                     + "default is configured server-side.", required = false)
             Long businessId,
+            @ToolParam(description = "Resource region from the alarm or application, for example "
+                    + "'cn-north-9'. This is not the APM API endpoint region.", required = false)
+            String region,
             @ToolParam(description = "Start time, format 'yyyy-MM-dd HH:mm:ss'.",
                     required = false)
             String startTimeString,
@@ -81,7 +85,7 @@ public class ApmTraceTool implements McpTool {
             Integer pageSize) {
 
         ApmQueryTracesRequest req = new ApmQueryTracesRequest(
-                businessId, startTimeString, endTimeString, traceId,
+                businessId, region, startTimeString, endTimeString, traceId,
                 source, hasError, timeUsedMin, page, pageSize);
         return ToolCallSupport.execute("query_traces", () -> service.queryTraces(req));
     }

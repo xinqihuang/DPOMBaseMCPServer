@@ -8,6 +8,7 @@ package com.huawei.smartom.agentic.adapter.apm.dto;
  * {@code query_traces} 工具的请求 DTO，对应华为云 APM {@code ShowSpanSearch} 接口的入参。
  *
  * @param businessId       APM 应用 id（{@code x-business-id} 头部），可选；为空时使用配置项默认值
+ * @param region           被查询应用所在资源区域，可选；为空时使用主资源区域配置
  * @param startTimeString  起始时间字符串（如 {@code 2026-05-28 10:00:00}），可选
  * @param endTimeString    结束时间字符串，可选
  * @param traceId          按 traceId 精确过滤，可选
@@ -21,6 +22,7 @@ package com.huawei.smartom.agentic.adapter.apm.dto;
  */
 public record ApmQueryTracesRequest(
         Long businessId,
+        String region,
         String startTimeString,
         String endTimeString,
         String traceId,

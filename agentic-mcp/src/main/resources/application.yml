@@ -60,7 +60,7 @@ management:
       application: ${spring.application.name}
 
 huaweicloud:
-  region: cn-southwest-2
+  region: ${HUAWEICLOUD_REGION:cn-north-9}
   ak: ${HUAWEICLOUD_AK:}
   sk: ${HUAWEICLOUD_SK:}
   project-id: ${HUAWEICLOUD_PROJECT_ID:}

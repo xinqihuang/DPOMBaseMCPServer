@@ -171,6 +171,7 @@ public class CorrelateIncidentService {
                     null,
                     null,
                     null,
+                    null,
                     request.apmTraceId(),
                     request.apmSource(),
                     null,

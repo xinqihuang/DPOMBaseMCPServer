@@ -2,12 +2,14 @@
 
 ## Purpose
 按 traceId/入口/时间窗/错误标志/最小耗时搜索 APM span 摘要，定位慢或出错的请求（trace 根因诊断链第 1 步）。
+
 ## Requirements
+
 ### Requirement: APM 调用链 span 检索
 
 系统 SHALL 提供只读工具 `query_traces`，调用 APM SDK `ShowSpanSearch`，按多维条件搜索华为云 APM 调用链 span，返回分页结果 `{ total, spans[] }`。
 
-工具 MUST 暴露以下入参：`businessId`（`x-business-id` 头部参数）/ `startTimeString` / `endTimeString` / `traceId` / `source` / `hasError` / `timeUsedMin` / `page` / `pageSize`。该工具 MUST 为只读（`readOnlyHint=true`、`destructiveHint=false`、`idempotentHint=true`），不返回完整 span 树，不做日志 / 异常详情，不做跨 region / 跨账号，不做客户端聚合 / 排序。
+工具 MUST 暴露以下入参：`businessId`（`x-business-id` 头部参数）/ `region`（资源区域）/ `startTimeString` / `endTimeString` / `traceId` / `source` / `hasError` / `timeUsedMin` / `page` / `pageSize`。该工具 MUST 为只读（`readOnlyHint=true`、`destructiveHint=false`、`idempotentHint=true`），不返回完整 span 树，不做日志 / 异常详情，不做跨账号，不做客户端聚合 / 排序。
 
 #### Scenario: 按过滤参数透传查询
 - **WHEN** Agent 传入任意合法过滤参数组合（traceId / source / 时间窗 / hasError / timeUsedMin）
@@ -30,12 +32,23 @@
 
 ### Requirement: business_id 解析与 fallback
 
-系统 SHALL 将 `businessId` 作为 HTTP `x-business-id` 头注入（`ShowSpanSearchRequest.setXBusinessId`），非写入 body。当入参 `businessId` 为 null 时，系统 SHALL 在 adapter 层回落到 `HuaweiCloudProperties.getApmBusinessId()` 配置默认值。
+系统 SHALL 将同一个有效 `businessId` 同时作为 HTTP `x-business-id` 头注入（`ShowSpanSearchRequest.setXBusinessId`）并写入请求体 `TraceSearchParam.bizId`。当入参 `businessId` 为 null 时，系统 SHALL 在 adapter 层回落到 `HuaweiCloudProperties.getApmBusinessId()` 配置默认值。
 
 #### Scenario: businessId 回落配置默认值
 - **GIVEN** 调用未传 `businessId`，但配置了 `apmBusinessId`
 - **WHEN** 调用工具
 - **THEN** 系统 SHALL 用配置默认值注入 `x-business-id` 头
+- **AND** 系统 SHALL 将相同值写入请求体 `biz_id`
+
+### Requirement: APM 端点区域与资源区域分离
+
+系统 SHALL 使用 `huaweicloud.apm-region` 选择 APM SDK 端点，但 SHALL 使用工具参数 `region` 填充 `TraceSearchParam.region`；工具参数为空时 SHALL 回落到 `huaweicloud.region`。系统 MUST NOT 将 APM 端点区域作为被查询资源区域。
+
+#### Scenario: 查询非 APM 端点区域中的应用
+- **GIVEN** APM SDK 端点为 `cn-north-4`，被查询应用位于 `cn-north-9`
+- **WHEN** Agent 传入 `region=cn-north-9` 或主资源区域配置为 `cn-north-9`
+- **THEN** `TraceSearchParam.region` SHALL 为 `cn-north-9`
+- **AND** APM SDK 客户端 SHALL 继续连接 `cn-north-4` 端点
 
 ### Requirement: 输入校验
 
@@ -78,3 +91,11 @@
 - **WHEN** 上游返回 401/403
 - **THEN** 系统 SHALL 返回 `UPSTREAM_AUTH_FAILED`，`retryable=false`，不重试
 
+### Requirement: business_id 双位置装配
+
+系统 SHALL 将有效 `businessId` 同时写入请求头 `x-business-id` 与请求体 `biz_id`，两处 MUST 使用同一个值。
+
+#### Scenario: 查询指定应用的 span
+- **WHEN** Agent 传入 `businessId=111092`
+- **THEN** 请求头 `x-business-id` SHALL 为 `111092`
+- **AND** 请求体 `biz_id` SHALL 为 `111092`
