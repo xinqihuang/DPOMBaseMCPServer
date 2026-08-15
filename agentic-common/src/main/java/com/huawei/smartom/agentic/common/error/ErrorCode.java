@@ -50,7 +50,17 @@ public enum ErrorCode {
     /** Serialization or otherwise unclassified internal error. */
     INTERNAL(false,
             "Unexpected server-side error, not caused by your arguments. Do not retry the "
-                    + "same call; try an alternative tool or report error_message to the operator.");
+                    + "same call; try an alternative tool or report error_message to the operator."),
+
+    /** OBS evidence transfer is not enabled or no real adapter is available. */
+    OBS_UNAVAILABLE(false,
+            "OBS evidence transfer is not enabled or the adapter is unavailable. Do not retry; "
+                    + "report to the operator."),
+
+    /** Upload requires an explicit prior approval for the exact package identity. */
+    UPLOAD_NOT_APPROVED(false,
+            "Upload requires an explicit prior approval bound to this package, granted by the "
+                    + "trusted control plane (not available to this agent). Report to the operator.");
 
     private final boolean retryable;
     private final String hint;

@@ -21,6 +21,7 @@
         <module>agentic-adapter-aom</module>
         <module>agentic-adapter-apm</module>
         <module>agentic-adapter-lts</module>
+        <module>agentic-adapter-obs</module>
     </modules>
 
 </project>

@@ -19,6 +19,15 @@ spring:
 dpom:
   mcp:
     write-tools-enabled: false
+  obs:
+    enabled: false
+    transfer-tools-enabled: false
+    bucket: ""
+    prefix: evidence
+    endpoint: ""
+    kms-key-id: ""
+    max-bytes: 1048576
+    approval-ttl-seconds: 3600
 
 apm:
   discovery-cache:
@@ -95,6 +104,10 @@ resilience4j:
         timeout-duration: 1500ms
       lts-readonly:
         limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0
+      obs-transfer:
+        limit-for-period: 5
         limit-refresh-period: 1s
         timeout-duration: 0
   retry:
