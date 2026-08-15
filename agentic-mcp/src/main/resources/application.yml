@@ -28,6 +28,16 @@ dpom:
     kms-key-id: ""
     max-bytes: 1048576
     approval-ttl-seconds: 3600
+  approval:
+    enabled: false
+    hmac-secret: ${DPOM_APPROVAL_HMAC_SECRET:}
+    hmac-previous-secret: ${DPOM_APPROVAL_PREVIOUS_HMAC_SECRET:}
+    timestamp-tolerance-seconds: 300
+    approval-ttl-seconds: 3600
+    store-file: ${DPOM_APPROVAL_STORE_FILE:data/dpom-approvals.json}
+    nonce-store-file: ${DPOM_APPROVAL_NONCE_STORE_FILE:data/dpom-approval-nonces.json}
+    max-body-bytes: 4096
+    nonce-cache-size: 10000
 
 apm:
   discovery-cache:
