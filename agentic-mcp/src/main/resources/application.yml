@@ -16,6 +16,10 @@ spring:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: non_null
 
+dpom:
+  mcp:
+    write-tools-enabled: false
+
 apm:
   discovery-cache:
     ttl: 1d

@@ -1,5 +1,8 @@
 # create-notification-mask Specification
 
+> 安全边界：该写工具默认不注册。仅当 `action-enabled` profile 与
+> `dpom.mcp.write-tools-enabled=true` 同时启用时才可发现；DPOMAgent 禁止启用或调用。
+
 ## Purpose
 创建 CES 告警通知屏蔽规则（写操作）：在指定时间窗内按资源/指标/规则条件屏蔽匹配告警的通知下发，用于变更窗口或已知噪声期间抑制无效告警，避免打扰值班人员。
 ## Requirements

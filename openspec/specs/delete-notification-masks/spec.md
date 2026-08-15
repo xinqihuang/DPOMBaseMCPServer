@@ -1,5 +1,8 @@
 # delete-notification-masks Specification
 
+> 安全边界：该破坏性写工具默认不注册。仅当 `action-enabled` profile 与
+> `dpom.mcp.write-tools-enabled=true` 同时启用时才可发现；DPOMAgent 禁止启用或调用。
+
 ## Purpose
 批量删除 CES 告警通知屏蔽规则（写操作）：按 mask id 列表删除不再需要的屏蔽，支持部分删除（输入 N 个、上游实删 M 个）的结果反馈，用于屏蔽期结束后及时恢复告警通知。
 ## Requirements

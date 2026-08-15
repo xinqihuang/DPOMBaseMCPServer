@@ -10,7 +10,7 @@
 |---|---|
 | 服务名 | `DPOMBaseMCPServer` |
 | 一句话定位 | 基于华为云 SDK，封装 AOM/APM/CES 监控能力，作为 MCP Server 提供给智能运维 Agent 使用 |
-| 范围（本期 MVP） | **只读监控查询**。AOM + APM + CES 的 read-only API |
+| 范围（本期 MVP） | **只读监控查询**。AOM + APM + CES + LTS 的 read-only API；生产默认不注册写工具 |
 | 不在范围 | 故障恢复（写操作）—— 另起项目 |
 | 部署形态 | 华为云 CCE 无状态服务，4U8G，Helm Chart 部署 |
 | 仓库 | Codehub（华为内部），主分支 `master` |

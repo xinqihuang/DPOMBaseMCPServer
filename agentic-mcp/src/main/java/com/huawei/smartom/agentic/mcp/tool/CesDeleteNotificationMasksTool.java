@@ -9,6 +9,8 @@ import com.huawei.smartom.agentic.monitoring.ces.CesNotificationMaskService;
 
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.List;
  * @since 2026-05-28
  */
 @Component
+@Profile("action-enabled")
+@ConditionalOnProperty(prefix = "dpom.mcp", name = "write-tools-enabled", havingValue = "true")
 public class CesDeleteNotificationMasksTool implements McpTool {
 
     private final CesNotificationMaskService service;

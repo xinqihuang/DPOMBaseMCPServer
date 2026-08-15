@@ -58,8 +58,7 @@ public class CesListNotificationMasksTool implements McpTool {
             name = "list_notification_masks",
             description = """
                     Query CES (Cloud Eye Service) alarm notification mask rules with paging and \
-                    optional filters. Use this to find existing mask ids before calling \
-                    delete_notification_masks, or to audit currently active shields. Filter by \
+                    optional filters. Use this to audit currently active shields. Filter by \
                     relation_type / mask_name / mask_status (MASK_EFFECTIVE — active now, or \
                     MASK_INEFFECTIVE — created but outside its time window), namespace, \
                     resource_id, or specific dimensions. Returns mask metadata (id, name, type, \

@@ -4,7 +4,10 @@
 
 ## 1. 一句话定位
 
-把华为云 AOM/APM/CES 的只读监控 API，包装成 MCP Server，提供给智能运维 Agent 调用。
+把华为云 AOM/APM/CES/LTS 的只读监控 API，包装成 MCP Server，提供给智能运维 Agent 调用。
+
+生产默认工具面严格只读。历史 CES 通知屏蔽写工具仅用于隔离的人工运维场景，必须同时启用
+`action-enabled` profile 与 `dpom.mcp.write-tools-enabled=true` 才会注册；DPOMAgent 不得启用或调用它们。
 
 ## 2. 上下文图
 
