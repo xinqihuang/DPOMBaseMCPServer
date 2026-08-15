@@ -127,6 +127,21 @@ class ApmAlarmAdapterImplTest {
         ArgumentCaptor<ListAlarmDataRequest> captor = ArgumentCaptor.forClass(ListAlarmDataRequest.class);
         verify(apmClient).listAlarmData(captor.capture());
         assertThat(captor.getValue().getXBusinessId()).isEqualTo(99999L);
+        assertThat(captor.getValue().getBody().getBusinessId()).isEqualTo(99999L);
+    }
+
+    @Test
+    @DisplayName("UT-A1c: discovered business id populates header and required body filter")
+    void ut01cDiscoveredBusinessIdPopulatesHeaderAndBody() {
+        when(apmClient.listAlarmData(any(ListAlarmDataRequest.class)))
+                .thenReturn(new ListAlarmDataResponse().withTotalCount(0).withAlarmDataList(List.of()));
+
+        adapter.listAlarmData(minimalRequest(111092L));
+
+        ArgumentCaptor<ListAlarmDataRequest> captor = ArgumentCaptor.forClass(ListAlarmDataRequest.class);
+        verify(apmClient).listAlarmData(captor.capture());
+        assertThat(captor.getValue().getXBusinessId()).isEqualTo(111092L);
+        assertThat(captor.getValue().getBody().getBusinessId()).isEqualTo(111092L);
     }
 
     @Test

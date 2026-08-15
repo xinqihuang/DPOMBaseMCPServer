@@ -89,6 +89,9 @@ public class SdkExceptionMapper {
         if (status >= 500 && status <= 599) {
             return ErrorCode.UPSTREAM_ERROR;
         }
+        if (status >= 400 && status <= 499) {
+            return ErrorCode.UPSTREAM_INVALID_PARAM;
+        }
         return ErrorCode.UPSTREAM_ERROR;
     }
 

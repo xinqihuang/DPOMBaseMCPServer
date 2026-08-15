@@ -81,12 +81,13 @@ class SdkExceptionMapperTest {
     }
 
     @Test
-    @DisplayName("HTTP 400 -> UPSTREAM_ERROR (catch-all)")
+    @DisplayName("HTTP 400 -> UPSTREAM_INVALID_PARAM, not retryable")
     void http400() {
         ServiceResponseException sre = new ClientRequestException(
                 400, "CES.0001", "Bad Request", "req-400");
         SmartomException mapped = mapper.map(sre);
-        assertThat(mapped.getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_ERROR);
+        assertThat(mapped.getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_INVALID_PARAM);
+        assertThat(mapped.getErrorCode().isRetryable()).isFalse();
     }
 
     @Test

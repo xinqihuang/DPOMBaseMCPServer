@@ -66,29 +66,34 @@ public class ApmAlarmDataTool implements McpTool {
                     instance IP, env id list, monitor item, collector. Returns full alarm \
                     metadata: rule identity, severity, instance / IP / region, lifecycle \
                     timestamps (alarm_first_time / alarm_last_time / gmt_create / gmt_modify), \
-                    and the alarm expression. Two business_id concepts coexist: 'business_id' is \
-                    the HTTP x-business-id header (tenant context, falls back to \
-                    huaweicloud.apm-business-id config when null); 'business_id_filter' is an \
-                    optional body filter. Use the returned 'id' with list_alarm_notify to fetch \
+                    and the alarm expression. 'business_id' MUST come from list_apm_business; \
+                    do not invent it. The server sends it as both the required HTTP x-business-id \
+                    application context and the body business_id filter. 'business_id_filter' is \
+                    only needed to explicitly override that body filter. The APM SDK service \
+                    endpoint region is server configuration; 'region' here filters monitored \
+                    resources (for example cn-north-9). Use status 'ALERT' for active alarms. \
+                    Use the returned 'id' with list_alarm_notify to fetch \
                     delivery records for a specific alarm.""")
     public Object listApmAlarmData(
-            @ToolParam(description = "APM business id (HTTP x-business-id header). Falls back to "
-                    + "huaweicloud.apm-business-id config when null.", required = false)
+            @ToolParam(description = "APM application/business id returned by list_apm_business. "
+                    + "The server applies it to both x-business-id and the default body filter. "
+                    + "Falls back to server configuration when omitted.", required = false)
             Long businessId,
             @ToolParam(description = "Page number, 1-indexed.", required = false)
             Integer page,
             @ToolParam(description = "Page size in [1, 100].", required = false)
             Integer pageSize,
-            @ToolParam(description = "Resource region filter (e.g. cn-north-4).", required = false)
+            @ToolParam(description = "Monitored resource region filter (e.g. cn-north-9); this is "
+                    + "not the server-configured APM SDK endpoint region.", required = false)
             String region,
             @ToolParam(description = "Application name filter.", required = false)
             String appName,
-            @ToolParam(description = "Body-level business_id filter (independent from the header "
-                    + "x-business-id).", required = false)
+            @ToolParam(description = "Optional body business_id override. Omit it to reuse "
+                    + "business_id automatically.", required = false)
             Long businessIdFilter,
             @ToolParam(description = "Monitor item id filter.", required = false)
             Long monitorItemId,
-            @ToolParam(description = "Alarm status filter (upstream-defined; passed through).",
+            @ToolParam(description = "Alarm status filter. Use ALERT for active alarms.",
                        required = false)
             String status,
             @ToolParam(description = "Alarm level as a string (upstream-defined).", required = false)

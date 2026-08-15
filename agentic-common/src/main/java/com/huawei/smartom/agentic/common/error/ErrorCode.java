@@ -31,6 +31,12 @@ public enum ErrorCode {
             "Server-side credential or permission problem. Changing arguments will not help; "
                     + "stop retrying and report this together with upstream_trace_id."),
 
+    /** Upstream rejected request parameters (HTTP 4xx other than auth / throttling). */
+    UPSTREAM_INVALID_PARAM(false,
+            "Huawei Cloud rejected one or more request parameters. Do not retry the same call. "
+                    + "Use the required discovery tool and correct the arguments; report "
+                    + "upstream_trace_id if the discovered arguments are still rejected."),
+
     /** Upstream server error (HTTP 5xx). */
     UPSTREAM_ERROR(true,
             "Huawei Cloud returned a server error. Retry once after a short backoff; "

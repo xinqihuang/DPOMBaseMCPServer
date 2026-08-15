@@ -75,6 +75,9 @@ public class ApmAlarmAdapterImpl implements ApmAlarmAdapter {
         Long businessId = request.businessId() == null
                 ? properties.getApmBusinessId()
                 : request.businessId();
+        Long businessIdFilter = request.businessIdFilter() == null
+                ? businessId
+                : request.businessIdFilter();
         LOG.info("apm.listAlarmData start, businessId={}, page={}, pageSize={}, appName={}, "
                         + "status={}, alarmLevel={}, keyword={}",
                 businessId, request.page(), request.pageSize(), request.appName(),
@@ -85,7 +88,7 @@ public class ApmAlarmAdapterImpl implements ApmAlarmAdapter {
                 .withPageSize(request.pageSize())
                 .withRegion(request.region())
                 .withAppName(request.appName())
-                .withBusinessId(request.businessIdFilter())
+                .withBusinessId(businessIdFilter)
                 .withMonitorItemId(request.monitorItemId())
                 .withStatus(request.status())
                 .withAlarmLevel(request.alarmLevel())
