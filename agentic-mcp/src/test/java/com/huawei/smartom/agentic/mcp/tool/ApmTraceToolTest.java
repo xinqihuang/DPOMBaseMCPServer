@@ -59,7 +59,8 @@ class ApmTraceToolTest {
     @Test
     @DisplayName("Success: request DTO is built from inputs and response is returned unchanged")
     void successPassthrough() {
-        ApmQueryTracesResponse expected = new ApmQueryTracesResponse(0, List.of());
+        ApmQueryTracesResponse expected = new ApmQueryTracesResponse(
+                250, List.of(), PAGE, PAGE_SIZE, true);
         when(service.queryTraces(any(ApmQueryTracesRequest.class))).thenReturn(expected);
 
         Object result = tool.queryTraces(
@@ -67,6 +68,9 @@ class ApmTraceToolTest {
                 TIME_USED_MIN, PAGE, PAGE_SIZE);
 
         assertThat(result).isSameAs(expected);
+        assertThat(((ApmQueryTracesResponse) result).page()).isEqualTo(PAGE);
+        assertThat(((ApmQueryTracesResponse) result).pageSize()).isEqualTo(PAGE_SIZE);
+        assertThat(((ApmQueryTracesResponse) result).hasMore()).isTrue();
 
         ArgumentCaptor<ApmQueryTracesRequest> captor =
                 ArgumentCaptor.forClass(ApmQueryTracesRequest.class);

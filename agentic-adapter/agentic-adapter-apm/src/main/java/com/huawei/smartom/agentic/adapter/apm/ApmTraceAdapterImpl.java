@@ -139,7 +139,13 @@ public class ApmTraceAdapterImpl implements ApmTraceAdapter {
         List<ApmSpan> spans = sdkSpans.stream()
                 .map(this::toSpan)
                 .toList();
-        return new ApmQueryTracesResponse(sdkResponse.getTotal(), spans);
+        Integer total = sdkResponse.getTotal();
+        Boolean hasMore = calculateHasMore(total, request.page(), request.pageSize());
+        return new ApmQueryTracesResponse(total, spans, request.page(), request.pageSize(), hasMore);
+    }
+
+    private Boolean calculateHasMore(Integer total, Integer page, Integer pageSize) {
+        return total == null ? null : (long) page * pageSize < total;
     }
 
     @Override

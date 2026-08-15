@@ -28,6 +28,7 @@ import io.github.resilience4j.retry.RetryRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +37,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -73,6 +75,7 @@ class ApmShowSpanSearchContractTest {
 
         HuaweiCloudProperties properties = new HuaweiCloudProperties();
         properties.setApmRegion("cn-north-4");
+        properties.setRegion("cn-north-9");
 
         adapter = new ApmTraceAdapterImpl(apmClient,
                 new HuaweiCloudInvocation(rlReg, retryReg, new SdkExceptionMapper()),
@@ -106,10 +109,13 @@ class ApmShowSpanSearchContractTest {
         when(apmClient.showSpanSearch(any(ShowSpanSearchRequest.class))).thenReturn(sdkResp);
 
         ApmQueryTracesResponse out = adapter.queryTraces(new ApmQueryTracesRequest(
-                123L, null, null, "tr-abc123", null, null, null, 1, 50));
+                123L, "cn-north-9", null, null, "tr-abc123", null, null, null, 1, 50));
 
         assertThat(out.total()).isEqualTo(1);
         assertThat(out.spans()).hasSize(1);
+        assertThat(out.page()).isEqualTo(1);
+        assertThat(out.pageSize()).isEqualTo(50);
+        assertThat(out.hasMore()).isFalse();
 
         ApmSpan span = out.spans().get(0);
 
@@ -139,6 +145,52 @@ class ApmShowSpanSearchContractTest {
         assertThat(span.isAsync()).isFalse();
         assertThat(span.type()).isEqualTo("HTTP");
         assertThat(span.bizCode()).isEqualTo("ORDER_CREATE_FAILED");
+    }
+
+    @Test
+    @DisplayName("Pagination metadata reports a following page without reordering spans")
+    void paginationMetadataReportsFollowingPage() throws IOException {
+        ShowSpanSearchResponse sdkResp = loadSample();
+        sdkResp.setTotal(101);
+        when(apmClient.showSpanSearch(any(ShowSpanSearchRequest.class))).thenReturn(sdkResp);
+
+        ApmQueryTracesResponse out = adapter.queryTraces(new ApmQueryTracesRequest(
+                123L, "cn-north-9", null, null, null, null, null, null, 2, 50));
+
+        assertThat(out.total()).isEqualTo(101);
+        assertThat(out.page()).isEqualTo(2);
+        assertThat(out.pageSize()).isEqualTo(50);
+        assertThat(out.hasMore()).isTrue();
+        assertThat(out.spans()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Missing upstream total keeps hasMore unknown")
+    void missingTotalKeepsHasMoreUnknown() throws IOException {
+        ShowSpanSearchResponse sdkResp = loadSample();
+        sdkResp.setTotal(null);
+        when(apmClient.showSpanSearch(any(ShowSpanSearchRequest.class))).thenReturn(sdkResp);
+
+        ApmQueryTracesResponse out = adapter.queryTraces(new ApmQueryTracesRequest(
+                123L, "cn-north-9", null, null, null, null, null, null, 1, 50));
+
+        assertThat(out.total()).isNull();
+        assertThat(out.hasMore()).isNull();
+    }
+
+    @Test
+    @DisplayName("Resource region is independent from the APM API endpoint region")
+    void resourceRegionIsIndependentFromEndpointRegion() throws IOException {
+        when(apmClient.showSpanSearch(any(ShowSpanSearchRequest.class))).thenReturn(loadSample());
+
+        adapter.queryTraces(new ApmQueryTracesRequest(
+                123L, null, null, null, "tr-abc123", null, null, null, 1, 50));
+
+        ArgumentCaptor<ShowSpanSearchRequest> captor = ArgumentCaptor.forClass(ShowSpanSearchRequest.class);
+        verify(apmClient).showSpanSearch(captor.capture());
+        assertThat(captor.getValue().getBody().getRegion()).isEqualTo("cn-north-9");
+        assertThat(captor.getValue().getXBusinessId()).isEqualTo(123L);
+        assertThat(captor.getValue().getBody().getBizId()).isEqualTo(123L);
     }
 
     private ShowSpanSearchResponse loadSample() throws IOException {

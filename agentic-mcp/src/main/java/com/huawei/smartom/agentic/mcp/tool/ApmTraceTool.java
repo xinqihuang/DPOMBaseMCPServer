@@ -53,8 +53,9 @@ public class ApmTraceTool implements McpTool {
                     Search APM (Application Performance Management) trace spans for a Huawei \
                     Cloud application. Use this when investigating latency / error issues — \
                     filter by traceId, entry url/method (source), time window, error flag, or \
-                    minimum elapsed time. Returns matched span summaries (traceId, spanId, \
-                    timing, error info, tags). Call get_service_topology afterwards with a \
+                    minimum elapsed time. Returns total, page, pageSize, hasMore and matched \
+                    span summaries (traceId, spanId, timing, error info, tags). Follow \
+                    hasMore for bounded pagination. Call get_service_topology afterwards with a \
                     specific traceId to see the call graph.""")
     public Object queryTraces(
             @ToolParam(description = "APM application id (x-business-id). Optional if a "
