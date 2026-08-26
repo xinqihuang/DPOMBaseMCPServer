@@ -1,10 +1,12 @@
 # DPOMBaseMCPServer
 
-> Huawei Cloud monitoring MCP server — exposing AOM/APM/CES read-only APIs as MCP tools for an intelligent ops agent.
+> Phase 1 online diagnosis system of record: bounded Huawei Cloud evidence, durable Investigation Runtime,
+> Kafka diagnosis events/progress, and Portal REST/SSE.
 
 ## 项目状态
 
-🚧 Bootstrapping — 当前处于骨架搭建阶段，第一个业务 tool `list_ces_metrics` 在 T05 任务卡。
+Phase 1A 的只读华为云工具面已形成迁移基线；Phase 1B 正按
+`D:\code\openspec\changes\complete-phase1-three-service-convergence` 收敛三服务目标。根决策见 `D:\code\ADR.md`。
 
 ## 快速开始
 
@@ -36,7 +38,7 @@
 ├── .cloudbuild/build.yml              ← CodeArts Pipeline
 ├── helm/dpom-mcp-server/              ← Helm Chart
 ├── scripts/smoke/                     ← 部署后冒烟脚本
-└── agentic-*/                         ← 六个 Maven 子模块 (agentic-common, agentic-adapter-ces, ...)
+└── agentic-*/                         ← 证据适配模块 + diagnosis/persistence/messaging + 唯一可执行 agentic-mcp
 ```
 
 ## 技术栈
@@ -49,6 +51,14 @@
 | SDK | huaweicloud-sdk-java-v3 3.1.196 |
 | 容错 | Resilience4j |
 | 部署 | CCE + Helm + SWR |
+
+## Phase 1B 边界
+
+- `agentic-diagnosis`：无框架的 Incident/Investigation/Run/Step/Observation/Hypothesis/Conclusion、预算与 checkpoint。
+- `agentic-persistence`：服务本地 MyBatis、事务、审计和 deployment-managed SQL。
+- `agentic-messaging`：`dpom.diagnosis-event.v2`、`dpom.diagnosis-progress.v1` 与有界至少一次发布。
+- `agentic-mcp`：唯一 executable，组合 MCP、Portal REST/SSE、runtime 和默认关闭的 worker。
+- SRE Intelligence 拥有数据/评价投影；DeepEval 只执行无状态 Judge；任何服务都不得跨库访问。
 
 ## 部署
 

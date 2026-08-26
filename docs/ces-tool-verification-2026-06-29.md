@@ -1,6 +1,6 @@
 # CES Tool 验证报告（2026-06-29）
 
-> 凭证来源：`.env.local`（AK=`WM2NEXJZEXZR8LQWAIJM`，region=`cn-north-9`，账号域 `MOS`）
+> 凭证来源：`.env.local`（AK=`<REDACTED_AK>`，region=`cn-north-9`，账号域 `MOS`）
 > 验证对象：`agentic-mcp` 0.0.1-SNAPSHOT，Spring AI MCP Server 1.0.4
 > 结论：**发现并修复一个 P0 bug**——`list_ces_metrics` / `query_ces_metric_data` 传 `namespace="SYS.ECS"` 必 400。修复后全部 CES tool 真实回归通过。
 
@@ -26,8 +26,8 @@
 `.env.local` 原始内容：
 
 ```
-HUAWEICLOUD_SDK_AK=HPUAY21EIYEM8I309V1S
-HUAWEICLOUD_SDK_K=9xK4vamP47HrlhV3SiK1Y29hbbfCXs3jlfhtlR9C   # 注意变量名是 _K 不是 _SK
+HUAWEICLOUD_SDK_AK=<REDACTED_AK>
+HUAWEICLOUD_SDK_SK=<REDACTED_SK>
 HUAWEICLOUD_SDK_REGION=cn-north-4
 ```
 
@@ -46,8 +46,8 @@ Incorrect IAM authentication information: verify ak sk signature failed
 ### 2.2 第二对凭证（本次使用）
 
 ```
-HUAWEICLOUD_SDK_AK=WM2NEXJZEXZR8LQWAIJM
-HUAWEICLOUD_SDK_SK=ciGUo04PQ595wn1HW6ZNOoh9QTCJD0x8EVnWcaUi
+HUAWEICLOUD_SDK_AK=<REDACTED_AK>
+HUAWEICLOUD_SDK_SK=<REDACTED_SK>
 HUAWEICLOUD_SDK_REGION=cn-north-9
 HUAWEICLOUD_PROJECT_ID=81679072734a4608ae65cd3940458c51
 ```

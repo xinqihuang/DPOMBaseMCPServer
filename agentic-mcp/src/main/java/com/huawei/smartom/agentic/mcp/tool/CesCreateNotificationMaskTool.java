@@ -26,7 +26,7 @@ import java.util.List;
  * @since 2026-05-28
  */
 @Component
-@Profile("action-enabled")
+@Profile("action-enabled & !production")
 @ConditionalOnProperty(prefix = "dpom.mcp", name = "write-tools-enabled", havingValue = "true")
 public class CesCreateNotificationMaskTool implements McpTool {
 

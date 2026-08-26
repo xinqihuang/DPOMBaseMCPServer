@@ -8,7 +8,6 @@ import com.huawei.smartom.agentic.adapter.apm.ApmTrendAdapter;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendViewConfig;
-import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +38,7 @@ class ApmTrendServiceTest {
     @BeforeEach
     void setUp() {
         adapter = mock(ApmTrendAdapter.class);
-        HuaweiCloudProperties properties = new HuaweiCloudProperties();
-        properties.setApmBusinessId(99999L);
-        service = new ApmTrendService(adapter, properties);
+        service = new ApmTrendService(adapter, 99999L);
     }
 
     @Test
@@ -106,8 +103,7 @@ class ApmTrendServiceTest {
     @Test
     @DisplayName("UT-S5: businessId null + default null -> INVALID_PARAM")
     void ut05BusinessIdMissing() {
-        HuaweiCloudProperties props = new HuaweiCloudProperties();
-        ApmTrendService svc = new ApmTrendService(adapter, props);
+        ApmTrendService svc = new ApmTrendService(adapter, null);
         ApmTrendViewConfig view = view("trend", "latency");
         ApmTrendRequest req = new ApmTrendRequest(
                 null, view, null, null, null, "t1", "t2");

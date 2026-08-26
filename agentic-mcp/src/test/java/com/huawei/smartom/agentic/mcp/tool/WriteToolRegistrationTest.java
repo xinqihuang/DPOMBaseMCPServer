@@ -57,6 +57,15 @@ class WriteToolRegistrationTest {
                 });
     }
 
+    @Test
+    @DisplayName("production profile 即使双重 opt-in 也不注册写工具")
+    void productionProfileAlwaysRejectsWriteTools() {
+        runner.withPropertyValues(
+                        "spring.profiles.active=production,action-enabled",
+                        "dpom.mcp.write-tools-enabled=true")
+                .run(this::assertWriteToolsAbsent);
+    }
+
     private void assertWriteToolsAbsent(org.springframework.context.ApplicationContext context) {
         assertThat(context.getBeansOfType(CesCreateNotificationMaskTool.class)).isEmpty();
         assertThat(context.getBeansOfType(CesDeleteNotificationMasksTool.class)).isEmpty();

@@ -9,7 +9,6 @@ import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyResponse;
-import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,14 +34,12 @@ import static org.mockito.Mockito.when;
 class ApmAlarmServiceTest {
 
     private ApmAlarmAdapter adapter;
-    private HuaweiCloudProperties properties;
     private ApmAlarmService service;
 
     @BeforeEach
     void setUp() {
         adapter = mock(ApmAlarmAdapter.class);
-        properties = new HuaweiCloudProperties();
-        service = new ApmAlarmService(adapter, properties);
+        service = new ApmAlarmService(adapter, 99999L);
     }
 
     @Test
@@ -56,7 +53,6 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-S2: page < 1 -> INVALID_PARAM")
     void ut02PageTooSmall() {
-        properties.setApmBusinessId(99999L);
         ApmAlarmDataRequest req = new ApmAlarmDataRequest(
                 null, 0, null, null, null, null, null,
                 null, null, null, null, null, null, null, null);
@@ -69,7 +65,6 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-S3: pageSize > 100 -> INVALID_PARAM")
     void ut03PageSizeTooBig() {
-        properties.setApmBusinessId(99999L);
         ApmAlarmDataRequest req = new ApmAlarmDataRequest(
                 null, null, 101, null, null, null, null,
                 null, null, null, null, null, null, null, null);
@@ -82,7 +77,7 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-S4: businessId null AND no config default -> INVALID_PARAM")
     void ut04NoBusinessId() {
-        // properties.apmBusinessId 默认 null（未调 setter）
+        service = new ApmAlarmService(adapter, null);
         ApmAlarmDataRequest req = new ApmAlarmDataRequest(
                 null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null);
@@ -95,7 +90,6 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-S5: all valid -> delegate to adapter and return its response")
     void ut05ValidDelegates() {
-        properties.setApmBusinessId(99999L);
         ApmAlarmDataResponse expected = new ApmAlarmDataResponse(List.of(), 0);
         when(adapter.listAlarmData(any(ApmAlarmDataRequest.class))).thenReturn(expected);
 
@@ -121,7 +115,6 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-N2: null alarm_data_id -> INVALID_PARAM")
     void utN02NullAlarmDataId() {
-        properties.setApmBusinessId(99999L);
         ApmAlarmNotifyRequest req = new ApmAlarmNotifyRequest(null, null, 1, 50, null);
         assertThatThrownBy(() -> service.listAlarmNotify(req))
                 .isInstanceOf(InvalidParamException.class)
@@ -132,7 +125,6 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-N3: non-positive alarm_data_id -> INVALID_PARAM")
     void utN03NonPositiveAlarmDataId() {
-        properties.setApmBusinessId(99999L);
         ApmAlarmNotifyRequest req = new ApmAlarmNotifyRequest(null, 0, 1, 50, null);
         assertThatThrownBy(() -> service.listAlarmNotify(req))
                 .isInstanceOf(InvalidParamException.class)
@@ -143,7 +135,7 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-N4: missing business_id (no config default) -> INVALID_PARAM")
     void utN04NoBusinessId() {
-        // properties.apmBusinessId stays null
+        service = new ApmAlarmService(adapter, null);
         ApmAlarmNotifyRequest req = new ApmAlarmNotifyRequest(null, 12345, 1, 50, null);
         assertThatThrownBy(() -> service.listAlarmNotify(req))
                 .isInstanceOf(InvalidParamException.class)
@@ -154,7 +146,6 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-N5: pageSize out of range -> INVALID_PARAM")
     void utN05PageSizeOutOfRange() {
-        properties.setApmBusinessId(99999L);
         ApmAlarmNotifyRequest req = new ApmAlarmNotifyRequest(null, 12345, 1, 101, null);
         assertThatThrownBy(() -> service.listAlarmNotify(req))
                 .isInstanceOf(InvalidParamException.class)
@@ -165,7 +156,6 @@ class ApmAlarmServiceTest {
     @Test
     @DisplayName("UT-N6: all valid -> delegate to adapter")
     void utN06ValidDelegates() {
-        properties.setApmBusinessId(99999L);
         ApmAlarmNotifyResponse expected = new ApmAlarmNotifyResponse(List.of(), 0);
         when(adapter.listAlarmNotify(any(ApmAlarmNotifyRequest.class))).thenReturn(expected);
 

@@ -21,7 +21,10 @@
     <modules>
         <module>agentic-common</module>
         <module>agentic-adapter</module>
+        <module>agentic-diagnosis</module>
         <module>agentic-monitoring</module>
+        <module>agentic-persistence</module>
+        <module>agentic-messaging</module>
         <module>agentic-mcp</module>
     </modules>
 
@@ -35,6 +38,11 @@
         <huaweicloud-sdk.version>3.1.177</huaweicloud-sdk.version>
         <resilience4j.version>2.2.0</resilience4j.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
+        <archunit.version>1.4.1</archunit.version>
+        <java-json-canonicalization.version>1.1</java-json-canonicalization.version>
+        <json-schema-validator.version>1.5.4</json-schema-validator.version>
+        <mybatis.version>3.5.19</mybatis.version>
+        <mybatis-spring.version>3.0.4</mybatis-spring.version>
 
         <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
         <checkstyle.version>10.17.0</checkstyle.version>
@@ -116,6 +124,32 @@
                 <version>${logstash-logback-encoder.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.erdtman</groupId>
+                <artifactId>java-json-canonicalization</artifactId>
+                <version>${java-json-canonicalization.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.networknt</groupId>
+                <artifactId>json-schema-validator</artifactId>
+                <version>${json-schema-validator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
+
             <!-- Internal modules -->
             <dependency>
                 <groupId>com.huawei.smartom.agentic</groupId>
@@ -150,6 +184,21 @@
             <dependency>
                 <groupId>com.huawei.smartom.agentic</groupId>
                 <artifactId>agentic-monitoring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.huawei.smartom.agentic</groupId>
+                <artifactId>agentic-diagnosis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.huawei.smartom.agentic</groupId>
+                <artifactId>agentic-persistence</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.huawei.smartom.agentic</groupId>
+                <artifactId>agentic-messaging</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

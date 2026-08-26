@@ -8,10 +8,10 @@ import com.huawei.smartom.agentic.adapter.apm.ApmTrendAdapter;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmTrendViewConfig;
-import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 import com.huawei.smartom.agentic.common.validation.Validations;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -37,17 +37,18 @@ public class ApmTrendService {
     private static final Set<String> VALID_VIEW_TYPES = Set.of("trend", "sumtable", "rawtable");
 
     private final ApmTrendAdapter adapter;
-    private final HuaweiCloudProperties properties;
+    private final Long defaultBusinessId;
 
     /**
      * 构造一个由指定 adapter + 配置支撑的 {@code ApmTrendService}。
      *
      * @param adapter    APM 趋势图 adapter
-     * @param properties 华为云配置，用于读取默认 APM business id
+     * @param defaultBusinessId 非敏感的默认 APM business id
      */
-    public ApmTrendService(ApmTrendAdapter adapter, HuaweiCloudProperties properties) {
+    public ApmTrendService(ApmTrendAdapter adapter,
+            @Value("${huaweicloud.apm-business-id:#{null}}") Long defaultBusinessId) {
         this.adapter = adapter;
-        this.properties = properties;
+        this.defaultBusinessId = defaultBusinessId;
     }
 
     /**
@@ -73,7 +74,7 @@ public class ApmTrendService {
         Validations.requireNonBlank(request.endTime(), "end_time");
         Long effective = request.businessId() != null
                 ? request.businessId()
-                : properties.getApmBusinessId();
+                : defaultBusinessId;
         if (effective == null) {
             throw new InvalidParamException(
                     "business_id is required (request.business_id is null and "

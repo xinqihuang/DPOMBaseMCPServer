@@ -24,6 +24,18 @@
             <groupId>com.huawei.smartom.agentic</groupId>
             <artifactId>agentic-monitoring</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.huawei.smartom.agentic</groupId>
+            <artifactId>agentic-diagnosis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.huawei.smartom.agentic</groupId>
+            <artifactId>agentic-persistence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.huawei.smartom.agentic</groupId>
+            <artifactId>agentic-messaging</artifactId>
+        </dependency>
 
         <!-- Spring Boot web + actuator -->
         <dependency>
@@ -33,6 +45,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.erdtman</groupId>
+            <artifactId>java-json-canonicalization</artifactId>
         </dependency>
 
         <!-- Spring AI MCP Server (WebMvc + SSE) -->

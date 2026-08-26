@@ -9,9 +9,9 @@ import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmDataResponse;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyRequest;
 import com.huawei.smartom.agentic.adapter.apm.dto.ApmAlarmNotifyResponse;
-import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,17 +39,18 @@ public class ApmAlarmService {
     private static final int PAGE_SIZE_MAX = 100;
 
     private final ApmAlarmAdapter adapter;
-    private final HuaweiCloudProperties properties;
+    private final Long defaultBusinessId;
 
     /**
      * 构造一个由指定 adapter + 配置支撑的 {@code ApmAlarmService}。
      *
      * @param adapter    APM 告警 adapter
-     * @param properties 华为云配置，用于读取默认 APM business id
+     * @param defaultBusinessId 非敏感的默认 APM business id
      */
-    public ApmAlarmService(ApmAlarmAdapter adapter, HuaweiCloudProperties properties) {
+    public ApmAlarmService(ApmAlarmAdapter adapter,
+            @Value("${huaweicloud.apm-business-id:#{null}}") Long defaultBusinessId) {
         this.adapter = adapter;
-        this.properties = properties;
+        this.defaultBusinessId = defaultBusinessId;
     }
 
     /**
@@ -85,7 +86,7 @@ public class ApmAlarmService {
     private void validate(ApmAlarmDataRequest request) {
         Long effective = request.businessId() != null
                 ? request.businessId()
-                : properties.getApmBusinessId();
+                : defaultBusinessId;
         if (effective == null) {
             throw new InvalidParamException(
                     "business_id is required (request.business_id is null and "
@@ -112,7 +113,7 @@ public class ApmAlarmService {
         }
         Long effective = request.businessId() != null
                 ? request.businessId()
-                : properties.getApmBusinessId();
+                : defaultBusinessId;
         if (effective == null) {
             throw new InvalidParamException(
                     "business_id is required (request.business_id is null and "

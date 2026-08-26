@@ -9,11 +9,14 @@
 | 字段 | 值 |
 |---|---|
 | 服务名 | `DPOMBaseMCPServer` |
-| 一句话定位 | 基于华为云 SDK，封装 AOM/APM/CES 监控能力，作为 MCP Server 提供给智能运维 Agent 使用 |
-| 范围（本期 MVP） | **只读监控查询**。AOM + APM + CES + LTS 的 read-only API；生产默认不注册写工具 |
+| 一句话定位 | Phase 1 在线诊断系统记录：封装只读云证据并拥有 Investigation Runtime、Kafka 事件和 Portal REST/SSE |
+| 范围（Phase 1B） | AOM/APM/CES/LTS/CCE/CMDB/codegraph/OBS 受控证据；Incident/Investigation/Run/Step；预算、checkpoint、审计、Kafka 发布与进度 |
 | 不在范围 | 故障恢复（写操作）—— 另起项目 |
 | 部署形态 | 华为云 CCE 无状态服务，4U8G，Helm Chart 部署 |
 | 仓库 | Codehub（华为内部），主分支 `master` |
+
+`D:\code\ADR.md` 是工作区最高优先级架构决策；历史任务卡或本仓库旧 ADR 只描述 Phase 1A 当前实现。
+Phase 1B 由 `D:\code\openspec\changes\complete-phase1-three-service-convergence` 驱动。
 
 ---
 
@@ -63,13 +66,16 @@ DPOMBaseMCPServer/
 │   └── tasks/                                   ← 任务卡 (AI 执行单元)
 ├── scripts/
 │   └── smoke/                                   ← 部署后冒烟脚本
-└── 子模块/                                       ← 7 个（含 1 个聚合父），目录名 = Maven artifactId
+└── 子模块/                                       ← 现有证据模块 + Phase 1B 诊断模块
     ├── agentic-common/                          ← com.huawei.smartom.agentic.common
     ├── agentic-adapter/                         ← 聚合父 pom（packaging=pom，无源码）
     │   ├── agentic-adapter-ces/                 ← com.huawei.smartom.agentic.adapter.ces
     │   ├── agentic-adapter-aom/                 ← com.huawei.smartom.agentic.adapter.aom
     │   └── agentic-adapter-apm/                 ← com.huawei.smartom.agentic.adapter.apm
     ├── agentic-monitoring/                      ← com.huawei.smartom.agentic.monitoring
+    ├── agentic-diagnosis/                       ← framework-free Investigation 领域与端口
+    ├── agentic-persistence/                     ← MyBatis、事务与部署 SQL 适配
+    ├── agentic-messaging/                       ← Kafka producer 与 publication worker
     └── agentic-mcp/                             ← com.huawei.smartom.agentic.mcp (Spring Boot 启动入口)
 ```
 
@@ -83,6 +89,9 @@ DPOMBaseMCPServer/
 | `agentic-adapter/agentic-adapter-aom` | `com.huawei.smartom.agentic.adapter.aom.*` | AOM SDK 封装 |
 | `agentic-adapter/agentic-adapter-apm` | `com.huawei.smartom.agentic.adapter.apm.*` | APM SDK 封装 |
 | `agentic-monitoring` | `com.huawei.smartom.agentic.monitoring.*` | 业务编排（含跨组件 correlate） |
+| `agentic-diagnosis` | `com.huawei.smartom.agentic.diagnosis.*` | 无框架调查领域、策略与端口 |
+| `agentic-persistence` | `com.huawei.smartom.agentic.persistence.*` | 服务本地 MyBatis 持久化与事务组合 |
+| `agentic-messaging` | `com.huawei.smartom.agentic.messaging.*` | Kafka 序列化、发布租约与有界 worker |
 | `agentic-mcp` | `com.huawei.smartom.agentic.mcp.*` | Spring Boot 启动类 + MCP tool 注册 + SSE endpoint |
 
 **命名规则**：Maven artifactId 取 Java 包名的最后两截（adapter 子包取最后三截），用 `-` 连接，去掉 `com.huawei.smartom.` 前缀。
@@ -91,11 +100,16 @@ DPOMBaseMCPServer/
 
 ```
 mcp ──► monitoring ──► adapter.{ces, aom, apm} ──► common
+ │          │
+ ├────────► diagnosis ◄──────── persistence
+ └────────► messaging ─────────► diagnosis ports
                               ▲
                               └── 仅依赖 common，不互相依赖
 adapter.ces 不能依赖 adapter.aom
 monitoring 不能直接依赖 common 之外的层 (必须通过 adapter 接口)
 mcp 不能直接 import huaweicloud SDK
+diagnosis 不能依赖 Spring、MyBatis、Kafka 或 Huawei SDK
+persistence 与 messaging 只能实现 diagnosis 端口；`agentic-mcp` 仍是唯一可执行 composition root
 ```
 
 ---
@@ -267,6 +281,13 @@ collector_name/collector_id/metric_set/function/查询 DSL 等。合法来源二
 - AK/SK 通过 Vault 注入到环境变量 `HUAWEICLOUD_AK` / `HUAWEICLOUD_SK`
 - 应用启动时一次性加载，**冷加载**，不支持热更新（轮换 = Pod 滚动重启）
 - 启动时校验 AK/SK 非空，缺失则 fail-fast（健康检查不通过）
+
+### 4.6 Phase 1B 数据与消息边界
+
+- 新生产表使用经评审的 deployment-managed forward/compatibility/rollback-safe SQL；应用不得在生产自动迁移。
+- 调查状态与 publication intent 在一个本地事务中提交；Kafka 为至少一次投递，不声称 XA 或 exactly-once。
+- Diagnosis Event v2 与 Progress v1 以 `investigationId` 分区，SRE 通过统一摄取端口处理 Kafka 与兼容 HTTP。
+- 所有诊断、Kafka、SSE 与切换能力默认关闭；配置、schema 或 authority epoch 不合法时失败关闭。
 
 ---
 

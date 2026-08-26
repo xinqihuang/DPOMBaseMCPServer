@@ -4,18 +4,22 @@
 
 ## 1. 一句话定位
 
-把华为云 AOM/APM/CES/LTS 的只读监控 API，包装成 MCP Server，提供给智能运维 Agent 调用。
+作为 Phase 1 在线诊断系统记录：把华为云 AOM/APM/CES/LTS/CCE 等只读证据包装为受控端口，
+持久化 Investigation Runtime，并向 SRE 发布版本化 Kafka 事件、向 Portal 提供 REST/SSE。
 
 生产默认工具面严格只读。历史 CES 通知屏蔽写工具仅用于隔离的人工运维场景，必须同时启用
 `action-enabled` profile 与 `dpom.mcp.write-tools-enabled=true` 才会注册；DPOMAgent 不得启用或调用它们。
 
-## 2. 上下文图
+## 2. Phase 1B 上下文图
 
 ```
-┌──────────────────────┐         MCP / SSE          ┌────────────────────────┐
-│  智能运维 Agent       │ ◄─────────────────────────► │  DPOMBaseMCPServer     │
-│  (Claude/通义/...)   │     list_ces_metrics ...   │  (Spring Boot 3.4)     │
-└──────────────────────┘                            └────────────┬───────────┘
+┌──────────────────────┐       REST / SSE / MCP     ┌────────────────────────┐
+│ Portal / 受控调用方   │ ◄─────────────────────────► │  DPOMBaseMCPServer     │
+└──────────────────────┘                            │  Investigation SoR     │
+                                                   └──────┬────────┬────────┘
+                                                          │        │ Kafka v2/progress
+                                          Huawei SDK      │        ▼
+                                                          │  SRE Intelligence
                                                                  │
                                                   Huawei Cloud Java SDK 3.1.177
                                                                  │
@@ -29,7 +33,17 @@
 
 ## 3. 内部分层
 
-七个 Maven 模块（含一个聚合父模块），单向依赖：
+现有七个 Maven 模块是 Phase 1A 证据能力；Phase 1B 增加 `agentic-diagnosis`、`agentic-persistence`、
+`agentic-messaging`，并保持 `agentic-mcp` 为唯一 executable。目标单向依赖为：
+
+```text
+agentic-mcp -> agentic-diagnosis <- agentic-persistence
+     |                 ^          <- agentic-messaging
+     v                 |
+agentic-monitoring -> adapter.* -> agentic-common
+```
+
+下图保留 Phase 1A 证据分层细节：
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -72,6 +86,16 @@ DPOMBaseMCPServer/
 - `agentic-adapter-ces` / `agentic-adapter-aom` / `agentic-adapter-apm` 之间不能互相依赖
 - `agentic-monitoring` 通过 adapter 接口访问下层，不直接 new SDK 类
 - 所有跨模块通信用我们自己的 DTO，不传 SDK Request/Response
+- `agentic-diagnosis` 不依赖 Spring、MyBatis、Kafka 或 Huawei SDK
+- persistence/messaging 只实现 diagnosis 端口，不把 provider/transport DTO 泄漏进领域
+- 服务间只通过版本化事件、API 或不可变 Artifact 交互，禁止跨库访问
+
+### 3.1 持久化与发布
+
+- 新生产 schema 由部署流程显式应用 SQL；应用只校验 schema readiness，不在生产自动迁移。
+- 领域终态与不可变 publication intent 同事务提交，网络发布在事务外以有界租约重试。
+- Kafka 保证为 investigation 分区内的至少一次传输；SRE 以规范身份、摘要、authority epoch 和 sequence 去重。
+- 直接 SSE 与 Kafka progress 都来自同一个已持久化 progress log，不携带证据正文或敏感信息。
 
 ## 4. 关键运行时特性
 
