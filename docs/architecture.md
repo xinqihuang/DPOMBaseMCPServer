@@ -128,6 +128,22 @@ DPOMBaseMCPServer/
 - **AK/SK**：Vault 注入到环境变量 `HUAWEICLOUD_AK` / `HUAWEICLOUD_SK`，应用启动时冷加载
 - **轮换**：通过 K8s 滚动重启实现，无热更新
 
+### 4.5 自动 OBS 证据存储
+
+- 诊断证据在 `BoundedEvidenceArtifactStore` 边界完成敏感字段净化、RFC 8785 规范化和 SHA-256 摘要，
+  上传成功并校验对象身份后才返回 `EvidenceRecord`；上传失败不得生成悬空引用。
+- 每个部署环境通过 `DPOM_OBS_ENDPOINT`、`DPOM_OBS_BUCKET`、`DPOM_OBS_PREFIX` 和
+  `DPOM_OBS_SERVICE_CODE` 固定自己的目标。代码、`application.yml` 和 Helm values 不提供测试桶默认值。
+- `DPOM_OBS_ENABLED` 与 `DPOM_OBS_AUTOMATIC_STORAGE_ENABLED` 均为 `true` 时才注册自动存储，默认关闭；
+  启用后 endpoint、bucket、prefix 或 service code 缺失会让组合根 fail-closed。
+- AK/SK 只从 `HUAWEICLOUD_AK` / `HUAWEICLOUD_SK` 注入；可选 `DPOM_OBS_KMS_KEY_ID` 未配置时仍请求
+  OBS SSE-KMS，由云侧选择默认主密钥。
+- 自动写入不设置逐证据包人工审批。安全边界由部署 gate、有界载荷、确定性对象键、敏感字段净化、
+  SSE-KMS 和最小权限 IAM 共同承担。运行身份只授予目标 bucket/prefix 所需的 Put/Get/Head 与 KMS 权限。
+- 对象键格式为
+  `{prefix}/{serviceCode}/{investigationId}/{evidenceType}/{sha256}.json`；测试验证对象使用
+  `{prefix}/verification/`，目标同样只能通过进程级运行参数指定。
+
 ## 5. 数据流：以 list_ces_metrics 为例
 
 ```

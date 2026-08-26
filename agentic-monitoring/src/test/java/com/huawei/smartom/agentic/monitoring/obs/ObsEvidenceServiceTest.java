@@ -8,11 +8,7 @@ import com.huawei.smartom.agentic.adapter.obs.ObsEvidenceAdapter;
 import com.huawei.smartom.agentic.adapter.obs.config.ObsProperties;
 import com.huawei.smartom.agentic.adapter.obs.dto.ObsPutEvidenceRequest;
 import com.huawei.smartom.agentic.adapter.obs.dto.ObsPutEvidenceResponse;
-import com.huawei.smartom.agentic.common.error.ErrorCode;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
-import com.huawei.smartom.agentic.common.exception.SmartomException;
-import com.huawei.smartom.agentic.monitoring.approval.ApprovalRecord;
-import com.huawei.smartom.agentic.monitoring.approval.ApprovalService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,80 +31,45 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * OBS 证据转移服务测试：对象名（含 checksum）、审批原子消费、Base64 限长、大小、checksum、证据包校验、回滚与 head/get。
+ * OBS 证据转移服务无人工审批测试。
  *
- * @author h00884391
- * @since 2026-08-15
+ * @author Codex
+ * @since 2026-08-26
  */
 class ObsEvidenceServiceTest {
 
     private ObsEvidenceAdapter adapter;
     private ObsProperties properties;
     private DiagnosticEvidencePackageValidator packageValidator;
-    private ApprovalService approvalService;
     private ObsEvidenceService service;
 
     @BeforeEach
     void setUp() {
         adapter = mock(ObsEvidenceAdapter.class);
         packageValidator = mock(DiagnosticEvidencePackageValidator.class);
-        approvalService = mock(ApprovalService.class);
         properties = new ObsProperties();
         properties.setPrefix("evidence");
         properties.setMaxBytes(1024);
-        service = new ObsEvidenceService(adapter, properties, approvalService, packageValidator);
+        service = new ObsEvidenceService(adapter, properties, packageValidator);
     }
 
     @Test
-    @DisplayName("审批消费后上传成功且对象名为服务端生成（含 checksum）")
-    void putEvidenceConsumesApprovalAndGeneratesObjectKey() {
+    @DisplayName("有效证据包无需人工审批即可上传")
+    void putEvidenceUploadsWithoutApproval() {
         byte[] content = "hello".getBytes(StandardCharsets.UTF_8);
         String sha256 = sha256(content);
-        ApprovalRecord record = record("svc", "inv", "pkg", sha256);
-        when(approvalService.consume("svc", "inv", "pkg", sha256)).thenReturn(record);
         when(adapter.putEvidence(any(ObsPutEvidenceRequest.class)))
-                .thenReturn(new ObsPutEvidenceResponse("evidence/svc/inv/pkg/" + sha256 + ".zip", "etag1", content.length));
+                .thenReturn(new ObsPutEvidenceResponse("evidence/svc/inv/pkg/" + sha256 + ".zip",
+                        "etag1", content.length));
 
         ObsPutEvidenceResponse response = service.putEvidence("svc", "inv", "pkg", base64(content), sha256);
 
         ArgumentCaptor<ObsPutEvidenceRequest> captor = ArgumentCaptor.forClass(ObsPutEvidenceRequest.class);
         verify(adapter).putEvidence(captor.capture());
         assertThat(captor.getValue().objectKey()).isEqualTo("evidence/svc/inv/pkg/" + sha256 + ".zip");
+        assertThat(captor.getValue().contentType()).isEqualTo("application/zip");
         assertThat(response.etag()).isEqualTo("etag1");
-        verify(approvalService).consume("svc", "inv", "pkg", sha256);
         verify(packageValidator).validate(any(byte[].class), eq("svc"), eq("pkg"));
-    }
-
-    @Test
-    @DisplayName("未审批上传返回 UPLOAD_NOT_APPROVED")
-    void uploadWithoutApprovalRejected() {
-        byte[] content = "hello".getBytes(StandardCharsets.UTF_8);
-        when(approvalService.consume("svc", "inv", "pkg", sha256(content)))
-                .thenThrow(new SmartomException(ErrorCode.UPLOAD_NOT_APPROVED, "not approved"));
-
-        Throwable throwable = catchThrowable(() ->
-                service.putEvidence("svc", "inv", "pkg", base64(content), sha256(content)));
-
-        assertThat(throwable).isInstanceOf(SmartomException.class);
-        assertThat(((SmartomException) throwable).getErrorCode()).isEqualTo(ErrorCode.UPLOAD_NOT_APPROVED);
-        verify(adapter, never()).putEvidence(any(ObsPutEvidenceRequest.class));
-    }
-
-    @Test
-    @DisplayName("上传失败回滚已消费的审批")
-    void uploadFailureRestoresApproval() {
-        byte[] content = "hello".getBytes(StandardCharsets.UTF_8);
-        String sha256 = sha256(content);
-        ApprovalRecord record = record("svc", "inv", "pkg", sha256);
-        when(approvalService.consume("svc", "inv", "pkg", sha256)).thenReturn(record);
-        when(adapter.putEvidence(any(ObsPutEvidenceRequest.class)))
-                .thenThrow(new SmartomException(ErrorCode.UPSTREAM_ERROR, "boom"));
-
-        Throwable throwable = catchThrowable(() ->
-                service.putEvidence("svc", "inv", "pkg", base64(content), sha256));
-
-        assertThat(throwable).isInstanceOf(SmartomException.class);
-        verify(approvalService).restore(record);
     }
 
     @Test
@@ -130,20 +91,8 @@ class ObsEvidenceServiceTest {
         Throwable throwable = catchThrowable(() ->
                 service.putEvidence("svc", "inv", "pkg", base64(content), sha256(content)));
 
-        assertThat(throwable).isInstanceOf(InvalidParamException.class)
-                .hasMessageContaining("base64");
-    }
-
-    @Test
-    @DisplayName("内容超限时拒绝")
-    void oversizedContentRejected() {
-        properties.setMaxBytes(3);
-        byte[] content = "hello".getBytes(StandardCharsets.UTF_8);
-
-        Throwable throwable = catchThrowable(() ->
-                service.putEvidence("svc", "inv", "pkg", base64(content), sha256(content)));
-
-        assertThat(throwable).isInstanceOf(InvalidParamException.class);
+        assertThat(throwable).isInstanceOf(InvalidParamException.class).hasMessageContaining("base64");
+        verify(adapter, never()).putEvidence(any(ObsPutEvidenceRequest.class));
     }
 
     @Test
@@ -155,12 +104,11 @@ class ObsEvidenceServiceTest {
                 service.putEvidence("svc", "inv", "pkg", base64(content), "deadbeef"));
 
         assertThat(throwable).isInstanceOf(InvalidParamException.class);
-        verify(approvalService, never()).consume(any(String.class), any(String.class), any(String.class),
-                any(String.class));
+        verify(adapter, never()).putEvidence(any(ObsPutEvidenceRequest.class));
     }
 
     @Test
-    @DisplayName("证据包校验失败时拒绝上传且不消费审批")
+    @DisplayName("证据包校验失败时拒绝上传")
     void packageValidationRejected() {
         byte[] content = "hello".getBytes(StandardCharsets.UTF_8);
         doThrow(new InvalidParamException("bad package")).when(packageValidator)
@@ -170,23 +118,16 @@ class ObsEvidenceServiceTest {
                 service.putEvidence("svc", "inv", "pkg", base64(content), sha256(content)));
 
         assertThat(throwable).isInstanceOf(InvalidParamException.class);
-        verify(approvalService, never()).consume(any(String.class), any(String.class), any(String.class),
-                any(String.class));
+        verify(adapter, never()).putEvidence(any(ObsPutEvidenceRequest.class));
     }
 
     @Test
-    @DisplayName("head/get 校验 checksum 格式（非 64 hex 拒绝）")
+    @DisplayName("head/get 校验 checksum 格式")
     void invalidChecksumFormatRejected() {
         Throwable throwable = catchThrowable(() ->
                 service.headEvidence("svc", "inv", "pkg", "not-a-checksum"));
 
         assertThat(throwable).isInstanceOf(InvalidParamException.class);
-    }
-
-    private ApprovalRecord record(String serviceCode, String investigationId, String packageId, String sha256) {
-        long now = System.currentTimeMillis();
-        return new ApprovalRecord(serviceCode, investigationId, packageId, sha256, "approver", "reason",
-                now + 3600000L, now);
     }
 
     private String base64(byte[] content) {
@@ -195,8 +136,7 @@ class ObsEvidenceServiceTest {
 
     private String sha256(byte[] content) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(digest.digest(content));
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
         }
         catch (Exception exception) {
             throw new IllegalStateException(exception);

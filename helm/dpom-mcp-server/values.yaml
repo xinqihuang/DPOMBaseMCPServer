@@ -27,6 +27,14 @@ jvm:
 
 env:
   HUAWEICLOUD_REGION: cn-southwest-2
+  DPOM_OBS_ENABLED: "false"
+  DPOM_OBS_TRANSFER_TOOLS_ENABLED: "false"
+  DPOM_OBS_AUTOMATIC_STORAGE_ENABLED: "false"
+  DPOM_OBS_ENDPOINT: ""
+  DPOM_OBS_BUCKET: ""
+  DPOM_OBS_PREFIX: ""
+  DPOM_OBS_KMS_KEY_ID: ""
+  DPOM_OBS_SERVICE_CODE: ""
 
 # AK/SK MUST NOT live here. They are injected by the team's Vault Operator at pod start
 # into env vars HUAWEICLOUD_AK / HUAWEICLOUD_SK. Configure the injection mechanism

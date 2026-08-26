@@ -49,7 +49,6 @@ public class ObsEvidenceAdapterImpl implements ObsEvidenceAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(ObsEvidenceAdapterImpl.class);
 
-    private static final String CONTENT_TYPE_ZIP = "application/zip";
     private static final String USER_METADATA_SHA256 = "sha256";
 
     private final ObsClient obsClient;
@@ -72,7 +71,6 @@ public class ObsEvidenceAdapterImpl implements ObsEvidenceAdapter {
 
     @Override
     public ObsPutEvidenceResponse putEvidence(ObsPutEvidenceRequest request) {
-        requireConfiguredKey(properties.getKmsKeyId());
         PutObjectRequest sdkRequest = toPutObjectRequest(request);
         try {
             PutObjectResult result = obsClient.putObject(sdkRequest);
@@ -89,7 +87,9 @@ public class ObsEvidenceAdapterImpl implements ObsEvidenceAdapter {
         try {
             ObjectMetadata metadata = obsClient.getObjectMetadata(properties.getBucket(), objectKey);
             long length = metadata.getContentLength() == null ? 0L : metadata.getContentLength();
-            return new ObsObjectMetadata(objectKey, length, metadata.getEtag());
+            Object sha256Metadata = metadata.getUserMetadata(USER_METADATA_SHA256);
+            String sha256 = sha256Metadata == null ? null : sha256Metadata.toString();
+            return new ObsObjectMetadata(objectKey, length, metadata.getEtag(), sha256);
         }
         catch (ObsException exception) {
             throw mapObsException(exception);
@@ -134,12 +134,14 @@ public class ObsEvidenceAdapterImpl implements ObsEvidenceAdapter {
     private PutObjectRequest toPutObjectRequest(ObsPutEvidenceRequest request) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength((long) request.content().length);
-        metadata.setContentType(CONTENT_TYPE_ZIP);
+        metadata.setContentType(request.contentType());
         metadata.addUserMetadata(USER_METADATA_SHA256, request.sha256());
 
         SseKmsHeader sseKmsHeader = new SseKmsHeader();
         sseKmsHeader.setEncryption(ServerEncryption.OBS_KMS);
-        sseKmsHeader.setKmsKeyId(properties.getKmsKeyId());
+        if (properties.getKmsKeyId() != null && !properties.getKmsKeyId().isBlank()) {
+            sseKmsHeader.setKmsKeyId(properties.getKmsKeyId());
+        }
 
         PutObjectRequest sdkRequest = new PutObjectRequest(properties.getBucket(), request.objectKey(),
                 new ByteArrayInputStream(request.content()));
@@ -173,9 +175,4 @@ public class ObsEvidenceAdapterImpl implements ObsEvidenceAdapter {
         return ErrorCode.UPSTREAM_ERROR;
     }
 
-    private void requireConfiguredKey(String kmsKeyId) {
-        if (kmsKeyId == null || kmsKeyId.isBlank()) {
-            throw new SmartomException(ErrorCode.OBS_UNAVAILABLE, "SSE-KMS 未配置（dpom.obs.kms-key-id 为空）");
-        }
-    }
 }

@@ -68,7 +68,8 @@ class ObsEvidenceAdapterImplTest {
         when(obsClient.putObject(any(PutObjectRequest.class))).thenReturn(putResult);
 
         ObsPutEvidenceResponse response = adapter.putEvidence(
-                new ObsPutEvidenceRequest("evidence/svc/inv/pkg.zip", new byte[]{1, 2, 3}, "abc123"));
+                new ObsPutEvidenceRequest("evidence/svc/inv/item.json", new byte[]{1, 2, 3}, "abc123",
+                        "application/json"));
 
         ArgumentCaptor<PutObjectRequest> captor = ArgumentCaptor.forClass(PutObjectRequest.class);
         verify(obsClient).putObject(captor.capture());
@@ -77,8 +78,9 @@ class ObsEvidenceAdapterImplTest {
         assertThat(captured.getSseKmsHeader().getEncryption()).isEqualTo(ServerEncryption.OBS_KMS);
         assertThat(captured.getSseKmsHeader().getKmsKeyId()).isEqualTo("kms-key-123");
         assertThat(captured.getMetadata().getContentLength()).isEqualTo(3L);
+        assertThat(captured.getMetadata().getContentType()).isEqualTo("application/json");
         assertThat(captured.getMetadata().getUserMetadata("sha256")).isEqualTo("abc123");
-        assertThat(response.objectKey()).isEqualTo("evidence/svc/inv/pkg.zip");
+        assertThat(response.objectKey()).isEqualTo("evidence/svc/inv/item.json");
         assertThat(response.etag()).isEqualTo("etag123");
         assertThat(response.size()).isEqualTo(3L);
     }
@@ -89,6 +91,7 @@ class ObsEvidenceAdapterImplTest {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(42L);
         metadata.setEtag("etag-head");
+        metadata.addUserMetadata("sha256", "sha-head");
         when(obsClient.getObjectMetadata("evidence-bucket", "key")).thenReturn(metadata);
 
         ObsObjectMetadata result = adapter.headEvidence("key");
@@ -96,6 +99,7 @@ class ObsEvidenceAdapterImplTest {
         assertThat(result.objectKey()).isEqualTo("key");
         assertThat(result.contentLength()).isEqualTo(42L);
         assertThat(result.etag()).isEqualTo("etag-head");
+        assertThat(result.sha256()).isEqualTo("sha-head");
     }
 
     @Test
@@ -194,17 +198,21 @@ class ObsEvidenceAdapterImplTest {
     }
 
     @Test
-    @DisplayName("未配置 KMS key 时 put 返回 OBS_UNAVAILABLE")
-    void missingKmsKeyFailsClosed() {
+    @DisplayName("未配置 KMS key 时仍使用默认 SSE-KMS 主密钥")
+    void missingKmsKeyUsesDefaultKmsKey() {
         ObsProperties properties = new ObsProperties();
         properties.setBucket("evidence-bucket");
         properties.setKmsKeyId("");
         ObsEvidenceAdapterImpl noKmsAdapter = new ObsEvidenceAdapterImpl(obsClient, properties, rateLimiterRegistry);
+        PutObjectResult putResult = mock(PutObjectResult.class);
+        when(putResult.getEtag()).thenReturn("etag-default-kms");
+        when(obsClient.putObject(any(PutObjectRequest.class))).thenReturn(putResult);
 
-        Throwable throwable = catchThrowable(() -> noKmsAdapter.putEvidence(
-                new ObsPutEvidenceRequest("key", new byte[]{1}, "abc")));
+        noKmsAdapter.putEvidence(new ObsPutEvidenceRequest("key", new byte[]{1}, "abc", "application/json"));
 
-        assertThat(throwable).isInstanceOf(SmartomException.class);
-        assertThat(((SmartomException) throwable).getErrorCode()).isEqualTo(ErrorCode.OBS_UNAVAILABLE);
+        ArgumentCaptor<PutObjectRequest> captor = ArgumentCaptor.forClass(PutObjectRequest.class);
+        verify(obsClient).putObject(captor.capture());
+        assertThat(captor.getValue().getSseKmsHeader().getEncryption()).isEqualTo(ServerEncryption.OBS_KMS);
+        assertThat(captor.getValue().getSseKmsHeader().getKmsKeyId()).isNull();
     }
 }

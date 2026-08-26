@@ -71,24 +71,15 @@ dpom:
   mcp:
     write-tools-enabled: false
   obs:
-    enabled: false
-    transfer-tools-enabled: false
-    bucket: ""
-    prefix: evidence
-    endpoint: ""
-    kms-key-id: ""
-    max-bytes: 1048576
-    approval-ttl-seconds: 3600
-  approval:
-    enabled: false
-    hmac-secret: ${DPOM_APPROVAL_HMAC_SECRET:}
-    hmac-previous-secret: ${DPOM_APPROVAL_PREVIOUS_HMAC_SECRET:}
-    timestamp-tolerance-seconds: 300
-    approval-ttl-seconds: 3600
-    store-file: ${DPOM_APPROVAL_STORE_FILE:data/dpom-approvals.json}
-    nonce-store-file: ${DPOM_APPROVAL_NONCE_STORE_FILE:data/dpom-approval-nonces.json}
-    max-body-bytes: 4096
-    nonce-cache-size: 10000
+    enabled: ${DPOM_OBS_ENABLED:false}
+    transfer-tools-enabled: ${DPOM_OBS_TRANSFER_TOOLS_ENABLED:false}
+    automatic-storage-enabled: ${DPOM_OBS_AUTOMATIC_STORAGE_ENABLED:false}
+    bucket: ${DPOM_OBS_BUCKET:}
+    prefix: ${DPOM_OBS_PREFIX:}
+    endpoint: ${DPOM_OBS_ENDPOINT:}
+    kms-key-id: ${DPOM_OBS_KMS_KEY_ID:}
+    service-code: ${DPOM_OBS_SERVICE_CODE:}
+    max-bytes: ${DPOM_OBS_MAX_BYTES:1048576}
 
 apm:
   discovery-cache:

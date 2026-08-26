@@ -19,13 +19,14 @@ public class ObsProperties {
 
     private boolean enabled = false;
     private boolean transferToolsEnabled = false;
+    private boolean automaticStorageEnabled = false;
     private String bucket = "";
-    private String prefix = "evidence";
+    private String prefix = "";
     private String endpoint = "";
     private String kmsKeyId = "";
+    private String serviceCode = "";
     private int maxBytes = 1048576;
     private int maxEntries = 200;
-    private int approvalTtlSeconds = 3600;
 
     /**
      * 返回 OBS 证据转移是否启用。
@@ -61,6 +62,24 @@ public class ObsProperties {
      */
     public void setTransferToolsEnabled(boolean transferToolsEnabled) {
         this.transferToolsEnabled = transferToolsEnabled;
+    }
+
+    /**
+     * 返回自动诊断证据存储是否启用。
+     *
+     * @return true 表示自动写入 OBS
+     */
+    public boolean isAutomaticStorageEnabled() {
+        return automaticStorageEnabled;
+    }
+
+    /**
+     * 设置自动诊断证据存储是否启用。
+     *
+     * @param automaticStorageEnabled 是否自动写入 OBS
+     */
+    public void setAutomaticStorageEnabled(boolean automaticStorageEnabled) {
+        this.automaticStorageEnabled = automaticStorageEnabled;
     }
 
     /**
@@ -136,6 +155,24 @@ public class ObsProperties {
     }
 
     /**
+     * 返回写入对象键所使用的服务编码。
+     *
+     * @return 服务编码
+     */
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    /**
+     * 设置写入对象键所使用的服务编码。
+     *
+     * @param serviceCode 服务编码
+     */
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+    }
+
+    /**
      * 返回证据包最大字节数。
      *
      * @return 最大字节数
@@ -171,21 +208,4 @@ public class ObsProperties {
         this.maxEntries = maxEntries;
     }
 
-    /**
-     * 返回审批有效期（秒）。
-     *
-     * @return 审批有效期秒数
-     */
-    public int getApprovalTtlSeconds() {
-        return approvalTtlSeconds;
-    }
-
-    /**
-     * 设置审批有效期（秒）。
-     *
-     * @param approvalTtlSeconds 审批有效期秒数
-     */
-    public void setApprovalTtlSeconds(int approvalTtlSeconds) {
-        this.approvalTtlSeconds = approvalTtlSeconds;
-    }
 }

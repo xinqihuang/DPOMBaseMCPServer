@@ -13,8 +13,6 @@ import com.huawei.smartom.agentic.adapter.obs.dto.ObsPutEvidenceResponse;
 import com.huawei.smartom.agentic.common.error.ErrorCode;
 import com.huawei.smartom.agentic.common.exception.InvalidParamException;
 import com.huawei.smartom.agentic.common.exception.SmartomException;
-import com.huawei.smartom.agentic.monitoring.approval.ApprovalRecord;
-import com.huawei.smartom.agentic.monitoring.approval.ApprovalService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +27,8 @@ import java.util.function.Supplier;
 /**
  * OBS 证据包转移的业务编排。
  *
- * <p>职责：对象名服务端生成（含内容 checksum）、身份与 checksum 白名单校验、显式 approval 原子消费、
- * Base64 解码前限长、大小与 checksum 校验、证据包结构校验、结构化审计，最终委托 adapter 执行 put/head/get。
- * 审批由可信控制面经 {@link ApprovalService} 触发，不暴露给 MCP；put 成功后审批被原子消费（并发单赢家），
- * 上传失败回滚以便重试。
+ * <p>职责：对象名服务端生成（含内容 checksum）、身份与 checksum 白名单校验、Base64 解码前限长、
+ * 大小与 checksum 校验、证据包结构校验、结构化审计，最终委托 adapter 执行 put/head/get。
  *
  * @author h00884391
  * @since 2026-08-15
@@ -44,7 +40,6 @@ public class ObsEvidenceService {
 
     private final ObsEvidenceAdapter adapter;
     private final ObsProperties properties;
-    private final ApprovalService approvalService;
     private final DiagnosticEvidencePackageValidator packageValidator;
 
     /**
@@ -52,19 +47,17 @@ public class ObsEvidenceService {
      *
      * @param adapter          OBS 证据转移适配器
      * @param properties       OBS 服务端配置
-     * @param approvalService  审批编排（原子消费/回滚）
      * @param packageValidator 证据包校验器
      */
     public ObsEvidenceService(ObsEvidenceAdapter adapter, ObsProperties properties,
-            ApprovalService approvalService, DiagnosticEvidencePackageValidator packageValidator) {
+            DiagnosticEvidencePackageValidator packageValidator) {
         this.adapter = adapter;
         this.properties = properties;
-        this.approvalService = approvalService;
         this.packageValidator = packageValidator;
     }
 
     /**
-     * 上传证据包（需显式 approval，原子消费；校验大小、checksum 与证据包结构）。
+     * 上传证据包（校验大小、checksum 与证据包结构，无逐包人工审批）。
      *
      * @param serviceCode      服务编码
      * @param investigationId  调查编号
@@ -82,15 +75,9 @@ public class ObsEvidenceService {
             requireSizeWithinLimit(content);
             requireChecksumMatch(content, sha256);
             packageValidator.validate(content, serviceCode, packageId);
-            ApprovalRecord approval = approvalService.consume(serviceCode, investigationId, packageId, sha256);
             String objectKey = buildObjectKey(serviceCode, investigationId, packageId, sha256);
-            try {
-                return adapter.putEvidence(new ObsPutEvidenceRequest(objectKey, content, sha256));
-            }
-            catch (RuntimeException exception) {
-                approvalService.restore(approval);
-                throw exception;
-            }
+            return adapter.putEvidence(new ObsPutEvidenceRequest(
+                    objectKey, content, sha256, "application/zip"));
         });
     }
 
