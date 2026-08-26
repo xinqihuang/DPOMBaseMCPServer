@@ -6,9 +6,12 @@ package com.huawei.smartom.agentic.adapter.apm.config;
 
 import com.huawei.smartom.agentic.common.config.HuaweiCloudProperties;
 import com.huawei.smartom.agentic.common.sdk.HuaweiCloudClientFactory;
+import com.huawei.smartom.agentic.adapter.apm.transport.ApmAlarmRuleAdminTransport;
+import com.huawei.smartom.agentic.adapter.apm.transport.SdkApmAlarmRuleAdminTransport;
 
 import com.huaweicloud.sdk.apm.v1.ApmClient;
 import com.huaweicloud.sdk.apm.v1.region.ApmRegion;
+import com.huaweicloud.sdk.core.impl.DefaultHttpClient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,5 +49,18 @@ public class ApmClientConfig {
 
         LOG.info("ApmClient initialized, apmRegion={}", properties.getApmRegion());
         return client;
+    }
+
+    /**
+     * 创建未生成 APM 规则管理接口使用的认证 HTTP 传输。
+     *
+     * @param properties 华为云连接配置；ak / sk 不能为空
+     * @return 使用统一凭据和超时配置的规则管理传输
+     */
+    @Bean
+    public ApmAlarmRuleAdminTransport apmAlarmRuleAdminTransport(HuaweiCloudProperties properties) {
+        return new SdkApmAlarmRuleAdminTransport(
+                HuaweiCloudClientFactory.credentials(properties),
+                new DefaultHttpClient(HuaweiCloudClientFactory.defaultHttpConfig()));
     }
 }
