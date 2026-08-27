@@ -60,22 +60,22 @@ public class ObsEvidenceService {
      * 上传证据包（校验大小、checksum 与证据包结构，无逐包人工审批）。
      *
      * @param serviceCode      服务编码
-     * @param investigationId  调查编号
+     * @param collectionId  调用方提供的证据集合编号
      * @param packageId        证据包编号
      * @param contentBase64    证据包内容的 Base64 编码
      * @param sha256           证据包 SHA-256 校验和（十六进制）
      * @return 上传结果
      */
-    public ObsPutEvidenceResponse putEvidence(String serviceCode, String investigationId, String packageId,
+    public ObsPutEvidenceResponse putEvidence(String serviceCode, String collectionId, String packageId,
             String contentBase64, String sha256) {
-        return executeAudited("PUT", serviceCode, investigationId, packageId, () -> {
-            requireIdentity(serviceCode, investigationId, packageId);
+        return executeAudited("PUT", serviceCode, collectionId, packageId, () -> {
+            requireIdentity(serviceCode, collectionId, packageId);
             requireBase64LengthWithinLimit(contentBase64);
             byte[] content = decodeBase64(contentBase64);
             requireSizeWithinLimit(content);
             requireChecksumMatch(content, sha256);
             packageValidator.validate(content, serviceCode, packageId);
-            String objectKey = buildObjectKey(serviceCode, investigationId, packageId, sha256);
+            String objectKey = buildObjectKey(serviceCode, collectionId, packageId, sha256);
             return adapter.putEvidence(new ObsPutEvidenceRequest(
                     objectKey, content, sha256, "application/zip"));
         });
@@ -85,16 +85,16 @@ public class ObsEvidenceService {
      * 获取证据包对象元数据（head）。
      *
      * @param serviceCode      服务编码
-     * @param investigationId  调查编号
+     * @param collectionId  调用方提供的证据集合编号
      * @param packageId        证据包编号
      * @param sha256           证据包 SHA-256 校验和（十六进制）
      * @return 对象元数据
      */
-    public ObsObjectMetadata headEvidence(String serviceCode, String investigationId, String packageId, String sha256) {
-        return executeAudited("HEAD", serviceCode, investigationId, packageId, () -> {
-            requireIdentity(serviceCode, investigationId, packageId);
+    public ObsObjectMetadata headEvidence(String serviceCode, String collectionId, String packageId, String sha256) {
+        return executeAudited("HEAD", serviceCode, collectionId, packageId, () -> {
+            requireIdentity(serviceCode, collectionId, packageId);
             validateChecksumFormat(sha256);
-            String objectKey = buildObjectKey(serviceCode, investigationId, packageId, sha256);
+            String objectKey = buildObjectKey(serviceCode, collectionId, packageId, sha256);
             return adapter.headEvidence(objectKey);
         });
     }
@@ -103,45 +103,45 @@ public class ObsEvidenceService {
      * 获取证据包对象内容（get，限流且受限读取上限）。
      *
      * @param serviceCode      服务编码
-     * @param investigationId  调查编号
+     * @param collectionId  调用方提供的证据集合编号
      * @param packageId        证据包编号
      * @param sha256           证据包 SHA-256 校验和（十六进制）
      * @return 对象内容
      */
-    public ObsObjectContent getEvidence(String serviceCode, String investigationId, String packageId, String sha256) {
-        return executeAudited("GET", serviceCode, investigationId, packageId, () -> {
-            requireIdentity(serviceCode, investigationId, packageId);
+    public ObsObjectContent getEvidence(String serviceCode, String collectionId, String packageId, String sha256) {
+        return executeAudited("GET", serviceCode, collectionId, packageId, () -> {
+            requireIdentity(serviceCode, collectionId, packageId);
             validateChecksumFormat(sha256);
-            String objectKey = buildObjectKey(serviceCode, investigationId, packageId, sha256);
+            String objectKey = buildObjectKey(serviceCode, collectionId, packageId, sha256);
             return adapter.getEvidence(objectKey);
         });
     }
 
-    private <T> T executeAudited(String eventType, String serviceCode, String investigationId, String packageId,
+    private <T> T executeAudited(String eventType, String serviceCode, String collectionId, String packageId,
             Supplier<T> action) {
         try {
             T result = action.get();
-            logAudit(eventType, "SUCCESS", null, serviceCode, investigationId, packageId);
+            logAudit(eventType, "SUCCESS", null, serviceCode, collectionId, packageId);
             return result;
         }
         catch (SmartomException exception) {
-            logAudit(eventType, "FAILURE", exception.getErrorCode().name(), serviceCode, investigationId, packageId);
+            logAudit(eventType, "FAILURE", exception.getErrorCode().name(), serviceCode, collectionId, packageId);
             throw exception;
         }
         catch (RuntimeException exception) {
-            logAudit(eventType, "FAILURE", ErrorCode.INTERNAL.name(), serviceCode, investigationId, packageId);
+            logAudit(eventType, "FAILURE", ErrorCode.INTERNAL.name(), serviceCode, collectionId, packageId);
             throw exception;
         }
     }
 
-    private String buildObjectKey(String serviceCode, String investigationId, String packageId, String sha256) {
-        return properties.getPrefix() + "/" + serviceCode + "/" + investigationId + "/"
+    private String buildObjectKey(String serviceCode, String collectionId, String packageId, String sha256) {
+        return properties.getPrefix() + "/" + serviceCode + "/" + collectionId + "/"
                 + packageId + "/" + sha256 + ".zip";
     }
 
-    private void requireIdentity(String serviceCode, String investigationId, String packageId) {
+    private void requireIdentity(String serviceCode, String collectionId, String packageId) {
         validateSegment(serviceCode, "serviceCode");
-        validateSegment(investigationId, "investigationId");
+        validateSegment(collectionId, "collectionId");
         validateSegment(packageId, "packageId");
     }
 
@@ -198,10 +198,10 @@ public class ObsEvidenceService {
     }
 
     private void logAudit(String eventType, String result, String errorCode,
-            String serviceCode, String investigationId, String packageId) {
-        LOG.info("OBS evidence audit, eventType={}, result={}, errorCode={}, serviceCode={}, investigationId={}, "
+            String serviceCode, String collectionId, String packageId) {
+        LOG.info("OBS evidence audit, eventType={}, result={}, errorCode={}, serviceCode={}, collectionId={}, "
                 + "packageId={}", eventType, result, errorCode, sanitizeSegment(serviceCode),
-                sanitizeSegment(investigationId), sanitizeSegment(packageId));
+                sanitizeSegment(collectionId), sanitizeSegment(packageId));
     }
 
     private String sanitizeSegment(String value) {

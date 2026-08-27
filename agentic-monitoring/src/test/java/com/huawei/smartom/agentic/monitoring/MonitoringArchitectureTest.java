@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
-/** Phase 1B 证据与调查边界的架构回归测试。 */
+/** 证据采集服务边界的架构回归测试。 */
 class MonitoringArchitectureTest {
 
     @Test
@@ -23,6 +23,8 @@ class MonitoringArchitectureTest {
         noClasses().should().dependOnClassesThat().resideInAnyPackage(
                 "com.huaweicloud..", "com.obs.services..",
                 "java.sql..", "javax.sql..", "org.mybatis..", "org.apache.kafka..",
+                "com.huawei.smartom.agentic.diagnosis..",
+                "com.huawei.smartom.agentic.messaging..",
                 "com.dpom.sre..", "com.dpom.agent..", "io.deepeval..")
                 .check(classes);
         noClasses().should().dependOnClassesThat().haveSimpleName("HuaweiCloudProperties")

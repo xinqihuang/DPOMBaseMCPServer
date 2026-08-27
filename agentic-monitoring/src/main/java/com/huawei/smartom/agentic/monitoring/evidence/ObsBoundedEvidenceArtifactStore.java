@@ -63,22 +63,22 @@ public final class ObsBoundedEvidenceArtifactStore implements BoundedEvidenceArt
     /**
      * 将有界响应规范化、摘要并写入环境配置的 OBS 位置。
      *
-     * @param investigationId 调查身份
+     * @param collectionId 调用方提供的证据集合编号
      * @param evidenceType 证据类型
      * @param boundedValue 有界响应
      * @param capturedAt 采集时间
      * @return OBS 引用、摘要和字节数
      */
     @Override
-    public StoredEvidence store(String investigationId, String evidenceType, Object boundedValue, Instant capturedAt) {
-        validateSegment(investigationId, "investigationId");
+    public StoredEvidence store(String collectionId, String evidenceType, Object boundedValue, Instant capturedAt) {
+        validateSegment(collectionId, "collectionId");
         validateSegment(evidenceType, "evidenceType");
         if (boundedValue == null || capturedAt == null) {
             throw new InvalidParamException("boundedValue and capturedAt are required");
         }
         CanonicalEvidence canonical = canonicalize(boundedValue);
         requireWithinLimit(canonical.bytes());
-        String objectKey = buildObjectKey(investigationId, evidenceType, canonical.sha256());
+        String objectKey = buildObjectKey(collectionId, evidenceType, canonical.sha256());
         ObsPutEvidenceRequest request = new ObsPutEvidenceRequest(
                 objectKey, canonical.bytes(), canonical.sha256(), CONTENT_TYPE_JSON);
         ObsPutEvidenceResponse response = adapter.putEvidence(request);
@@ -159,8 +159,8 @@ public final class ObsBoundedEvidenceArtifactStore implements BoundedEvidenceArt
         }
     }
 
-    private String buildObjectKey(String investigationId, String evidenceType, String sha256) {
-        return properties.getPrefix() + "/" + properties.getServiceCode() + "/" + investigationId + "/"
+    private String buildObjectKey(String collectionId, String evidenceType, String sha256) {
+        return properties.getPrefix() + "/" + properties.getServiceCode() + "/" + collectionId + "/"
                 + evidenceType + "/" + sha256 + ".json";
     }
 

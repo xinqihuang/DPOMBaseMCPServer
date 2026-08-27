@@ -32,9 +32,9 @@ class ObsWriteToolRegistrationTest {
     }
 
     @Test
-    @DisplayName("仅启用 write-tools-enabled 不注册 OBS 工具（独立 gate）")
-    void writeToolsEnabledDoesNotRegisterObsTools() {
-        runner.withPropertyValues("dpom.mcp.write-tools-enabled=true", "spring.profiles.active=action-enabled")
+    @DisplayName("其他 profile 不会隐式注册 OBS 工具（独立 gate）")
+    void unrelatedProfileDoesNotRegisterObsTools() {
+        runner.withPropertyValues("spring.profiles.active=production")
                 .run(this::assertObsToolsAbsent);
     }
 

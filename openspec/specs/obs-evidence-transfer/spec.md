@@ -17,7 +17,7 @@ accept them from the caller.
 - **AND** any caller-supplied bucket/prefix/key/credential SHALL be ignored
 
 ### Requirement: Server-generated object names with content checksum
-The system SHALL generate the object key server-side from a fixed prefix, the evidence identity (serviceCode, investigationId,
+The system SHALL generate the object key server-side from a fixed prefix, the evidence identity (serviceCode, collectionId,
 packageId) and the content SHA-256 checksum, and MUST NOT use a caller-provided arbitrary object key.
 
 #### Scenario: Deterministic object name
@@ -40,35 +40,21 @@ delete, copy or any general OBS management operation.
 - **AND** no list/delete/copy operation SHALL be exposed
 
 ### Requirement: Independent transfer tool gate
-The OBS evidence transfer tools SHALL be registered under an independent gate (dpom.obs.transfer-tools-enabled) and MUST NOT
-reuse dpom.mcp.write-tools-enabled or the action-enabled profile, so enabling evidence transfer SHALL NOT also expose CES write
-tools.
+The OBS evidence transfer tools SHALL be registered under the dedicated `dpom.obs.transfer-tools-enabled` gate. This Artifact
+gate MUST NOT enable any production-resource mutation capability.
 
 #### Scenario: Independent gate
-- **WHEN** only dpom.obs.transfer-tools-enabled is enabled
-- **THEN** the OBS transfer tools SHALL be registered and the CES write tools SHALL NOT be registered
+- **WHEN** `dpom.obs.transfer-tools-enabled` is enabled
+- **THEN** only the OBS put/head/get tools SHALL be added by this gate
 
-### Requirement: Explicit approval from trusted control plane
-The system SHALL require a prior, separately recorded approval bound to the exact serviceCode, investigationId, packageId
-and content SHA-256 before an upload proceeds. Approval SHALL be granted only by an authenticated non-MCP trusted control
-plane, SHALL be persisted, and SHALL be consumed at most once by a successful upload.
+### Requirement: Automatic evidence upload
+The system SHALL NOT require a per-upload human approval. Deployment configuration, bounded payload validation, deterministic
+keys, integrity checks, encryption and least-privilege IAM SHALL form the upload safety boundary.
 
-#### Scenario: Upload without approval
-- **WHEN** an upload is requested without a recorded, unexpired approval matching the identity and sha256
-- **THEN** the upload SHALL fail with UPLOAD_NOT_APPROVED and no OBS write SHALL occur
-
-#### Scenario: Approval is not an MCP tool
-- **WHEN** the MCP tool surface is enumerated
-- **THEN** no approve tool SHALL be present
-- **AND** approval SHALL come from a non-MCP authenticated trusted control plane
-
-#### Scenario: Approval expires
-- **WHEN** a recorded approval is past its expiry
-- **THEN** the upload SHALL be rejected
-
-#### Scenario: Approval consumed once
-- **WHEN** an upload succeeds with a recorded approval
-- **THEN** the approval SHALL be consumed and a second upload with the same identity and sha256 SHALL be rejected
+#### Scenario: Valid upload under an enabled deployment gate
+- **WHEN** a valid bounded evidence package is uploaded while OBS transfer is enabled
+- **THEN** the service SHALL upload it without an approval token
+- **AND** the operation SHALL be audited without recording evidence content or credentials
 
 ### Requirement: Package structure and content validation
 The system SHALL parse and validate the content as a Diagnostic Evidence Package with a camelCase manifest (matching the DPOMAgent
@@ -133,11 +119,11 @@ The system SHALL upload evidence with server-side encryption using the server-co
 - **THEN** the object SHALL be written with server-side encryption (SSE-KMS) using the configured KMS key
 
 ### Requirement: Structured audit for every action
-The system SHALL record a structured audit event for every approval, put, head and get, covering success and failure, with event
+The system SHALL record a structured audit event for every put, head and get, covering success and failure, with event
 type, result, error code, identity and timestamp, and without evidence body or credentials.
 
 #### Scenario: Transfer audit
-- **WHEN** an approval or transfer action occurs
+- **WHEN** a transfer action occurs
 - **THEN** a structured audit event SHALL be recorded with eventType, result, errorCode and identity
 - **AND** the audit SHALL NOT contain the evidence body or credentials
 
@@ -161,7 +147,3 @@ closed with OBS_UNAVAILABLE and MUST NOT contact OBS.
 - **WHEN** the service starts without OBS enabled
 - **THEN** the evidence transfer adapter SHALL be a fail-closed disabled adapter
 - **AND** no OBS connection SHALL be attempted
-
-#### Scenario: No automatic production execution
-- **WHEN** the investigation Agent runs automatically
-- **THEN** it SHALL NOT trigger an evidence upload without an explicit human-approved action

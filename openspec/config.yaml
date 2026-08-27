@@ -1,8 +1,10 @@
 schema: spec-driven
 
 context: |
-  服务: DPOMBaseMCPServer —— 基于华为云 SDK 封装 AOM/APM/CES/LTS 监控能力的 MCP Server，
-  供智能运维 Agent 调用。本期范围: 只读监控查询 (read-only)；故障恢复(写)不在范围。
+  服务: DPOMBaseMCPServer —— 面向 DPOMAgent 的无模型、无诊断状态证据 MCP Server，基于华为云 SDK
+  封装 AOM/APM/CES/LTS/OBS 的采集、标准化、确定性聚合和受控 Artifact 操作。DPOMAgent 是
+  Investigation/Diagnosis/ToolUse/报告/Kafka Diagnosis Event 的唯一权威来源；生产变更属于
+  HuaweiCloudAlarmChangeGuard。
   部署: 华为云 CCE 无状态服务, Helm Chart。
 
   技术栈基线(不可偏离): JDK 21(虚拟线程) · Spring Boot 3.4.x · Spring AI MCP Server(WebMvc+SSE) 1.0.4 ·
@@ -13,6 +15,8 @@ context: |
   adapter 之间不互相依赖; mcp 不直接 import 华为云 SDK; SDK 类型不得泄漏到 adapter 之外。
 
   核心架构约束:
+  - 禁止 LLM/Prompt/Agent、诊断领域或持久化、Kafka producer、诊断报告和生产告警变更能力进入本服务。
+  - 构建和测试必须自包含，不得扫描 ../contracts 或依赖同级仓库、Kafka、MySQL、模型凭证。
   - 自定义 DTO 无损包裹 SDK 类型: SDK 响应字段 DTO 必须全覆盖, 砍字段须在 spec 显式列理由。
   - 面向 Agent 的入参禁止凭先验捏造上游结构(collector_id/metric_set/function 等):
     合法来源仅二选一 —— (a)受控枚举/带 allowed-values 的 key, 或 (b)先调只读发现工具拿真实结构再转发。

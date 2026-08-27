@@ -20,7 +20,7 @@
 
 ### Requirement: list 输入校验与枚举集差异
 
-系统 SHALL 在 service 层校验：`offset` MUST ∈ [0, 10000]；`limit` MUST ∈ [1, 100]；`sort_key` / `sort_dir` / `relation_type` / `resource_level` / `mask_status` 给值则 MUST 在各自枚举集。`relation_type` 用 `ALLOWED_LIST_RELATION_TYPES`（含 `DEFAULT`、不含 `EVENT.SYS`），与 create 的枚举集**不同**。全部过滤字段缺省时允许。校验失败 SHALL 返回 `INVALID_PARAM` 且不发起上游调用。
+系统 SHALL 在 service 层校验：`offset` MUST ∈ [0, 10000]；`limit` MUST ∈ [1, 100]；`sort_key` / `sort_dir` / `relation_type` / `resource_level` / `mask_status` 给值则 MUST 在各自枚举集。`relation_type` 允许 `DEFAULT`、不允许 `EVENT.SYS`。全部过滤字段缺省时允许。校验失败 SHALL 返回 `INVALID_PARAM` 且不发起上游调用。
 
 #### Scenario: 分页越界
 - **WHEN** `offset` < 0 或 > 10000，或 `limit` > 100 或 < 1
@@ -36,7 +36,7 @@
 
 ### Requirement: list 响应枚举透传
 
-系统 SHALL 将响应中各枚举字段（`relation_type` / `mask_type` / `mask_status` / `resource_level` 等）经 `.getValue()` 转 String 后放入 DTO，以便与 create 工具的入参对照，避免 Jackson 序列化输出枚举对象嵌套结构污染 MCP 契约。
+系统 SHALL 将响应中各枚举字段（`relation_type` / `mask_type` / `mask_status` / `resource_level` 等）经 `.getValue()` 转 String 后放入 DTO，避免 Jackson 序列化输出枚举对象嵌套结构污染 MCP 契约。
 
 #### Scenario: 枚举字段转字符串
 - **GIVEN** 上游返回含枚举字段的多条屏蔽规则

@@ -52,11 +52,10 @@
 - **T08** 全部 UT（Tool / Service / Adapter）+ TC + 冒烟脚本（当前**零测试覆盖**）
 - **T09 / T10 / T11 / T12 / T13** 全部 UT + TC + 冒烟脚本（当前**零测试覆盖**）
 - **T14** Service / Adapter UT、Contract Test、冒烟脚本（已有 `CesMetricDataToolTest` + `CesBatchMetricDataToolTest` 共 14 条）
-- **T15** 全部 UT（write tool 风险最高）+ TC + 冒烟脚本（当前**零测试覆盖**）
 
 ### 架构遗留 / 待 ADR
 
-- **MCP `annotations`（readOnlyHint / destructiveHint / idempotentHint）未实际设置**：Spring AI 1.0.4 `@Tool` 注解不暴露这些字段；spec 中描述的 annotation 当前仅是"意图"，未传到 MCP 客户端。涉及 `delete_notification_masks` 等写工具的语义安全。
+- **MCP `annotations`（readOnlyHint / destructiveHint / idempotentHint）未实际设置**：Spring AI 1.0.4 `@Tool` 注解不暴露这些字段；当前以显式 evidence-only tool allowlist 防止生产写工具进入运行时。
 - **AOM 入参仍用 `Set<Integer>` / `Set<String>` 校验 period / statistics**：与 CES 的 `CesMetricFilter` / `CesMetricPeriod` 枚举不对称（见 ADR-004）。是否对 AOM 做同样治理待决。
 - **`query_logs` 复用 `AomMetricsAdapterImpl`**：类名"Metrics"已带歧义；如要拆分到独立 `AomLogAdapter`，开新任务。
 - **`correlate_incident` 限流计费**：单次调用扇出到 4 个下游、消耗 3 个 RateLimiter 域、APM 域消耗 2 个 permit；流量增长时需要单独配额。
@@ -66,8 +65,6 @@
 
 - 每个 tool 的 Micrometer 指标看板配置
 - 每个 tool 的 README 使用示例
-- `create_notification_mask` 客户端去重 / 同名预检
-- `delete_notification_masks` 部分删除（输入 N 个 ID，上游只删除 M 个）的明确告知 UX
 
 ## 任务卡的写法约定
 

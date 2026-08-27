@@ -1,83 +1,55 @@
 # DPOMBaseMCPServer
 
-> Phase 1 online diagnosis system of record: bounded Huawei Cloud evidence, durable Investigation Runtime,
-> Kafka diagnosis events/progress, and Portal REST/SSE.
+DPOMBaseMCPServer 是面向 DPOMAgent 的证据工具服务。它只负责从华为云监控与日志系统采集、标准化、
+关联和存取有界证据；DPOMAgent 是 Investigation、Diagnosis、ToolUse 决策和诊断结论的唯一权威来源。
 
-## 项目状态
+## 服务边界
 
-Phase 1A 的只读华为云工具面已形成迁移基线；Phase 1B 正按
-`D:\code\openspec\changes\complete-phase1-three-service-convergence` 收敛三服务目标。根决策见 `D:\code\ADR.md`。
+本服务允许：
 
-## 快速开始
+- 查询 CES、AOM、APM、LTS 等观测数据和发现信息；
+- 对多个只读来源做确定性的证据聚合，不生成假设或根因；
+- 将证据包写入可配置的 OBS 位置，并执行 Head/Get 与完整性校验。
 
-### 给开发者
+本服务禁止：
 
-1. 读 [`CLAUDE.md`](./CLAUDE.md) —— 项目约束 / 编码规范 / AI Coding 工作流
-2. 读 [`docs/architecture.md`](./docs/architecture.md) —— 架构基线
-3. 在 [`docs/tasks/`](./docs/tasks/) 选一个任务，用 IDE AI 跑
+- 承载大模型、Prompt、Agent 或 ToolUse 决策；
+- 保存 Incident/Investigation/Run/Step/Hypothesis/Conclusion 状态；
+- 生成诊断报告、Diagnosis Event 或 Diagnosis Progress；
+- 依赖 Kafka、诊断 Outbox、外部兄弟 `contracts` 目录；
+- 修改 CES/AOM/APM 告警规则或其他生产资源。生产变更由 `HuaweiCloudAlarmChangeGuard` 管理。
 
-### 给 AI（Claude / Cursor / Copilot）
+## Maven 模块
 
-打开本仓库时，自动读 `CLAUDE.md`（根目录）和 `.cursor/rules/*.mdc`。请遵守其中约束，特别是：
-
-- **不引入** Lombok / WebFlux / Guava
-- **不泄漏** Huawei Cloud SDK 类型到 `adapter.*` 之外
-- 测试用例 1:1 对应 spec 中的 UT-XX / TC-XX
-
-## 仓库结构
-
-```
-.
-├── CLAUDE.md                          ← AI Coding 总入口
-├── .cursor/rules/                     ← Cursor 规则镜像
-├── docs/
-│   ├── architecture.md
-│   ├── specs/tools/                   ← 每个 tool 一份 spec
-│   ├── decisions/                     ← 架构决策记录 (ADR)
-│   └── tasks/                         ← AI 任务卡
-├── .cloudbuild/build.yml              ← CodeArts Pipeline
-├── helm/dpom-mcp-server/              ← Helm Chart
-├── scripts/smoke/                     ← 部署后冒烟脚本
-└── agentic-*/                         ← 证据适配模块 + diagnosis/persistence/messaging + 唯一可执行 agentic-mcp
+```text
+agentic-mcp -> agentic-monitoring -> agentic-adapter-* -> agentic-common
 ```
 
-## 技术栈
+- `agentic-common`：统一错误、配置、弹性调用和通用类型。
+- `agentic-adapter`：CES/AOM/APM/LTS/OBS SDK 的隔离与稳定 DTO。
+- `agentic-monitoring`：参数校验、证据查询、确定性聚合与 OBS Artifact 处理。
+- `agentic-mcp`：唯一可执行模块和 MCP Tool 暴露面。
 
-| 项 | 选型 |
-|---|---|
-| 语言 | JDK 21 |
-| 框架 | Spring Boot 3.4 + Spring AI 1.0.4 |
-| 协议 | MCP (SSE transport, WebMvc) |
-| SDK | huaweicloud-sdk-java-v3 3.1.196 |
-| 容错 | Resilience4j |
-| 部署 | CCE + Helm + SWR |
+仓库不再包含 `agentic-diagnosis`、`agentic-persistence` 或 `agentic-messaging`。
 
-## Phase 1B 边界
+## 构建验证
 
-- `agentic-diagnosis`：无框架的 Incident/Investigation/Run/Step/Observation/Hypothesis/Conclusion、预算与 checkpoint。
-- `agentic-persistence`：服务本地 MyBatis、事务、审计和 deployment-managed SQL。
-- `agentic-messaging`：`dpom.diagnosis-event.v2`、`dpom.diagnosis-progress.v1` 与有界至少一次发布。
-- `agentic-mcp`：唯一 executable，组合 MCP、Portal REST/SSE、runtime 和默认关闭的 worker。
-- SRE Intelligence 拥有数据/评价投影；DeepEval 只执行无状态 Judge；任何服务都不得跨库访问。
+要求 JDK 21 与 Maven 3.9+：
 
-## 部署
-
-详见 [T02 任务卡](./docs/tasks/T02-cicd-deploy.md)。
-
-镜像 tag 规则：`<版本>_<构建时间>`，如 `2.0.0_20260520171836`。
-
-完整镜像路径：
-
-```
-swr.cn-north-9.myhuaweicloud.com/powercloud/DPOMBaseMCPService:<version>_<timestamp>
+```shell
+mvn clean verify
 ```
 
-## 当前可用 MCP Tools
+构建不需要同级 `contracts` 仓库、Kafka、MySQL 或模型凭证。真实云端集成测试默认关闭，单元测试和
+录制契约测试不读取真实 AK/SK。
 
-| Tool | 状态 | Spec |
-|---|---|---|
-| `hello_world` | T01 占位 | — |
-| `list_ces_metrics` | T05 in progress | [spec](./docs/specs/tools/list_ces_metrics.md) |
+## 配置
+
+华为云凭据只通过部署环境注入：`HUAWEICLOUD_AK`、`HUAWEICLOUD_SK`。OBS 目标必须按环境配置，
+包括 `DPOM_OBS_ENDPOINT`、`DPOM_OBS_BUCKET`、`DPOM_OBS_PREFIX` 和 `DPOM_OBS_SERVICE_CODE`；代码中没有测试桶默认值。
+
+详细约束见 [架构文档](./docs/architecture.md) 和
+[OpenSpec 变更](./openspec/changes/remove-diagnosis-from-dpom-base/)。
 
 ## License
 

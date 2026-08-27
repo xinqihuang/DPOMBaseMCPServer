@@ -1,36 +1,33 @@
-# ADR-005: AI For SRE Phase 1 服务边界引用
+# ADR-005: DPOMBase evidence-only 服务边界
 
-- 状态: Accepted
-- 日期: 2026-08-21
+- 状态: Accepted（替代 2026-08-21 的 Phase 1B Investigation SoR 决策）
+- 日期: 2026-08-27
 - 权威决策: `D:\code\ADR.md`
 
 ## Context
 
-工作区 Phase 1 目标只有三个后端部署单元。本文记录 DPOMBaseMCPServer 从 Phase 1A 只读证据网关
-演进为 Phase 1B 在线诊断系统记录的责任。
+DPOMAgent 已被确定为 Investigation/Diagnosis 的唯一权威来源。让 DPOMBase 同时保存调查状态、生成报告并发布
+Kafka 诊断事件，会产生双权威、契约漂移和部署耦合。
 
 ## Decision
 
-DPOMBaseMCPServer 的 provider adapter 继续保持生产侧只读证据边界，同时本服务新增：
+DPOMBaseMCPServer 仅提供 AOM/APM/CES/LTS/CCE/CMDB/OBS 的证据采集、标准化、确定性聚合与受控 Artifact
+能力。它不承载模型、诊断状态、ToolUse 决策、报告、诊断消息或生产资源变更。
 
-- 封装华为云 APM、CES、AOM、LTS、CCE、CMDB 等只读访问与供应商 DTO；
-- 保留既有审批约束下的受控 OBS 证据传输；
-- Incident、Investigation、Run、Step、Observation、Hypothesis、Conclusion、预算、checkpoint 和审计；
-- 默认关闭、可恢复的 Diagnosis Orchestrator 与 source authority epoch；
-- 事务 publication intent、Diagnosis Event v2、Progress v1、Kafka 和 Portal REST/SSE；
-- 不承载 Dataset、Judge 聚合、Release Gate 或生产写工具，不与其他服务共享数据库。
+DPOMAgent 负责 Investigation、Diagnosis、报告和发往 SRE Intelligence 的 Diagnosis Event；
+HuaweiCloudAlarmChangeGuard 负责 CES/AOM/APM 告警规则等生产变更。
 
-Phase 1B change `complete-phase1-three-service-convergence` 负责兼容、切换、回滚与安全隔离。切换不复制
-DPOMAgent 历史行，而是按 authority epoch 停止新调查、drain 旧运行、验证后切换新来源。
+仓库移除 diagnosis、persistence、messaging 模块及对兄弟 `contracts` 目录的构建依赖。OBS Put/Head/Get 是
+证据 Artifact 操作，不视为业务资源变更，目标仍必须由部署配置和最小权限 IAM 约束。
 
 ## Consequences
 
-- 本仓库现有只读 provider 工具和安全边界保持不变；新 runtime 不扩大生产写工具面。
-- SRE Intelligence 与 DeepEval 不直接访问华为云 SDK 或本服务数据库。
-- 后续诊断事件契约由中立工作区资产定义，而不是由本仓库 Java DTO 单方面定义。
+- DPOMBase 可独立构建和部署，不需要 Kafka、MySQL、模型凭证或同级契约仓库；
+- MCP 暴露面由 evidence-only allowlist 约束；
+- 生产告警变更不再能通过 DPOMBase 调用；
+- 旧 Phase 1B Investigation SoR、Kafka publication 与 Portal progress 设计只保留在归档历史中，不再生效。
 
 ## References
 
 - 工作区 ADR：`D:\code\ADR.md`
-- OpenSpec change：`D:\code\openspec\changes\complete-phase1-three-service-convergence`
-- 中立契约目录：`D:\code\contracts\diagnosis-event\v1`
+- OpenSpec change：`openspec/changes/remove-diagnosis-from-dpom-base`

@@ -55,25 +55,7 @@ public enum ErrorCode {
     /** OBS evidence transfer is not enabled or no real adapter is available. */
     OBS_UNAVAILABLE(false,
             "OBS evidence transfer is not enabled or the adapter is unavailable. Do not retry; "
-                    + "report to the operator."),
-
-    /** Upload requires an explicit prior approval for the exact package identity. */
-    UPLOAD_NOT_APPROVED(false,
-            "Upload requires an explicit prior approval bound to this package, granted by the "
-                    + "trusted control plane (not available to this agent). Report to the operator."),
-    /** Approval control-plane authentication failed (bad/expired signature, replay, or client credentials). */
-    APPROVAL_AUTH_FAILED(false,
-            "Control-plane authentication failed. Do not retry with the same credentials; "
-                    + "contact the operator to rotate the HMAC secret."),
-
-    /** Approval target does not exist (revoke/consume of a missing, expired or revoked approval). */
-    APPROVAL_NOT_FOUND(false,
-            "No matching approval was found (missing, expired or revoked). "
-                    + "Request a new approval from the trusted control plane."),
-
-    /** Approval persistence failed; safe to retry after the storage recovers. */
-    APPROVAL_STORAGE_ERROR(true,
-            "Approval storage is temporarily unavailable. Retry after the storage recovers.");
+                    + "report to the operator.");
 
     private final boolean retryable;
     private final String hint;

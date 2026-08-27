@@ -9,14 +9,14 @@
 | 字段 | 值 |
 |---|---|
 | 服务名 | `DPOMBaseMCPServer` |
-| 一句话定位 | Phase 1 在线诊断系统记录：封装只读云证据并拥有 Investigation Runtime、Kafka 事件和 Portal REST/SSE |
-| 范围（Phase 1B） | AOM/APM/CES/LTS/CCE/CMDB/codegraph/OBS 受控证据；Incident/Investigation/Run/Step；预算、checkpoint、审计、Kafka 发布与进度 |
-| 不在范围 | 故障恢复（写操作）—— 另起项目 |
+| 一句话定位 | 面向 DPOMAgent 的无模型、无诊断状态证据采集与标准化 MCP 服务 |
+| 范围 | AOM/APM/CES/LTS/CCE/CMDB/codegraph/OBS 受控证据、确定性聚合和 OBS Artifact |
+| 不在范围 | Investigation/Diagnosis/ToolUse/报告/Kafka 发布；生产变更由 HuaweiCloudAlarmChangeGuard 负责 |
 | 部署形态 | 华为云 CCE 无状态服务，4U8G，Helm Chart 部署 |
 | 仓库 | Codehub（华为内部），主分支 `master` |
 
-`D:\code\ADR.md` 是工作区最高优先级架构决策；历史任务卡或本仓库旧 ADR 只描述 Phase 1A 当前实现。
-Phase 1B 由 `D:\code\openspec\changes\complete-phase1-three-service-convergence` 驱动。
+`D:\code\ADR.md` 是工作区最高优先级架构决策；本仓库当前边界由
+`openspec/changes/remove-diagnosis-from-dpom-base` 固化。历史任务卡和归档 OpenSpec 只用于追溯。
 
 ---
 
@@ -66,16 +66,15 @@ DPOMBaseMCPServer/
 │   └── tasks/                                   ← 任务卡 (AI 执行单元)
 ├── scripts/
 │   └── smoke/                                   ← 部署后冒烟脚本
-└── 子模块/                                       ← 现有证据模块 + Phase 1B 诊断模块
+└── 子模块/                                       ← 仅证据模块
     ├── agentic-common/                          ← com.huawei.smartom.agentic.common
     ├── agentic-adapter/                         ← 聚合父 pom（packaging=pom，无源码）
     │   ├── agentic-adapter-ces/                 ← com.huawei.smartom.agentic.adapter.ces
     │   ├── agentic-adapter-aom/                 ← com.huawei.smartom.agentic.adapter.aom
-    │   └── agentic-adapter-apm/                 ← com.huawei.smartom.agentic.adapter.apm
+    │   ├── agentic-adapter-apm/                 ← com.huawei.smartom.agentic.adapter.apm
+    │   ├── agentic-adapter-lts/                 ← com.huawei.smartom.agentic.adapter.lts
+    │   └── agentic-adapter-obs/                 ← com.huawei.smartom.agentic.adapter.obs
     ├── agentic-monitoring/                      ← com.huawei.smartom.agentic.monitoring
-    ├── agentic-diagnosis/                       ← framework-free Investigation 领域与端口
-    ├── agentic-persistence/                     ← MyBatis、事务与部署 SQL 适配
-    ├── agentic-messaging/                       ← Kafka producer 与 publication worker
     └── agentic-mcp/                             ← com.huawei.smartom.agentic.mcp (Spring Boot 启动入口)
 ```
 
@@ -84,14 +83,13 @@ DPOMBaseMCPServer/
 | Maven 目录名 / artifactId | Java 包名 | 职责 |
 |---|---|---|
 | `agentic-common` | `com.huawei.smartom.agentic.common.*` | 错误码、统一异常、DTO 基类、Resilience4j 配置、线程池 |
-| `agentic-adapter` | —（聚合父 pom，无源码） | CES/AOM/APM 三个 adapter 子模块的 Maven 聚合容器 |
+| `agentic-adapter` | —（聚合父 pom，无源码） | CES/AOM/APM/LTS/OBS adapter 子模块的 Maven 聚合容器 |
 | `agentic-adapter/agentic-adapter-ces` | `com.huawei.smartom.agentic.adapter.ces.*` | CES SDK 封装 + 自定义 DTO |
 | `agentic-adapter/agentic-adapter-aom` | `com.huawei.smartom.agentic.adapter.aom.*` | AOM SDK 封装 |
 | `agentic-adapter/agentic-adapter-apm` | `com.huawei.smartom.agentic.adapter.apm.*` | APM SDK 封装 |
-| `agentic-monitoring` | `com.huawei.smartom.agentic.monitoring.*` | 业务编排（含跨组件 correlate） |
-| `agentic-diagnosis` | `com.huawei.smartom.agentic.diagnosis.*` | 无框架调查领域、策略与端口 |
-| `agentic-persistence` | `com.huawei.smartom.agentic.persistence.*` | 服务本地 MyBatis 持久化与事务组合 |
-| `agentic-messaging` | `com.huawei.smartom.agentic.messaging.*` | Kafka 序列化、发布租约与有界 worker |
+| `agentic-adapter/agentic-adapter-lts` | `com.huawei.smartom.agentic.adapter.lts.*` | LTS SDK 封装 |
+| `agentic-adapter/agentic-adapter-obs` | `com.huawei.smartom.agentic.adapter.obs.*` | OBS Artifact SDK 封装 |
+| `agentic-monitoring` | `com.huawei.smartom.agentic.monitoring.*` | 证据校验、查询、确定性聚合与 Artifact 处理 |
 | `agentic-mcp` | `com.huawei.smartom.agentic.mcp.*` | Spring Boot 启动类 + MCP tool 注册 + SSE endpoint |
 
 **命名规则**：Maven artifactId 取 Java 包名的最后两截（adapter 子包取最后三截），用 `-` 连接，去掉 `com.huawei.smartom.` 前缀。
@@ -99,17 +97,13 @@ DPOMBaseMCPServer/
 ### 2.2 依赖方向（必须遵守，CI 会校验）
 
 ```
-mcp ──► monitoring ──► adapter.{ces, aom, apm} ──► common
- │          │
- ├────────► diagnosis ◄──────── persistence
- └────────► messaging ─────────► diagnosis ports
-                              ▲
-                              └── 仅依赖 common，不互相依赖
+mcp ──► monitoring ──► adapter.{ces, aom, apm, lts, obs} ──► common
+
 adapter.ces 不能依赖 adapter.aom
 monitoring 不能直接依赖 common 之外的层 (必须通过 adapter 接口)
 mcp 不能直接 import huaweicloud SDK
-diagnosis 不能依赖 Spring、MyBatis、Kafka 或 Huawei SDK
-persistence 与 messaging 只能实现 diagnosis 端口；`agentic-mcp` 仍是唯一可执行 composition root
+仓库不得包含 diagnosis/persistence/messaging 模块，不得引入 Kafka、MyBatis 或模型客户端
+`agentic-mcp` 是唯一可执行 composition root
 ```
 
 ---
@@ -282,12 +276,12 @@ collector_name/collector_id/metric_set/function/查询 DSL 等。合法来源二
 - 应用启动时一次性加载，**冷加载**，不支持热更新（轮换 = Pod 滚动重启）
 - 启动时校验 AK/SK 非空，缺失则 fail-fast（健康检查不通过）
 
-### 4.6 Phase 1B 数据与消息边界
+### 4.6 证据服务边界
 
-- 新生产表使用经评审的 deployment-managed forward/compatibility/rollback-safe SQL；应用不得在生产自动迁移。
-- 调查状态与 publication intent 在一个本地事务中提交；Kafka 为至少一次投递，不声称 XA 或 exactly-once。
-- Diagnosis Event v2 与 Progress v1 以 `investigationId` 分区，SRE 通过统一摄取端口处理 Kafka 与兼容 HTTP。
-- 所有诊断、Kafka、SSE 与切换能力默认关闭；配置、schema 或 authority epoch 不合法时失败关闭。
+- 工具只返回观测事实、来源、时间窗、完整性元数据和稳定错误，不生成假设、根因或结论。
+- 不保存 Investigation 状态，不生成报告，不构造或发布 Diagnosis Event/Progress。
+- 除受控 OBS Artifact Put/Head/Get 外不暴露生产写工具；告警规则变更进入 HuaweiCloudAlarmChangeGuard。
+- 构建不得扫描父目录或同级 `contracts` 仓库，也不得依赖 Kafka、MySQL 或模型凭证。
 
 ---
 
@@ -340,6 +334,8 @@ collector_name/collector_id/metric_set/function/查询 DSL 等。合法来源二
 - [ ] 测试覆盖 spec 中列出的所有 UT/TC 用例
 - [ ] 异常 catch 不是 `Exception` 而是明确类型
 - [ ] 错误返回包含 `errorCode` 和 `retryable`
+- [ ] 没有 LLM、诊断状态、诊断报告、Kafka producer 或生产告警变更能力
+- [ ] MCP Tool 属于显式证据/发现/Artifact allowlist
 
 ---
 

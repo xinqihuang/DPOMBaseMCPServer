@@ -5,7 +5,6 @@
 package com.huawei.smartom.agentic.mcp.tool;
 
 import com.huawei.smartom.agentic.mcp.config.McpServerConfig;
-import com.huawei.smartom.agentic.monitoring.ces.CesNotificationMaskService;
 import com.huawei.smartom.agentic.monitoring.obs.ObsEvidenceService;
 
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * OBS 证据转移有效 MCP 暴露面测试：仅开 OBS gate 时，暴露 OBS put/head/get，不暴露 CES create/delete 与 approve。
+ * OBS 证据转移有效 MCP 暴露面测试：仅开 OBS gate 时，只暴露 OBS put/head/get。
  *
  * @author h00884391
  * @since 2026-08-15
@@ -30,9 +29,7 @@ class ObsMcpExposureTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withBean(ObsEvidenceService.class, () -> mock(ObsEvidenceService.class))
-            .withBean(CesNotificationMaskService.class, () -> mock(CesNotificationMaskService.class))
-            .withUserConfiguration(ObsEvidenceTool.class, CesCreateNotificationMaskTool.class,
-                    CesDeleteNotificationMasksTool.class, McpServerConfig.class);
+            .withUserConfiguration(ObsEvidenceTool.class, McpServerConfig.class);
 
     @Test
     @DisplayName("仅开 OBS gate 时只暴露 OBS put/head/get")
@@ -44,9 +41,8 @@ class ObsMcpExposureTest {
                     for (ToolCallback callback : provider.getToolCallbacks()) {
                         names.add(callback.getToolDefinition().name());
                     }
-                    assertThat(names).contains("put_evidence_package", "head_evidence_package", "get_evidence_package");
-                    assertThat(names).doesNotContain(
-                            "create_notification_mask", "delete_notification_masks", "approve_evidence_upload");
+                    assertThat(names).containsExactlyInAnyOrder(
+                            "put_evidence_package", "head_evidence_package", "get_evidence_package");
                 });
     }
 }

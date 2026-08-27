@@ -16,11 +16,11 @@ public interface BoundedEvidenceArtifactStore {
     /**
      * 写入已由现有 monitoring service 限界的响应。
      *
-     * @param investigationId 调查身份
+     * @param collectionId 调用方提供的证据集合编号
      * @param evidenceType 证据类型
      * @param boundedValue 有界响应，仅在 adapter 边界内可见
      * @param capturedAt 采集时间
      * @return 中立引用、摘要和大小
      */
-    StoredEvidence store(String investigationId, String evidenceType, Object boundedValue, Instant capturedAt);
+    StoredEvidence store(String collectionId, String evidenceType, Object boundedValue, Instant capturedAt);
 }

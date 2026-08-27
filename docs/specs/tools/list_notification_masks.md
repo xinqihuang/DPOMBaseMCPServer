@@ -4,15 +4,14 @@
 
 ## 1. 意图与场景
 
-让智能运维 Agent 分页查询 CES 当前已配置的告警通知屏蔽规则，用于审计、清理或在删除前定位目标 ID。
+让智能运维 Agent 分页查询 CES 当前已配置的告警通知屏蔽规则，用于只读审计和解释告警通知状态。
 
 典型场景:
-- 删除前置: 通过 `mask_name` / `mask_status` 等过滤定位目标 ID，再调 `delete_notification_masks`
 - 审计巡检: 列出当前 `MASK_EFFECTIVE`（生效中）的全部屏蔽，确认是否存在长期未清理的噪声屏蔽
 - 资源关联排查: 给定 `resource_id` / `namespace` / `dimensions`，确认其是否在被屏蔽中
 
 定位:
-- 这是 `create_notification_mask` / `delete_notification_masks` 的**只读发现 tool**，与三件套配套
+- 这是独立的只读证据发现 tool；DPOMBase 不提供对应写操作
 - 与 `list_ces_metrics` 在职责上正交（一个查指标定义，一个查屏蔽规则）
 
 ## 2. 范围边界
@@ -35,8 +34,7 @@
 - description（Agent 看到的）:
 
   > Query CES alarm notification mask rules with paging and optional filters.
-  > Use this to find existing mask ids before calling delete_notification_masks,
-  > or to audit currently active shields. Filter by relation_type / mask_name /
+  > Use this to audit currently active shields. Filter by relation_type / mask_name /
   > mask_status (MASK_EFFECTIVE — active now, or MASK_INEFFECTIVE — created but
   > outside its time window), namespace, resource_id, or specific dimensions.
   > Returns mask metadata (id, name, type, time window, etc.) plus a total
@@ -55,7 +53,7 @@
 | `limit` | int | 否 | 100 | 分页大小 [1, 100] |
 | `sort_key` | enum | 否 | — | `create_time` / `update_time` |
 | `sort_dir` | enum | 否 | — | `ASC` / `DESC` |
-| `relation_type` | enum | 否 | — | `ALARM_RULE` / `RESOURCE` / `RESOURCE_POLICY_NOTIFICATION` / `RESOURCE_POLICY_ALARM` / `DEFAULT`（注意：与 create 的枚举集不同，list 多了 `DEFAULT`，少了 `EVENT.SYS`） |
+| `relation_type` | enum | 否 | — | `ALARM_RULE` / `RESOURCE` / `RESOURCE_POLICY_NOTIFICATION` / `RESOURCE_POLICY_ALARM` / `DEFAULT` |
 | `relation_ids` | array<string> | 否 | — | 关联编号过滤 |
 | `metric_name` | string | 否 | — | 指标名过滤 |
 | `resource_level` | enum | 否 | — | `dimension` / `product` |
@@ -102,7 +100,7 @@
 字段说明:
 - `notification_masks`: 屏蔽规则列表，可能为空但不会为 `null`
 - `count`: 上游返回的总条数（不是 `notification_masks.length`），用于客户端推断是否还有下一页
-- 各枚举类字段（`relation_type` / `mask_type` 等）已透传上游 `.getValue()` 字符串，方便与 create 工具的入参对照
+- 各枚举类字段（`relation_type` / `mask_type` 等）已透传上游 `.getValue()` 字符串
 
 ### 3.4 输出契约（失败）
 
@@ -141,7 +139,7 @@
 | `limit` | `withLimit(Integer)` |
 | `sort_key` | `setSortKey(ListNotificationMasksRequest.SortKeyEnum.fromValue(...))` |
 | `sort_dir` | `setSortDir(ListNotificationMasksRequest.SortDirEnum.fromValue(...))` |
-| `relation_type` | `body.setRelationType(ListRelationType.fromValue(...))`（**注意**：list 用 `ListRelationType`，create 用 `RelationType`，**是不同的 SDK 枚举类**） |
+| `relation_type` | `body.setRelationType(ListRelationType.fromValue(...))` |
 | `relation_ids` / `metric_name` / `mask_id` / `mask_name` / `resource_id` / `namespace` | `body.setXxx(...)` |
 | `resource_level` | `body.setResourceLevel(ListNotificationMaskRequestBody.ResourceLevelEnum.fromValue(...))` |
 | `mask_status` | `body.setMaskStatus(ListNotificationMaskRequestBody.MaskStatusEnum.fromValue(...))` |
@@ -149,7 +147,7 @@
 
 **AI 容易写错的点**:
 1. **SDK 的 v2 包路径**：`com.huaweicloud.sdk.ces.v2.model.ListNotificationMasksRequest` / `ListNotificationMaskRequestBody`（注意单数 `Mask`）；分页参数挂在 Request 上，过滤参数挂在 body 上
-2. **`ListRelationType` vs `RelationType` 是不同的枚举类**：list 接口比 create 接口多了 `DEFAULT`，少了 `EVENT.SYS`；不能用同一个 service 常量集
+2. **`ListRelationType` 是查询专用枚举类**：允许 `DEFAULT`，不允许 `EVENT.SYS`
 3. **body 为可选**：当所有过滤字段都未提供时，不要设置一个空 body（SDK 默认）；adapter 内用 `bodyHasValue` 标志位决定是否调 `setBody`
 4. 响应字段中的枚举对象需 `.getValue()` 转 String 再放进 DTO，否则 JSON 序列化会输出枚举对象结构
 

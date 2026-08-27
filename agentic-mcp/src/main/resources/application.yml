@@ -20,56 +20,6 @@ spring:
     default-property-inclusion: non_null
 
 dpom:
-  diagnostic-report:
-    generation-enabled: ${DPOM_DIAGNOSTIC_REPORT_GENERATION_ENABLED:false}
-    read-api-enabled: ${DPOM_DIAGNOSTIC_REPORT_READ_ENABLED:false}
-    token: ${DPOM_DIAGNOSTIC_REPORT_TOKEN:}
-  investigation:
-    authority:
-      enabled: ${DPOM_INVESTIGATION_AUTHORITY_ENABLED:false}
-      authority-epoch: ${DPOM_AUTHORITY_EPOCH:}
-      cutover-at: ${DPOM_AUTHORITY_CUTOVER_AT:}
-      producer-identity: ${DPOM_KAFKA_PRODUCER_IDENTITY:}
-      accepted-schemas: diagnosis-event/2.0,diagnosis-progress/1.0
-      characterization-accepted: ${DPOM_CUTOVER_CHARACTERIZATION_ACCEPTED:false}
-      data-compatibility-accepted: ${DPOM_CUTOVER_DATA_COMPATIBILITY_ACCEPTED:false}
-      dual-path-parity-accepted: ${DPOM_CUTOVER_PARITY_ACCEPTED:false}
-      rollback-accepted: ${DPOM_CUTOVER_ROLLBACK_ACCEPTED:false}
-      retirement-criteria-recorded: ${DPOM_CUTOVER_RETIREMENT_RECORDED:false}
-      dpom-agent-admission-stopped: ${DPOM_AGENT_ADMISSION_STOPPED:false}
-      dpom-agent-drained-or-closed: ${DPOM_AGENT_DRAINED_OR_CLOSED:false}
-    progress-api:
-      enabled: ${DPOM_INVESTIGATION_PROGRESS_API_ENABLED:false}
-      bearer-token: ${DPOM_INVESTIGATION_PROGRESS_API_TOKEN:}
-      page-limit: 100
-      max-clients: 100
-      buffer-limit: 25
-      connection-duration: 5m
-      heartbeat-interval: 15s
-      poll-interval: 1s
-    publication:
-      enabled: ${DPOM_INVESTIGATION_PUBLICATION_ENABLED:false}
-      bootstrap-servers: ${DPOM_KAFKA_BOOTSTRAP_SERVERS:}
-      producer-identity: ${DPOM_KAFKA_PRODUCER_IDENTITY:}
-      worker-id: ${DPOM_KAFKA_WORKER_ID:}
-      batch-size: 50
-      max-attempts: 8
-      max-age: 24h
-      lease-duration: 30s
-      initial-backoff: 1s
-      max-backoff: 5m
-      capacity: 10000
-      acknowledgement-timeout: 10s
-      poll-delay: 1s
-    persistence:
-      enabled: ${DPOM_INVESTIGATION_PERSISTENCE_ENABLED:false}
-      jdbc-url: ${DPOM_DB_URL:}
-      username: ${DPOM_DB_USERNAME:}
-      password: ${DPOM_DB_PASSWORD:}
-      driver-class-name: ${DPOM_DB_DRIVER:com.mysql.cj.jdbc.Driver}
-      expected-schema-version: 1
-  mcp:
-    write-tools-enabled: false
   obs:
     enabled: ${DPOM_OBS_ENABLED:false}
     transfer-tools-enabled: ${DPOM_OBS_TRANSFER_TOOLS_ENABLED:false}

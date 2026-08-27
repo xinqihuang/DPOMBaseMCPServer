@@ -4,10 +4,6 @@
 
 package com.huawei.smartom.agentic.adapter.ces;
 
-import com.huawei.smartom.agentic.adapter.ces.dto.CesCreateNotificationMaskRequest;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesCreateNotificationMaskResponse;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesDeleteNotificationMasksRequest;
-import com.huawei.smartom.agentic.adapter.ces.dto.CesDeleteNotificationMasksResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListNotificationMasksRequest;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesListNotificationMasksResponse;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMask;
@@ -16,28 +12,17 @@ import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMaskMetricExtra
 import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMaskPolicy;
 import com.huawei.smartom.agentic.adapter.ces.dto.CesNotificationMaskResourceCategory;
 import com.huawei.smartom.agentic.adapter.ces.dto.NotificationMaskProductMetric;
-import com.huawei.smartom.agentic.adapter.ces.dto.NotificationMaskResource;
 import com.huawei.smartom.agentic.common.resilience.HuaweiCloudInvocation;
 
 import com.huaweicloud.sdk.ces.v2.CesClient;
-import com.huaweicloud.sdk.ces.v2.model.BatchDeleteNotificationMasksRequest;
-import com.huaweicloud.sdk.ces.v2.model.BatchDeleteNotificationMasksRequestBody;
-import com.huaweicloud.sdk.ces.v2.model.BatchDeleteNotificationMasksResponse;
-import com.huaweicloud.sdk.ces.v2.model.BatchUpdateNotificationMasksRequest;
-import com.huaweicloud.sdk.ces.v2.model.BatchUpdateNotificationMasksRequestBody;
-import com.huaweicloud.sdk.ces.v2.model.BatchUpdateNotificationMasksResponse;
 import com.huaweicloud.sdk.ces.v2.model.HierarchicalValue;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMaskRequestBody;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMaskRespNotificationMasks;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMasksRequest;
 import com.huaweicloud.sdk.ces.v2.model.ListNotificationMasksResponse;
 import com.huaweicloud.sdk.ces.v2.model.ListRelationType;
-import com.huaweicloud.sdk.ces.v2.model.MaskType;
 import com.huaweicloud.sdk.ces.v2.model.MetricExtraInfo;
 import com.huaweicloud.sdk.ces.v2.model.PoliciesInListResp;
-import com.huaweicloud.sdk.ces.v2.model.ProductMetric;
-import com.huaweicloud.sdk.ces.v2.model.RelationType;
-import com.huaweicloud.sdk.ces.v2.model.Resource;
 import com.huaweicloud.sdk.ces.v2.model.ResourceCategory;
 import com.huaweicloud.sdk.ces.v2.model.ResourceDimension;
 
@@ -45,19 +30,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * 基于华为云 Java SDK V2 ({@code com.huaweicloud.sdk.ces.v2.CesClient}) 的
  * {@link CesNotificationMaskAdapter} 实现。
  *
  * <p>所有 SDK 异常通过 {@link HuaweiCloudInvocation} 统一映射为 {@code SmartomException}。
- * 限流命名为 {@code ces-write}（与 {@code ces-readonly} 分开），重试沿用
- * {@code huaweicloud-retryable} 实例。
+ * 限流命名为 {@code ces-readonly}，重试沿用 {@code huaweicloud-retryable} 实例。
  *
  * @author h00884391
  * @since 2026-05-28
@@ -67,11 +50,8 @@ public class CesNotificationMaskAdapterImpl implements CesNotificationMaskAdapte
 
     private static final Logger LOG = LoggerFactory.getLogger(CesNotificationMaskAdapterImpl.class);
 
-    private static final String RATE_LIMITER_WRITE = "ces-write";
     private static final String RATE_LIMITER_READ = "ces-readonly";
     private static final String RETRY_NAME = "huaweicloud-retryable";
-    private static final String API_CREATE = "ces.batchUpdateNotificationMasks";
-    private static final String API_DELETE = "ces.batchDeleteNotificationMasks";
     private static final String API_LIST = "ces.listNotificationMasks";
 
     private final CesClient cesV2Client;
@@ -86,41 +66,6 @@ public class CesNotificationMaskAdapterImpl implements CesNotificationMaskAdapte
     public CesNotificationMaskAdapterImpl(CesClient cesV2Client, HuaweiCloudInvocation invocation) {
         this.cesV2Client = cesV2Client;
         this.invocation = invocation;
-    }
-
-    @Override
-    public CesCreateNotificationMaskResponse createNotificationMask(CesCreateNotificationMaskRequest request) {
-        Objects.requireNonNull(request, "request must not be null");
-        LOG.info("ces.batchUpdateNotificationMasks start, maskName={}, relationType={}, maskType={}",
-                request.maskName(), request.relationType(), request.maskType());
-
-        BatchUpdateNotificationMasksRequest sdkRequest = toCreateSdkRequest(request);
-        BatchUpdateNotificationMasksResponse sdkResponse = invocation.execute(
-                RATE_LIMITER_WRITE, RETRY_NAME, API_CREATE,
-                () -> cesV2Client.batchUpdateNotificationMasks(sdkRequest));
-
-        return new CesCreateNotificationMaskResponse(
-                sdkResponse.getRelationIds(),
-                sdkResponse.getNotificationMaskId());
-    }
-
-    @Override
-    public CesDeleteNotificationMasksResponse deleteNotificationMasks(CesDeleteNotificationMasksRequest request) {
-        Objects.requireNonNull(request, "request must not be null");
-        int idCount = request.notificationMaskIds() == null ? 0 : request.notificationMaskIds().size();
-        LOG.info("ces.batchDeleteNotificationMasks start, ids.size={}", idCount);
-
-        BatchDeleteNotificationMasksRequest sdkRequest = new BatchDeleteNotificationMasksRequest()
-                .withBody(new BatchDeleteNotificationMasksRequestBody()
-                        .withNotificationMaskIds(request.notificationMaskIds()));
-        BatchDeleteNotificationMasksResponse sdkResponse = invocation.execute(
-                RATE_LIMITER_WRITE, RETRY_NAME, API_DELETE,
-                () -> cesV2Client.batchDeleteNotificationMasks(sdkRequest));
-
-        List<String> deleted = sdkResponse.getNotificationMaskIds() == null
-                ? Collections.emptyList()
-                : sdkResponse.getNotificationMaskIds();
-        return new CesDeleteNotificationMasksResponse(deleted);
     }
 
     @Override
@@ -142,67 +87,6 @@ public class CesNotificationMaskAdapterImpl implements CesNotificationMaskAdapte
                 .map(this::toNotificationMask)
                 .toList();
         return new CesListNotificationMasksResponse(masks, sdkResponse.getCount());
-    }
-
-    private BatchUpdateNotificationMasksRequest toCreateSdkRequest(CesCreateNotificationMaskRequest request) {
-        BatchUpdateNotificationMasksRequestBody body = new BatchUpdateNotificationMasksRequestBody()
-                .withMaskName(request.maskName())
-                .withMaskType(MaskType.fromValue(request.maskType()))
-                .withEffectiveTimezone(request.effectiveTimezone());
-        if (request.relationType() != null) {
-            body.setRelationType(RelationType.fromValue(request.relationType()));
-        }
-        if (request.relationIds() != null && !request.relationIds().isEmpty()) {
-            body.setRelationIds(request.relationIds());
-        }
-        if (request.resources() != null && !request.resources().isEmpty()) {
-            List<Resource> sdkResources = request.resources().stream()
-                    .map(this::toSdkResource)
-                    .toList();
-            body.setResources(sdkResources);
-        }
-        if (request.metricNames() != null && !request.metricNames().isEmpty()) {
-            body.setMetricNames(request.metricNames());
-        }
-        if (request.productMetrics() != null && !request.productMetrics().isEmpty()) {
-            List<ProductMetric> sdkProductMetrics = request.productMetrics().stream()
-                    .map(item -> new ProductMetric()
-                            .withDimensionName(item.dimensionName())
-                            .withMetricName(item.metricName()))
-                    .toList();
-            body.setProductMetrics(sdkProductMetrics);
-        }
-        if (request.resourceLevel() != null) {
-            body.setResourceLevel(
-                    BatchUpdateNotificationMasksRequestBody.ResourceLevelEnum.fromValue(request.resourceLevel()));
-        }
-        if (request.productName() != null) {
-            body.setProductName(request.productName());
-        }
-        if (request.startDate() != null) {
-            body.setStartDate(LocalDate.parse(request.startDate()));
-        }
-        if (request.startTime() != null) {
-            body.setStartTime(request.startTime());
-        }
-        if (request.endDate() != null) {
-            body.setEndDate(LocalDate.parse(request.endDate()));
-        }
-        if (request.endTime() != null) {
-            body.setEndTime(request.endTime());
-        }
-        return new BatchUpdateNotificationMasksRequest().withBody(body);
-    }
-
-    private Resource toSdkResource(NotificationMaskResource res) {
-        Resource sdk = new Resource().withNamespace(res.namespace());
-        if (res.dimensions() != null && !res.dimensions().isEmpty()) {
-            List<ResourceDimension> dims = res.dimensions().stream()
-                    .map(dim -> new ResourceDimension().withName(dim.name()).withValue(dim.value()))
-                    .toList();
-            sdk.setDimensions(dims);
-        }
-        return sdk;
     }
 
     private ListNotificationMasksRequest toListSdkRequest(CesListNotificationMasksRequest request) {
