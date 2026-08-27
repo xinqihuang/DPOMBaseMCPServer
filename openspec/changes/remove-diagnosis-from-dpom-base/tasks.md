@@ -29,4 +29,4 @@
 
 - [x] 5.1 Run focused retained-tool tests, full `mvn clean verify`, package/startup checks and static forbidden-dependency scans.
 - [x] 5.2 Produce an acceptance report listing removed modules, retained tools, commands, Maven/JDK versions and objective PASS/FAIL evidence without credentials.
-- [ ] 5.3 Review the final diff for unrelated changes, commit the repository-scoped implementation and push the active branch to GitHub.
+- [x] 5.3 Review the final diff for unrelated changes, commit the repository-scoped implementation and push the active branch to GitHub.
