@@ -47,11 +47,21 @@ class EvidenceOnlyArchitectureTest {
                     .doesNotContain("com.huawei.smartom.agentic.diagnosis")
                     .doesNotContain("com.huawei.smartom.agentic.messaging")
                     .doesNotContain("org.apache.kafka")
+                    .doesNotContain("org.mybatis")
+                    .doesNotContain("com.baomidou")
+                    .doesNotContain("langchain4j")
+                    .doesNotContain("deepseek")
+                    .doesNotContain("openai")
                     .doesNotContain("DiagnosisEventV2Builder")
                     .doesNotContain("InvestigationProgressController")
                     .doesNotContain("DiagnosisReportApplicationService")
+                    .doesNotContain("DiagnosticReport")
+                    .doesNotContain("InvestigationRepository")
                     .doesNotContain("DiagnoseTraceService")
                     .doesNotContain("ApmAlarmRuleAdminAdapter")
+                    .doesNotContain("UpdateAlarmRuleStatus")
+                    .doesNotContain("CreateNotificationMask")
+                    .doesNotContain("DeleteNotificationMask")
                     .doesNotContain("../contracts")
                     .doesNotContain("contracts/conformance");
         }
@@ -71,6 +81,8 @@ class EvidenceOnlyArchitectureTest {
             }
         }
         assertThat(actual).containsExactlyInAnyOrderElementsOf(ALLOWED_TOOLS);
+        assertThat(actual).noneMatch(name -> name.matches(
+                ".*(diagnos|conclud|report|publish|disable|enable|mask_create|mask_delete|mutat|change).*"));
     }
 
     private static Set<Path> activeBuildFiles(Path root) throws IOException {

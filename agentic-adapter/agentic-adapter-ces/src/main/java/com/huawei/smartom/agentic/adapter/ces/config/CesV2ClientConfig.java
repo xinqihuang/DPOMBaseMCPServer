@@ -18,8 +18,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 基于 {@link HuaweiCloudProperties} 构建华为云 CES V2 SDK 客户端 Bean。
  *
- * <p>V2 客户端在 v1 之上提供新一代接口，包括告警屏蔽规则（{@code BatchUpdateNotificationMasks} /
- * {@code BatchDeleteNotificationMasks} / {@code ListNotificationMasks}）。与 V1 客户端独立共存。
+ * <p>V2 客户端仅供本服务执行只读告警屏蔽规则查询（{@code ListNotificationMasks}）。
+ * 生产资源变更由 HuaweiCloudAlarmChangeGuard 独占；与 V1 客户端独立共存。
  *
  * <p>凭据与 HTTP 超时由 {@link HuaweiCloudClientFactory} 统一构造。
  *
